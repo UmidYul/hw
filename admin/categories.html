@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Категории - AURA Admin</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/admin/styles.css">
+</head>
+
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">A</div>
+                    <div class="sidebar-logo-text">AURA Admin</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Основное</div>
+                    <a href="index.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Каталог</div>
+                    <a href="products.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📦</span>
+                        <span>Товары</span>
+                    </a>
+                    <a href="categories.html" class="sidebar-nav-link active">
+                        <span class="sidebar-nav-icon">🏷️</span>
+                        <span>Категории</span>
+                    </a>
+                    <a href="collections.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📚</span>
+                        <span>Коллекции</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Маркетинг</div>
+                    <a href="discounts.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">💰</span>
+                        <span>Скидки</span>
+                    </a>
+                    <a href="promocodes.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🎫</span>
+                        <span>Промокоды</span>
+                    </a>
+                    <a href="banners.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🖼️</span>
+                        <span>Баннеры</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Продажи</div>
+                    <a href="orders.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🛍️</span>
+                        <span>Заказы</span>
+                    </a>
+                    <a href="customers.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">👥</span>
+                        <span>Клиенты</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Настройки</div>
+                    <a href="settings.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">⚙️</span>
+                        <span>Настройки</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="topbar-btn" id="sidebar-toggle">☰</button>
+                </div>
+                <div class="topbar-right">
+                    <div class="topbar-profile">
+                        <div class="topbar-profile-avatar">A</div>
+                        <div class="topbar-profile-name">Администратор</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Категории</h1>
+                        <p class="page-subtitle">Управление категориями товаров</p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="btn btn-primary" onclick="openCategoryModal()">➕ Добавить категорию</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div id="categories-container">
+                        <div class="card-body">
+                            <div class="skeleton skeleton-text"></div>
+                            <div class="skeleton skeleton-text"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Category Modal -->
+    <div class="modal" id="category-modal">
+        <div class="modal-backdrop" onclick="closeCategoryModal()"></div>
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-title">Новая категория</h3>
+                <button class="modal-close" onclick="closeCategoryModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="category-form">
+                    <div class="form-group">
+                        <label class="form-label form-label-required">Название</label>
+                        <input type="text" class="form-input" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Slug</label>
+                        <input type="text" class="form-input" name="slug">
+                        <div class="form-hint">URL-адрес (генерируется автоматически)</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Описание</label>
+                        <textarea class="form-textarea" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-checkbox">
+                            <input type="checkbox" name="visibility" checked>
+                            <span>Видимая</span>
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeCategoryModal()">Отмена</button>
+                <button class="btn btn-primary" onclick="saveCategory()">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/js/api.js"></script>
+    <script src="/admin/repo.js"></script>
+    <script src="/admin/seed.js"></script>
+    <script src="/admin/components.js"></script>
+    <script>
+        let editingId = null;
+
+        async function loadCategories() {
+            try {
+                const [categories, products] = await Promise.all([
+                    API.categories.getAll(),
+                    API.products.getAll()
+                ]);
+                const container = document.getElementById('categories-container');
+
+                if (categories.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🏷️</div><div class="empty-state-title">Категорий нет</div></div>';
+                    return;
+                }
+
+                let html = '<table class="table"><thead><tr>';
+                html += '<th>Название</th>';
+                html += '<th>Slug</th>';
+                html += '<th>Товаров</th>';
+                html += '<th>Видимость</th>';
+                html += '<th>Действия</th>';
+                html += '</tr></thead><tbody>';
+
+                categories.forEach(cat => {
+                    const count = products.filter(p => p.category === cat.id).length;
+                    const isVisible = cat.is_visible !== undefined ? cat.is_visible : cat.visibility;
+                    html += `<tr>
+                    <td><strong>${cat.name}</strong><br><small class="text-muted">${cat.description || ''}</small></td>
+                    <td><code>${cat.slug}</code></td>
+                    <td>${count}</td>
+                    <td>${isVisible ? Components.renderBadge('Видима', 'success') : Components.renderBadge('Скрыта', 'default')}</td>
+                    <td>
+                        <button class="btn btn-sm btn-ghost" onclick="editCategory('${cat.id}')">✏️</button>
+                        <button class="btn btn-sm btn-ghost" onclick="deleteCategory('${cat.id}', ${count})">🗑️</button>
+                    </td>
+                </tr>`;
+                });
+
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Failed to load categories:', error);
+                document.getElementById('categories-container').innerHTML = '<div class="empty-state"><div class="empty-state-icon">❌</div><div class="empty-state-title">Не удалось загрузить категории</div></div>';
+            }
+        }
+
+        async function openCategoryModal(id = null) {
+            editingId = id;
+            const form = document.getElementById('category-form');
+            form.reset();
+
+            if (id) {
+                try {
+                    const category = await API.categories.getById(id);
+                    if (category) {
+                        document.getElementById('modal-title').textContent = 'Редактировать категорию';
+                        form.querySelector('[name="name"]').value = category.name;
+                        form.querySelector('[name="slug"]').value = category.slug;
+                        form.querySelector('[name="description"]').value = category.description || '';
+                        form.querySelector('[name="visibility"]').checked = category.is_visible !== undefined ? category.is_visible : category.visibility;
+                    }
+                } catch (error) {
+                    console.error('Failed to load category:', error);
+                    Components.showToast('Ошибка', 'Не удалось загрузить категорию', 'error');
+                    return;
+                }
+            } else {
+                document.getElementById('modal-title').textContent = 'Новая категория';
+            }
+
+            document.getElementById('category-modal').classList.add('show');
+        }
+
+        function closeCategoryModal() {
+            document.getElementById('category-modal').classList.remove('show');
+            editingId = null;
+        }
+
+        function generateSlug(text) {
+            return text.toLowerCase()
+                .replace(/[а-яё]/g, (char) => {
+                    const map = { 'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e', 'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch', 'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya' };
+                    return map[char] || char;
+                })
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-|-$/g, '');
+        }
+
+        async function saveCategory() {
+            const form = document.getElementById('category-form');
+            const name = form.querySelector('[name="name"]').value.trim();
+
+            if (!name) {
+                Components.showToast('Ошибка', 'Укажите название категории', 'error');
+                return;
+            }
+
+            let slug = form.querySelector('[name="slug"]').value.trim();
+            if (!slug) {
+                slug = generateSlug(name);
+            }
+
+            const data = {
+                name,
+                slug,
+                description: form.querySelector('[name="description"]').value,
+                is_visible: form.querySelector('[name="visibility"]').checked,
+                order_index: 0
+            };
+
+            try {
+                if (editingId) {
+                    await API.categories.update(editingId, data);
+                    Components.showToast('Успешно', 'Категория обновлена', 'success');
+                } else {
+                    await API.categories.create(data);
+                    Components.showToast('Успешно', 'Категория создана', 'success');
+                }
+
+                closeCategoryModal();
+                await loadCategories();
+            } catch (error) {
+                console.error('Failed to save category:', error);
+                Components.showToast('Ошибка', 'Не удалось сохранить категорию', 'error');
+            }
+        }
+
+        function editCategory(id) {
+            openCategoryModal(id);
+        }
+
+        async function deleteCategory(id, productCount) {
+            if (productCount > 0) {
+                Components.showToast('Ошибка', `В категории ${productCount} товаров. Сначала переместите их.`, 'error');
+                return;
+            }
+
+            Components.confirm('Удалить категорию?', 'Это действие нельзя отменить', async () => {
+                try {
+                    await API.categories.delete(id);
+                    await loadCategories();
+                    Components.showToast('Успешно', 'Категория удалена', 'success');
+                } catch (error) {
+                    console.error('Failed to delete category:', error);
+                    Components.showToast('Ошибка', 'Не удалось удалить категорию', 'error');
+                }
+            });
+        }
+
+        // Auto-generate slug
+        document.getElementById('category-form').querySelector('[name="name"]').addEventListener('input', (e) => {
+            if (!editingId) {
+                const slugInput = document.getElementById('category-form').querySelector('[name="slug"]');
+                slugInput.value = generateSlug(e.target.value);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(loadCategories, 300);
+        });
+    </script>
+</body>
+
+</html>

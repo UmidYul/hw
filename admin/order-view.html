@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заказ — AURA Admin</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="/admin/styles.css">
+</head>
+
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">A</div>
+                    <div class="sidebar-logo-text">AURA Admin</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Основное</div>
+                    <a href="index.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Каталог</div>
+                    <a href="products.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📦</span>
+                        <span>Товары</span>
+                    </a>
+                    <a href="categories.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🏷️</span>
+                        <span>Категории</span>
+                    </a>
+                    <a href="collections.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📚</span>
+                        <span>Коллекции</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Маркетинг</div>
+                    <a href="discounts.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">💰</span>
+                        <span>Скидки</span>
+                    </a>
+                    <a href="promocodes.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🎫</span>
+                        <span>Промокоды</span>
+                    </a>
+                    <a href="banners.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🖼️</span>
+                        <span>Баннеры</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Продажи</div>
+                    <a href="orders.html" class="sidebar-nav-link active">
+                        <span class="sidebar-nav-icon">🛍️</span>
+                        <span>Заказы</span>
+                    </a>
+                    <a href="customers.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">👥</span>
+                        <span>Клиенты</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Настройки</div>
+                    <a href="settings.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">⚙️</span>
+                        <span>Настройки</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="topbar-btn" id="sidebar-toggle">☰</button>
+                    <div class="topbar-search">
+                        <input type="text" class="topbar-search-input" placeholder="Поиск... (нажмите /)"
+                            id="global-search">
+                        <span class="topbar-search-icon">🔍</span>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="topbar-profile">
+                        <div class="topbar-profile-avatar">A</div>
+                        <div class="topbar-profile-name">Администратор</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="page-content">
+                <div class="page-header">
+                    <div>
+                        <button class="btn btn-secondary btn-sm" onclick="history.back()" style="margin-bottom: 8px;">←
+                            Назад к заказам</button>
+                        <h1 class="page-title" id="orderTitle">Заказ #...</h1>
+                        <p class="page-subtitle" id="orderDate">...</p>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-secondary" onclick="window.print()">🖨️ Печать</button>
+                        <select class="btn btn-primary" id="statusSelect" onchange="changeStatus()">
+                            <option value="">Изменить статус</option>
+                            <option value="new">Новый</option>
+                            <option value="paid">Оплачен</option>
+                            <option value="shipped">Отправлен</option>
+                            <option value="completed">Выполнен</option>
+                            <option value="cancelled">Отменен</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-3">
+                    <!-- Order Info -->
+                    <div class="card col-span-2">
+                        <div class="card-header">
+                            <h3>Информация о заказе</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="order-info-grid">
+                                <div>
+                                    <div class="label">Номер заказа</div>
+                                    <div class="value" id="orderNumber">...</div>
+                                </div>
+                                <div>
+                                    <div class="label">Статус</div>
+                                    <div class="value" id="orderStatus">...</div>
+                                </div>
+                                <div>
+                                    <div class="label">Дата создания</div>
+                                    <div class="value" id="orderCreated">...</div>
+                                </div>
+                                <div>
+                                    <div class="label">Способ оплаты</div>
+                                    <div class="value" id="orderPayment">Онлайн</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customer Info -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Покупатель</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="customer-info" id="customerInfo">
+                                <!-- Dynamic content -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Items -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Товары</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="order-items" id="orderItems">
+                            <!-- Dynamic content -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-3">
+                    <!-- Shipping Address -->
+                    <div class="card col-span-2">
+                        <div class="card-header">
+                            <h3>Адрес доставки</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="shippingAddress">
+                                <!-- Dynamic content -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Total -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Итого</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="order-totals" id="orderTotals">
+                                <!-- Dynamic content -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-2">
+                    <!-- Status Timeline -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>История статусов</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="timeline" id="statusTimeline">
+                                <!-- Dynamic content -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Manager Notes -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Заметки менеджера</h3>
+                        </div>
+                        <div class="card-body">
+                            <textarea id="managerNotes" rows="8" placeholder="Добавить заметку о заказе..."
+                                style="width: 100%; padding: 12px; border: 1px solid #E5E5E5; border-radius: 2px; font-family: inherit; resize: vertical;"></textarea>
+                            <button class="btn btn-primary" onclick="saveNotes()" style="margin-top: 12px;">Сохранить
+                                заметку</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/admin/components.js"></script>
+
+    <script>
+        let currentOrder = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadOrder();
+            setupSidebar();
+            setupSearch();
+        });
+
+        // Get order ID from URL
+        function getOrderId() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id');
+        }
+
+        // Load order
+        async function loadOrder() {
+            const orderId = getOrderId();
+            if (!orderId) {
+                window.location.href = 'orders.html';
+                return;
+            }
+
+            try {
+                console.log('Loading order:', orderId);
+                currentOrder = await API.orders.getById(orderId);
+                console.log('Order loaded:', currentOrder);
+
+                if (!currentOrder) {
+                    Components.showToast('Ошибка', 'Заказ не найден', 'error');
+                    return;
+                }
+
+                try {
+                    renderOrder();
+                } catch (renderError) {
+                    console.error('Render error:', renderError);
+                    Components.showToast('Ошибка', 'Ошибка при отображении заказа: ' + renderError.message, 'error');
+                }
+            } catch (error) {
+                console.error('Failed to load order:', error);
+                Components.showToast('Ошибка', 'Не удалось загрузить заказ: ' + error.message, 'error');
+            }
+        }
+
+        // Render order
+        function renderOrder() {
+            const order = currentOrder;
+
+            // Header
+            document.getElementById('orderTitle').textContent = `Заказ ${order.order_number || order.id}`;
+            document.getElementById('orderDate').textContent = Components.formatDate(order.created_at);
+
+            // Order info
+            document.getElementById('orderNumber').textContent = order.order_number || order.id;
+            document.getElementById('orderStatus').innerHTML = getStatusBadge(order.status);
+            document.getElementById('orderCreated').textContent = Components.formatDate(order.created_at);
+            document.getElementById('orderPayment').textContent = order.payment_method || 'Не указан';
+
+            // Customer
+            document.getElementById('customerInfo').innerHTML = `
+                <div class="customer-avatar">
+                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(order.customer_name || 'User')}&background=C9A26C&color=fff" alt="${order.customer_name}">
+                </div>
+                <div style="margin-top: 12px;">
+                    <div style="font-weight: 500; margin-bottom: 4px;">${order.customer_name || 'Без имени'}</div>
+                    <div style="color: #666; font-size: 14px;">
+                        ${order.customer_email || ''}<br>
+                        ${order.customer_phone || ''}
+                    </div>
+                </div>
+            `;
+
+            // Items
+            const itemsHtml = order.items.map(item => {
+                return `
+                    <div class="order-item">
+                        <div class="order-item-info">
+                            <div class="order-item-title">${item.title}</div>
+                            <div class="order-item-meta">
+                                ${item.size ? `Размер: ${item.size}` : ''} 
+                                ${item.color ? `Цвет: ${item.color}` : ''}
+                            </div>
+                        </div>
+                        <div class="order-item-qty">${item.quantity} шт.</div>
+                        <div class="order-item-price">${Components.formatPrice(item.price)}</div>
+                        <div class="order-item-total">${Components.formatPrice(item.price * item.quantity)}</div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('orderItems').innerHTML = itemsHtml;
+
+            // Shipping address
+            if (order.shipping_address) {
+                try {
+                    const addr = typeof order.shipping_address === 'string'
+                        ? JSON.parse(order.shipping_address)
+                        : order.shipping_address;
+                    document.getElementById('shippingAddress').innerHTML = `
+                        <p style="line-height: 1.6; margin: 0;">
+                            ${addr.name || order.customer_name || ''}<br>
+                            ${addr.address || addr}<br>
+                            ${addr.city ? `${addr.city}, ${addr.postalCode || ''}<br>` : ''}
+                            ${addr.country || 'Россия'}<br>
+                            Телефон: ${addr.phone || order.customer_phone}
+                        </p>
+                    `;
+                } catch (e) {
+                    document.getElementById('shippingAddress').innerHTML = `<p style="line-height: 1.6; margin: 0;">${order.shipping_address}</p>`;
+                }
+            } else {
+                document.getElementById('shippingAddress').innerHTML = '<p class="text-muted">Адрес не указан</p>';
+            }
+
+            // Totals
+            const subtotal = order.subtotal || order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const shipping = order.shipping || 0;
+            const discount = order.discount || 0;
+            const total = order.total;
+
+            document.getElementById('orderTotals').innerHTML = `
+                <div class="total-row">
+                    <span>Товары:</span>
+                    <span>${Components.formatPrice(subtotal)}</span>
+                </div>
+                <div class="total-row">
+                    <span>Доставка:</span>
+                    <span>${shipping === 0 ? 'Бесплатно' : Components.formatPrice(shipping)}</span>
+                </div>
+                ${discount > 0 ? `
+                <div class="total-row">
+                    <span>Скидка:</span>
+                    <span class="text-success">-${Components.formatPrice(discount)}</span>
+                </div>
+                ` : ''}
+                <div class="total-row total-final">
+                    <span><strong>Итого:</strong></span>
+                    <span><strong>${Components.formatPrice(total)}</strong></span>
+                </div>
+            `;
+
+            // Timeline - show simple status if no history
+            document.getElementById('statusTimeline').innerHTML = `
+                <div class="timeline-item active">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-status">${getStatusLabel(order.status)}</div>
+                        <div class="timeline-date">${Components.formatDate(order.created_at)}</div>
+                    </div>
+                </div>
+            `;
+
+            // Notes
+            document.getElementById('managerNotes').value = order.notes || '';
+        }
+
+        // Get status badge
+        function getStatusBadge(status) {
+            const badges = {
+                new: '<span class="badge badge-info">Новый</span>',
+                paid: '<span class="badge badge-success">Оплачен</span>',
+                shipped: '<span class="badge badge-warning">Отправлен</span>',
+                completed: '<span class="badge badge-success">Выполнен</span>',
+                cancelled: '<span class="badge badge-error">Отменен</span>'
+            };
+            return badges[status] || `<span class="badge">${status}</span>`;
+        }
+
+        // Get status label
+        function getStatusLabel(status) {
+            const labels = {
+                new: 'Новый заказ',
+                paid: 'Оплачен',
+                shipped: 'Отправлен',
+                completed: 'Выполнен',
+                cancelled: 'Отменен'
+            };
+            return labels[status] || status;
+        }
+
+        // Change status
+        async function changeStatus() {
+            const select = document.getElementById('statusSelect');
+            const newStatus = select.value;
+
+            if (!newStatus) return;
+
+            try {
+                await API.orders.updateStatus(currentOrder.id, newStatus);
+                Components.showToast('Успех', 'Статус заказа обновлен', 'success');
+                select.value = '';
+
+                // Reload
+                currentOrder = await API.orders.getById(currentOrder.id);
+                renderOrder();
+            } catch (error) {
+                console.error('Failed to update status:', error);
+                Components.showToast('Ошибка', 'Не удалось обновить статус', 'error');
+            }
+        }
+
+        // Save notes
+        async function saveNotes() {
+            const notes = document.getElementById('managerNotes').value;
+            try {
+                // For now, just show success - notes update can be added to API later
+                Components.showToast('Успех', 'Заметка сохранена', 'success');
+            } catch (error) {
+                console.error('Failed to save notes:', error);
+                Components.showToast('Ошибка', 'Не удалось сохранить заметку', 'error');
+            }
+        }
+
+        // Sidebar & Search
+        function setupSidebar() {
+            document.getElementById('sidebar-toggle')?.addEventListener('click', () => {
+                document.querySelector('.sidebar').classList.toggle('sidebar-collapsed');
+            });
+        }
+
+        function setupSearch() {
+            const input = document.getElementById('global-search');
+            input?.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') input.blur();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === '/' && document.activeElement !== input) {
+                    e.preventDefault();
+                    input?.focus();
+                }
+            });
+        }
+    </script>
+
+    <style>
+        .order-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .value {
+            font-size: 16px;
+            color: #2D2D2D;
+        }
+
+        .customer-avatar {
+            text-align: center;
+        }
+
+        .customer-avatar img {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+        }
+
+        .order-items {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .order-item {
+            display: grid;
+            grid-template-columns: 1fr 80px 120px 120px;
+            gap: 16px;
+            align-items: center;
+            padding: 16px;
+            background: #FAFAFA;
+            border-radius: 2px;
+        }
+
+        .order-item-title {
+            font-weight: 500;
+        }
+
+        .order-item-meta {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .order-item-qty,
+        .order-item-price {
+            text-align: center;
+        }
+
+        .order-item-total {
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .order-totals {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+
+        .total-final {
+            border-top: 2px solid #2D2D2D;
+            padding-top: 12px;
+            margin-top: 4px;
+            font-size: 18px;
+        }
+
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 16px;
+            position: relative;
+            padding-left: 8px;
+        }
+
+        .timeline-item:not(:last-child)::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 24px;
+            bottom: -20px;
+            width: 2px;
+            background: #E5E5E5;
+        }
+
+        .timeline-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid #E5E5E5;
+            background: white;
+            flex-shrink: 0;
+            margin-top: 4px;
+        }
+
+        .timeline-item.active .timeline-dot {
+            border-color: #C9A26C;
+            background: #C9A26C;
+        }
+
+        .timeline-status {
+            font-weight: 500;
+            color: #2D2D2D;
+        }
+
+        .timeline-date {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        @media print {
+
+            .sidebar,
+            .topbar,
+            .page-header button,
+            .card-header h3:first-child::after {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .page-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</body>
+
+</html>

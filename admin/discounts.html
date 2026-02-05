@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Скидки — AURA Admin</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="/admin/styles.css">
+</head>
+
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">A</div>
+                    <div class="sidebar-logo-text">AURA Admin</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Основное</div>
+                    <a href="index.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Каталог</div>
+                    <a href="products.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📦</span>
+                        <span>Товары</span>
+                    </a>
+                    <a href="categories.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🏷️</span>
+                        <span>Категории</span>
+                    </a>
+                    <a href="collections.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📚</span>
+                        <span>Коллекции</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Маркетинг</div>
+                    <a href="discounts.html" class="sidebar-nav-link active">
+                        <span class="sidebar-nav-icon">💰</span>
+                        <span>Скидки</span>
+                    </a>
+                    <a href="promocodes.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🎫</span>
+                        <span>Промокоды</span>
+                    </a>
+                    <a href="banners.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🖼️</span>
+                        <span>Баннеры</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Продажи</div>
+                    <a href="orders.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🛍️</span>
+                        <span>Заказы</span>
+                    </a>
+                    <a href="customers.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">👥</span>
+                        <span>Клиенты</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Настройки</div>
+                    <a href="settings.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">⚙️</span>
+                        <span>Настройки</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="topbar-btn" id="sidebar-toggle">☰</button>
+                    <div class="topbar-search">
+                        <input type="text" class="topbar-search-input" placeholder="Поиск... (нажмите /)"
+                            id="global-search">
+                        <span class="topbar-search-icon">🔍</span>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="topbar-profile">
+                        <div class="topbar-profile-avatar">A</div>
+                        <div class="topbar-profile-name">Администратор</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="page-content">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Скидки</h1>
+                        <p class="page-subtitle">Управление автоматическими скидками</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openDiscountModal()">
+                        + Создать скидку
+                    </button>
+                </div>
+
+                <!-- Discounts Table -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Название</th>
+                                        <th>Тип</th>
+                                        <th>Значение</th>
+                                        <th>Условия</th>
+                                        <th>Период</th>
+                                        <th>Статус</th>
+                                        <th class="text-right">Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="discountsTable">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Discount Modal -->
+    <div class="modal" id="discountModal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="modalTitle">Новая скидка</h2>
+                    <button class="modal-close" onclick="closeDiscountModal()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <form id="discountForm">
+                        <input type="hidden" name="id" id="discountId">
+
+                        <div class="form-group">
+                            <label for="name">Название скидки *</label>
+                            <input type="text" id="name" name="name" placeholder="Летняя распродажа" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Описание</label>
+                            <textarea id="description" name="description" rows="2"
+                                placeholder="Краткое описание акции"></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="type">Тип скидки *</label>
+                                <select id="type" name="type" onchange="updateDiscountType()" required>
+                                    <option value="percent">Процент</option>
+                                    <option value="fixed">Фиксированная сумма</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="value">Значение *</label>
+                                <input type="number" id="value" name="value" placeholder="10" min="0" step="0.01"
+                                    required>
+                                <small class="text-muted" id="valueHint">Процент скидки (0-100)</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="target">Применить к *</label>
+                            <select id="target" name="target" onchange="toggleTargetOptions()" required>
+                                <option value="all">Все товары</option>
+                                <option value="category">Категория</option>
+                                <option value="collection">Коллекция</option>
+                                <option value="products">Конкретные товары</option>
+                            </select>
+                        </div>
+
+                        <!-- Category select -->
+                        <div id="categorySelect" class="form-group" style="display: none;">
+                            <label for="categoryId">Выберите категорию</label>
+                            <select id="categoryId" name="categoryId">
+                                <option value="">Выберите категорию</option>
+                            </select>
+                        </div>
+
+                        <!-- Collection select -->
+                        <div id="collectionSelect" class="form-group" style="display: none;">
+                            <label for="collectionId">Выберите коллекцию</label>
+                            <select id="collectionId" name="collectionId">
+                                <option value="">Выберите коллекцию</option>
+                            </select>
+                        </div>
+
+                        <!-- Products select -->
+                        <div id="productsSelect" class="form-group" style="display: none;">
+                            <label>Выберите товары</label>
+                            <div class="product-selector" id="productSelector">
+                                <!-- Dynamic product checkboxes -->
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="minAmount">Минимальная сумма заказа</label>
+                            <input type="number" id="minAmount" name="minAmount" placeholder="0" min="0" step="0.01">
+                            <small class="text-muted">Оставьте пустым для отключения условия</small>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="startDate">Дата начала</label>
+                                <input type="datetime-local" id="startDate" name="startDate">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="endDate">Дата окончания</label>
+                                <input type="datetime-local" id="endDate" name="endDate">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="priority">Приоритет</label>
+                                <input type="number" id="priority" name="priority" value="0" min="0">
+                                <small class="text-muted">Чем выше число, тем выше приоритет</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" name="isActive" id="isActive" checked>
+                                    Активна
+                                </label>
+                                <br>
+                                <label style="margin-top: 8px;">
+                                    <input type="checkbox" name="combineWithOther" id="combineWithOther">
+                                    Комбинировать с другими скидками
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeDiscountModal()">Отмена</button>
+                    <button type="button" class="btn btn-primary" onclick="saveDiscount()">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/admin/repo.js"></script>
+    <script src="/admin/seed.js"></script>
+    <script src="/admin/components.js"></script>
+
+    <script>
+        let currentDiscountId = null;
+        let allCategories = [];
+        let allCollections = [];
+        let allProducts = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDiscounts();
+            setupSidebar();
+            setupSearch();
+        });
+
+        // Load discounts
+        async function loadDiscounts() {
+            try {
+                const discounts = await API.discounts.getAll();
+                const tbody = document.getElementById('discountsTable');
+
+                if (discounts.length === 0) {
+                    tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center">
+                            <div class="empty-state">
+                                <p>Нет скидок</p>
+                                <button class="btn btn-primary" onclick="openDiscountModal()">Создать первую скидку</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                    return;
+                }
+
+                tbody.innerHTML = discounts.map(discount => {
+                    const isActive = discount.is_active ?? discount.isActive;
+                    const statusBadge = isActive
+                        ? '<span class="badge badge-success">Активна</span>'
+                        : '<span class="badge badge-secondary">Неактивна</span>';
+
+                    const discountType = discount.discount_type || discount.type;
+                    const discountValue = discount.discount_value ?? discount.value;
+                    const typeLabel = discountType === 'percent' ? '%' : '₽';
+                    const valueDisplay = `${discountValue}${typeLabel}`;
+
+                    const targetLabels = {
+                        all: 'Все товары',
+                        category: 'Категория',
+                        collection: 'Коллекция',
+                        products: 'Выбранные товары'
+                    };
+
+                    let conditions = [];
+                    const minAmount = discount.min_amount ?? discount.minAmount;
+                    if (minAmount) {
+                        conditions.push(`От ${Components.formatPrice(minAmount)}`);
+                    }
+                    const conditionsText = conditions.length > 0 ? conditions.join(', ') : '—';
+
+                    const now = new Date();
+                    const startDate = discount.start_date || discount.startDate;
+                    const endDate = discount.end_date || discount.endDate;
+                    const start = startDate ? new Date(startDate) : null;
+                    const end = endDate ? new Date(endDate) : null;
+
+                    let period = 'Без ограничений';
+                    if (start && end) {
+                        period = `${formatShortDate(start)} - ${formatShortDate(end)}`;
+                    } else if (start) {
+                        period = `С ${formatShortDate(start)}`;
+                    } else if (end) {
+                        period = `До ${formatShortDate(end)}`;
+                    }
+
+                    const isScheduleActive = (!start || now >= start) && (!end || now <= end);
+                    const scheduleIndicator = !isScheduleActive && isActive
+                        ? ' <small class="text-muted">(не в расписании)</small>'
+                        : '';
+
+                    return `
+                    <tr>
+                        <td>
+                            <strong>${discount.name}</strong>
+                            ${discount.description ? `<br><small class="text-muted">${discount.description}</small>` : ''}
+                        </td>
+                        <td>${discountType === 'percent' ? 'Процент' : 'Фикс. сумма'}</td>
+                        <td><strong class="text-accent">${valueDisplay}</strong></td>
+                        <td>
+                            ${targetLabels[discount.target] || discount.target}
+                            ${conditionsText !== '—' ? `<br><small class="text-muted">${conditionsText}</small>` : ''}
+                        </td>
+                        <td><small>${period}</small></td>
+                        <td>${statusBadge}${scheduleIndicator}</td>
+                        <td class="text-right">
+                            <button class="btn btn-sm btn-secondary" onclick="editDiscount('${discount.id}')">Изменить</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteDiscount('${discount.id}')">Удалить</button>
+                        </td>
+                    </tr>
+                `;
+                }).join('');
+            } catch (error) {
+                console.error('Ошибка загрузки скидок:', error);
+                Components.showToast('Ошибка', 'Не удалось загрузить скидки', 'error');
+                document.getElementById('discountsTable').innerHTML = `
+                    <tr><td colspan="7" class="text-center">Ошибка загрузки данных</td></tr>
+                `;
+            }
+        }
+
+        // Format short date
+        function formatShortDate(date) {
+            return new Intl.DateTimeFormat('ru-RU', {
+                day: 'numeric',
+                month: 'short'
+            }).format(date);
+        }
+
+        // Open modal
+        async function openDiscountModal(id = null) {
+            const modal = document.getElementById('discountModal');
+            const form = document.getElementById('discountForm');
+            const title = document.getElementById('modalTitle');
+
+            currentDiscountId = id;
+            form.reset();
+
+            try {
+                // Load data
+                allCategories = await API.categories.getAll();
+                allCollections = await API.collections.getAll();
+                const products = await API.products.getAll();
+                allProducts = products.filter(p => p.status === 'active');
+
+                populateCategorySelector();
+                populateCollectionSelector();
+                populateProductSelector();
+
+                if (id) {
+                    title.textContent = 'Редактировать скидку';
+                    const discount = await API.discounts.getById(id);
+
+                    document.getElementById('discountId').value = discount.id;
+                    document.getElementById('name').value = discount.name;
+                    document.getElementById('description').value = discount.description || '';
+                    document.getElementById('type').value = discount.discount_type || discount.type;
+                    document.getElementById('value').value = discount.discount_value ?? discount.value;
+                    document.getElementById('target').value = discount.target;
+                    document.getElementById('minAmount').value = discount.min_amount ?? discount.minAmount ?? '';
+                    document.getElementById('priority').value = discount.priority || 0;
+                    document.getElementById('isActive').checked = discount.is_active ?? discount.isActive;
+                    document.getElementById('combineWithOther').checked = discount.combine_with_other ?? discount.combineWithOther ?? false;
+
+                    const startDate = discount.start_date || discount.startDate;
+                    if (startDate) {
+                        document.getElementById('startDate').value = startDate.split('T')[0];
+                    }
+
+                    const endDate = discount.end_date || discount.endDate;
+                    if (endDate) {
+                        document.getElementById('endDate').value = endDate.split('T')[0];
+                    }
+
+                    // Set target-specific fields
+                    if (discount.target === 'category') {
+                        const categoryId = discount.category_id || discount.categoryId;
+                        document.getElementById('categoryId').value = categoryId || '';
+                    } else if (discount.target === 'collection') {
+                        const collectionId = discount.collection_id || discount.collectionId;
+                        document.getElementById('collectionId').value = collectionId || '';
+                    } else if (discount.target === 'products') {
+                        const productIds = discount.product_ids || discount.productIds;
+                        if (Array.isArray(productIds)) {
+                            productIds.forEach(productId => {
+                                const checkbox = document.querySelector(`#productSelector input[value="${productId}"]`);
+                                if (checkbox) checkbox.checked = true;
+                            });
+                        }
+                    }
+
+                    updateDiscountType();
+                    toggleTargetOptions();
+                } else {
+                    title.textContent = 'Новая скидка';
+                    updateDiscountType();
+                }
+
+                modal.classList.add('active');
+            } catch (error) {
+                console.error('Ошибка загрузки данных скидки:', error);
+                Components.showToast('Ошибка', 'Не удалось загрузить данные', 'error');
+            }
+        }
+
+        // Close modal
+        function closeDiscountModal() {
+            document.getElementById('discountModal').classList.remove('active');
+            currentDiscountId = null;
+        }
+
+        // Update discount type hint
+        function updateDiscountType() {
+            const type = document.getElementById('type').value;
+            const hint = document.getElementById('valueHint');
+            const valueInput = document.getElementById('value');
+
+            if (type === 'percent') {
+                hint.textContent = 'Процент скидки (0-100)';
+                valueInput.max = 100;
+            } else {
+                hint.textContent = 'Сумма скидки в рублях';
+                valueInput.removeAttribute('max');
+            }
+        }
+
+        // Toggle target options
+        function toggleTargetOptions() {
+            const target = document.getElementById('target').value;
+
+            document.getElementById('categorySelect').style.display = target === 'category' ? 'block' : 'none';
+            document.getElementById('collectionSelect').style.display = target === 'collection' ? 'block' : 'none';
+            document.getElementById('productsSelect').style.display = target === 'products' ? 'block' : 'none';
+        }
+
+        // Populate selectors
+        function populateCategorySelector() {
+            const select = document.getElementById('categoryId');
+            select.innerHTML = '<option value="">Выберите категорию</option>' +
+                allCategories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+        }
+
+        function populateCollectionSelector() {
+            const select = document.getElementById('collectionId');
+            select.innerHTML = '<option value="">Выберите коллекцию</option>' +
+                allCollections.map(col => `<option value="${col.id}">${col.name}</option>`).join('');
+        }
+
+        function populateProductSelector() {
+            const container = document.getElementById('productSelector');
+            if (allProducts.length === 0) {
+                container.innerHTML = '<p class="text-muted">Нет активных товаров</p>';
+                return;
+            }
+
+            container.innerHTML = allProducts.map(product => `
+                <label class="product-checkbox">
+                    <input type="checkbox" value="${product.id}">
+                    <span>${product.title} — ${Components.formatPrice(product.price)}</span>
+                </label>
+            `).join('');
+        }
+
+        // Save discount
+        async function saveDiscount() {
+            const name = document.getElementById('name').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const type = document.getElementById('type').value;
+            const value = parseFloat(document.getElementById('value').value);
+            const target = document.getElementById('target').value;
+            const minAmount = parseFloat(document.getElementById('minAmount').value) || null;
+            const priority = parseInt(document.getElementById('priority').value) || 0;
+            const isActive = document.getElementById('isActive').checked;
+            const combineWithOther = document.getElementById('combineWithOther').checked;
+            const startDate = document.getElementById('startDate').value ? new Date(document.getElementById('startDate').value).toISOString() : null;
+            const endDate = document.getElementById('endDate').value ? new Date(document.getElementById('endDate').value).toISOString() : null;
+
+            if (!name || isNaN(value)) {
+                Components.showToast('Ошибка', 'Заполните обязательные поля', 'error');
+                return;
+            }
+
+            if (type === 'percent' && (value < 0 || value > 100)) {
+                Components.showToast('Ошибка', 'Процент должен быть от 0 до 100', 'error');
+                return;
+            }
+
+            const data = {
+                name,
+                description,
+                type,
+                value,
+                target,
+                minAmount,
+                priority,
+                isActive,
+                combineWithOther,
+                startDate,
+                endDate
+            };
+
+            // Add target-specific data
+            if (target === 'category') {
+                data.categoryId = document.getElementById('categoryId').value;
+                if (!data.categoryId) {
+                    Components.showToast('Ошибка', 'Выберите категорию', 'error');
+                    return;
+                }
+            } else if (target === 'collection') {
+                data.collectionId = document.getElementById('collectionId').value;
+                if (!data.collectionId) {
+                    Components.showToast('Ошибка', 'Выберите коллекцию', 'error');
+                    return;
+                }
+            } else if (target === 'products') {
+                const checkboxes = document.querySelectorAll('#productSelector input:checked');
+                data.productIds = Array.from(checkboxes).map(cb => cb.value);
+                if (data.productIds.length === 0) {
+                    Components.showToast('Ошибка', 'Выберите хотя бы один товар', 'error');
+                    return;
+                }
+            }
+
+            // Map to snake_case for API
+            const apiData = {
+                name: data.name,
+                description: data.description,
+                discount_type: data.type,
+                discount_value: data.value,
+                target: data.target,
+                min_amount: data.minAmount || null,
+                priority: data.priority,
+                is_active: data.isActive,
+                combine_with_other: data.combineWithOther,
+                start_date: data.startDate || null,
+                end_date: data.endDate || null,
+                category_id: data.categoryId || null,
+                collection_id: data.collectionId || null,
+                product_ids: data.productIds ? JSON.stringify(data.productIds) : null
+            };
+
+            try {
+                if (currentDiscountId) {
+                    await API.discounts.update(currentDiscountId, apiData);
+                    Components.showToast('Успех', 'Скидка обновлена', 'success');
+                } else {
+                    await API.discounts.create(apiData);
+                    Components.showToast('Успех', 'Скидка создана', 'success');
+                }
+
+                closeDiscountModal();
+                await loadDiscounts();
+            } catch (error) {
+                console.error('Ошибка сохранения скидки:', error);
+                Components.showToast('Ошибка', 'Не удалось сохранить скидку', 'error');
+            }
+        }
+
+        // Edit discount
+        function editDiscount(id) {
+            openDiscountModal(id);
+        }
+
+        // Delete discount
+        async function deleteDiscount(id) {
+            try {
+                const discount = await API.discounts.getById(id);
+
+                Components.confirm(
+                    'Удалить скидку?',
+                    `Вы уверены, что хотите удалить скидку "${discount.name}"?`,
+                    async () => {
+                        try {
+                            await API.discounts.delete(id);
+                            Components.showToast('Успех', 'Скидка удалена', 'success');
+                            await loadDiscounts();
+                        } catch (error) {
+                            console.error('Ошибка удаления скидки:', error);
+                            Components.showToast('Ошибка', 'Не удалось удалить скидку', 'error');
+                        }
+                    }
+                );
+            } catch (error) {
+                console.error('Ошибка загрузки скидки:', error);
+                Components.showToast('Ошибка', 'Не удалось загрузить данные скидки', 'error');
+            }
+        }
+
+        // Sidebar & Search
+        function setupSidebar() {
+            document.getElementById('sidebar-toggle')?.addEventListener('click', () => {
+                document.querySelector('.sidebar').classList.toggle('sidebar-collapsed');
+            });
+        }
+
+        function setupSearch() {
+            const input = document.getElementById('global-search');
+            input?.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') input.blur();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === '/' && document.activeElement !== input) {
+                    e.preventDefault();
+                    input?.focus();
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

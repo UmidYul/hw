@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Коллекции — AURA Admin</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="/admin/styles.css">
+</head>
+
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">A</div>
+                    <div class="sidebar-logo-text">AURA Admin</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Основное</div>
+                    <a href="index.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Каталог</div>
+                    <a href="products.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📦</span>
+                        <span>Товары</span>
+                    </a>
+                    <a href="categories.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🏷️</span>
+                        <span>Категории</span>
+                    </a>
+                    <a href="collections.html" class="sidebar-nav-link active">
+                        <span class="sidebar-nav-icon">📚</span>
+                        <span>Коллекции</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Маркетинг</div>
+                    <a href="discounts.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">💰</span>
+                        <span>Скидки</span>
+                    </a>
+                    <a href="promocodes.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🎫</span>
+                        <span>Промокоды</span>
+                    </a>
+                    <a href="banners.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🖼️</span>
+                        <span>Баннеры</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Продажи</div>
+                    <a href="orders.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🛍️</span>
+                        <span>Заказы</span>
+                    </a>
+                    <a href="customers.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">👥</span>
+                        <span>Клиенты</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Настройки</div>
+                    <a href="settings.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">⚙️</span>
+                        <span>Настройки</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="topbar-btn" id="sidebar-toggle">☰</button>
+                    <div class="topbar-search">
+                        <input type="text" class="topbar-search-input" placeholder="Поиск... (нажмите /)"
+                            id="global-search">
+                        <span class="topbar-search-icon">🔍</span>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="topbar-profile">
+                        <div class="topbar-profile-avatar">A</div>
+                        <div class="topbar-profile-name">Администратор</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="page-content">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Коллекции</h1>
+                        <p class="page-subtitle">Управление подборками товаров</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openCollectionModal()">
+                        + Создать коллекцию
+                    </button>
+                </div>
+
+                <!-- Collections Table -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Название</th>
+                                        <th>Slug</th>
+                                        <th>Тип</th>
+                                        <th>Товаров</th>
+                                        <th>Видимость</th>
+                                        <th class="text-right">Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="collectionsTable">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Collection Modal -->
+    <div class="modal" id="collectionModal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="modalTitle">Новая коллекция</h2>
+                    <button class="modal-close" onclick="closeCollectionModal()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <form id="collectionForm">
+                        <input type="hidden" name="id" id="collectionId">
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="name">Название *</label>
+                                <input type="text" id="name" name="name" placeholder="Новая коллекция" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="slug">Slug *</label>
+                                <input type="text" id="slug" name="slug" placeholder="new-collection" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Описание</label>
+                            <textarea id="description" name="description" rows="3"
+                                placeholder="Краткое описание коллекции"></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ruleType">Тип подборки *</label>
+                                <select id="ruleType" name="ruleType" onchange="toggleRuleType()">
+                                    <option value="manual">Ручной выбор товаров</option>
+                                    <option value="rule">Автоматически по правилам</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" name="isActive" id="isActive" checked>
+                                    Показывать на сайте
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Manual Selection -->
+                        <div id="manualSection" class="rule-section">
+                            <div class="form-group">
+                                <label>Выберите товары</label>
+                                <div class="product-selector" id="productSelector">
+                                    <!-- Dynamic product checkboxes -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rule-based Selection -->
+                        <div id="ruleSection" class="rule-section" style="display: none;">
+                            <div class="form-group">
+                                <label for="ruleCategory">Категория</label>
+                                <select id="ruleCategory" name="ruleCategory">
+                                    <option value="">Все категории</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ruleTags">Теги (через запятую)</label>
+                                <input type="text" id="ruleTags" name="ruleTags" placeholder="новинка, sale, лимитед">
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="ruleMinPrice">Мин. цена</label>
+                                    <input type="number" id="ruleMinPrice" name="ruleMinPrice" placeholder="0">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ruleMaxPrice">Макс. цена</label>
+                                    <input type="number" id="ruleMaxPrice" name="ruleMaxPrice" placeholder="999999">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ruleLimit">Максимум товаров</label>
+                                <input type="number" id="ruleLimit" name="ruleLimit" value="20" min="1">
+                            </div>
+                        </div>
+
+                        <!-- Preview -->
+                        <div class="form-group">
+                            <label>Предпросмотр товаров</label>
+                            <div id="previewProducts" class="preview-list">
+                                <div class="empty-state">
+                                    <p>Выберите товары или настройте правила</p>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeCollectionModal()">Отмена</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCollection()">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/admin/repo.js"></script>
+    <script src="/admin/seed.js"></script>
+    <script src="/admin/components.js"></script>
+
+    <script>
+        let currentCollectionId = null;
+        let allProducts = [];
+        let allCategories = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCollections();
+            setupSidebar();
+            setupSearch();
+        });
+
+        // Load collections
+        async function loadCollections() {
+            try {
+                const collections = await API.collections.getAll();
+                const tbody = document.getElementById('collectionsTable');
+
+                if (collections.length === 0) {
+                    tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center">
+                            <div class="empty-state">
+                                <p>Нет коллекций</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                    return;
+                }
+
+                tbody.innerHTML = collections.map(collection => {
+                    const productIds = Array.isArray(collection.product_ids) ? collection.product_ids : (collection.product_ids ? JSON.parse(collection.product_ids) : []);
+                    const conditions = collection.conditions ? (typeof collection.conditions === 'string' ? JSON.parse(collection.conditions) : collection.conditions) : null;
+                    const isVisible = collection.is_visible !== undefined ? collection.is_visible : (collection.isVisible !== undefined ? collection.isVisible : 1);
+                    const statusBadge = isVisible
+                        ? '<span class="badge badge-success">Активна</span>'
+                        : '<span class="badge badge-secondary">Скрыта</span>';
+                    const typeLabel = (collection.collection_type || collection.type) === 'manual' ? 'Ручная' : 'Авто';
+                    const productCount = productIds.length || 0;
+
+                    return `
+                    <tr>
+                        <td><strong>${collection.name}</strong></td>
+                        <td><code>${collection.slug}</code></td>
+                        <td>${typeLabel}</td>
+                        <td>${productCount}</td>
+                        <td>${statusBadge}</td>
+                        <td class="text-right">
+                            <button class="btn btn-sm btn-secondary" onclick="editCollection('${collection.id}')">Изменить</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteCollection('${collection.id}')">Удалить</button>
+                        </td>
+                    </tr>
+                `;
+                }).join('');
+            } catch (error) {
+                console.error('Failed to load collections:', error);
+                document.getElementById('collectionsTable').innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center">
+                            <div class="empty-state">
+                                <p>Не удалось загрузить коллекции</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Open modal
+        async function openCollectionModal(id = null) {
+            const modal = document.getElementById('collectionModal');
+            const form = document.getElementById('collectionForm');
+            const title = document.getElementById('modalTitle');
+
+            currentCollectionId = id;
+            form.reset();
+
+            try {
+                // Load products and categories
+                const [products, categories] = await Promise.all([
+                    API.products.getAll(),
+                    API.categories.getAll()
+                ]);
+                allProducts = products.filter(p => p.status === 'active');
+                allCategories = categories;
+
+                if (id) {
+                    title.textContent = 'Редактировать коллекцию';
+                    const collection = await API.collections.getById(id);
+
+                    document.getElementById('collectionId').value = collection.id;
+                    document.getElementById('name').value = collection.name;
+                    document.getElementById('slug').value = collection.slug;
+                    document.getElementById('description').value = collection.description || '';
+                    const ruleType = collection.type || collection.collection_type || collection.ruleType || 'manual';
+                    document.getElementById('ruleType').value = ruleType;
+                    const isVisible = collection.is_visible !== undefined ? collection.is_visible : (collection.isVisible !== undefined ? collection.isVisible : 1);
+                    document.getElementById('isActive').checked = Boolean(isVisible);
+
+                    if (ruleType === 'auto' || ruleType === 'rule') {
+                        const conditions = collection.conditions ? (typeof collection.conditions === 'string' ? JSON.parse(collection.conditions) : collection.conditions) : {};
+                        document.getElementById('ruleCategory').value = conditions.category || conditions.categoryId || '';
+                        document.getElementById('ruleTags').value = conditions.tags ? conditions.tags.join(', ') : '';
+                        document.getElementById('ruleMinPrice').value = collection.rule.minPrice || '';
+                        document.getElementById('ruleMaxPrice').value = collection.rule.maxPrice || '';
+                        document.getElementById('ruleLimit').value = collection.rule.limit || 20;
+                    }
+                } else {
+                    title.textContent = 'Новая коллекция';
+                }
+
+                await populateProductSelector();
+                populateCategorySelector();
+                toggleRuleType();
+                updatePreview();
+
+                modal.classList.add('active');
+            } catch (error) {
+                console.error('Error loading collection modal:', error);
+                Components.showToast('Ошибка', 'Не удалось загрузить данные', 'error');
+            }
+        }
+
+        // Close modal
+        function closeCollectionModal() {
+            document.getElementById('collectionModal').classList.remove('active');
+            currentCollectionId = null;
+        }
+
+        // Populate product selector
+        async function populateProductSelector() {
+            const container = document.getElementById('productSelector');
+            let selectedIds = [];
+
+            if (currentCollectionId) {
+                try {
+                    const collection = await API.collections.getById(currentCollectionId);
+                    selectedIds = collection.product_ids || collection.productIds || [];
+                    if (typeof selectedIds === 'string') {
+                        selectedIds = JSON.parse(selectedIds);
+                    }
+                } catch (error) {
+                    console.error('Error loading collection products:', error);
+                }
+            }
+
+            if (allProducts.length === 0) {
+                container.innerHTML = '<p class="text-muted">Нет активных товаров</p>';
+                return;
+            }
+
+            container.innerHTML = allProducts.map(product => {
+                const checked = selectedIds.includes(product.id) ? 'checked' : '';
+                const imageUrl = product.imageUrl || product.images?.[0] || '/images/placeholder.jpg';
+                const price = product.price || product.regular_price || 0;
+                return `
+                    <div class="product-selector-item">
+                        <label>
+                            <input type="checkbox" value="${product.id}" ${checked} onchange="updatePreview()">
+                            <img src="${imageUrl}" alt="${product.title || product.name}">
+                            <div class="product-info">
+                                <div class="product-name">${product.title || product.name}</div>
+                                <div class="product-price">${price.toLocaleString('ru-RU')} ₽</div>
+                            </div>
+                        </label>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Populate category selector
+        function populateCategorySelector() {
+            const select = document.getElementById('ruleCategory');
+            select.innerHTML = '<option value="">Все категории</option>' +
+                allCategories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+        }
+
+        // Toggle rule type
+        function toggleRuleType() {
+            const type = document.getElementById('ruleType').value;
+            const manualSection = document.getElementById('manualSection');
+            const ruleSection = document.getElementById('ruleSection');
+
+            if (type === 'manual') {
+                manualSection.style.display = 'block';
+                ruleSection.style.display = 'none';
+            } else {
+                manualSection.style.display = 'none';
+                ruleSection.style.display = 'block';
+            }
+
+            updatePreview();
+        }
+
+        // Update preview
+        function updatePreview() {
+            const container = document.getElementById('previewProducts');
+            const type = document.getElementById('ruleType').value;
+            let products = [];
+
+            if (type === 'manual') {
+                const checkboxes = document.querySelectorAll('#productSelector input[type="checkbox"]:checked');
+                const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+                products = allProducts.filter(p => selectedIds.includes(String(p.id)));
+            } else {
+                // Apply rules
+                const categoryId = document.getElementById('ruleCategory').value;
+                const tags = document.getElementById('ruleTags').value.split(',').map(t => t.trim().toLowerCase()).filter(t => t);
+                const minPrice = parseFloat(document.getElementById('ruleMinPrice').value) || 0;
+                const maxPrice = parseFloat(document.getElementById('ruleMaxPrice').value) || Infinity;
+                const limit = parseInt(document.getElementById('ruleLimit').value) || 20;
+
+                products = allProducts.filter(p => {
+                    const catId = p.category_id || p.categoryId;
+                    if (categoryId && String(catId) !== categoryId) return false;
+                    const price = p.price || p.regular_price || 0;
+                    if (price < minPrice || price > maxPrice) return false;
+                    if (tags.length > 0) {
+                        const productTags = [
+                            p.tags?.isNew || p.is_new ? 'новинка' : null,
+                            p.tags?.isSale || p.is_sale ? 'sale' : null,
+                            p.tags?.isLimited || p.is_limited ? 'лимитед' : null
+                        ].filter(Boolean);
+                        if (!tags.some(tag => productTags.includes(tag))) return false;
+                    }
+                    return true;
+                }).slice(0, limit);
+            }
+
+            if (products.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>Нет товаров по заданным критериям</p></div>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="preview-grid">
+                    ${products.map(p => {
+                const imageUrl = p.imageUrl || p.image_url || p.images?.[0] || '/images/placeholder.jpg';
+                const title = p.title || p.name;
+                const price = p.price || p.regular_price || 0;
+                return `
+                            <div class="preview-item">
+                                <img src="${imageUrl}" alt="${title}">
+                                <div>
+                                    <div class="preview-item-title">${title}</div>
+                                    <div class="preview-item-price">${price.toLocaleString('ru-RU')} ₽</div>
+                                </div>
+                            </div>
+                        `;
+            }).join('')}
+                </div>
+                <div style="margin-top: 12px;">
+                    <small class="text-muted">Показано: ${products.length} товаров</small>
+                </div>
+            `;
+        }
+
+        // Generate slug
+        document.getElementById('name')?.addEventListener('input', (e) => {
+            if (!currentCollectionId) {
+                const slug = e.target.value
+                    .toLowerCase()
+                    .replace(/\s+/g, '-')
+                    .replace(/[^a-z0-9-]/g, '');
+                document.getElementById('slug').value = slug;
+            }
+        });
+
+        // Save collection
+        async function saveCollection() {
+            const form = document.getElementById('collectionForm');
+            const name = document.getElementById('name').value.trim();
+            const slug = document.getElementById('slug').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const ruleType = document.getElementById('ruleType').value;
+            const isActive = document.getElementById('isActive').checked;
+
+            if (!name || !slug) {
+                Components.showToast('Ошибка', 'Заполните обязательные поля', 'error');
+                return;
+            }
+
+            const data = {
+                name,
+                slug,
+                description,
+                type: ruleType,
+                isVisible: isActive
+            };
+
+            if (ruleType === 'manual') {
+                const checkboxes = document.querySelectorAll('#productSelector input[type="checkbox"]:checked');
+                data.productIds = Array.from(checkboxes).map(cb => cb.value);
+            } else {
+                const tags = document.getElementById('ruleTags').value.split(',').map(t => t.trim().toLowerCase()).filter(t => t);
+                data.conditions = {
+                    category: document.getElementById('ruleCategory').value || null,
+                    tags: tags.length > 0 ? tags : null,
+                    min_price: parseFloat(document.getElementById('ruleMinPrice').value) || null,
+                    max_price: parseFloat(document.getElementById('ruleMaxPrice').value) || null,
+                    limit: parseInt(document.getElementById('ruleLimit').value) || 20
+                };
+            }
+
+            try {
+                if (currentCollectionId) {
+                    await API.collections.update(currentCollectionId, data);
+                    Components.showToast('Успех', 'Коллекция обновлена', 'success');
+                } else {
+                    await API.collections.create(data);
+                    Components.showToast('Успех', 'Коллекция создана', 'success');
+                }
+
+                closeCollectionModal();
+                await loadCollections();
+            } catch (error) {
+                console.error('Failed to save collection:', error);
+                Components.showToast('Ошибка', 'Не удалось сохранить коллекцию', 'error');
+            }
+        }
+
+        // Edit collection
+        function editCollection(id) {
+            openCollectionModal(id);
+        }
+
+        // Delete collection
+        async function deleteCollection(id) {
+            try {
+                const collection = await API.collections.getById(id);
+
+                Components.confirm(
+                    'Удалить коллекцию?',
+                    `Вы уверены, что хотите удалить коллекцию "${collection.name}"?`,
+                    async () => {
+                        try {
+                            await API.collections.delete(id);
+                            Components.showToast('Успех', 'Коллекция удалена', 'success');
+                            await loadCollections();
+                        } catch (error) {
+                            console.error('Failed to delete collection:', error);
+                            Components.showToast('Ошибка', 'Не удалось удалить коллекцию', 'error');
+                        }
+                    }
+                );
+            } catch (error) {
+                console.error('Failed to load collection:', error);
+                Components.showToast('Ошибка', 'Не удалось загрузить коллекцию', 'error');
+            }
+        }
+
+        // Sidebar & Search
+        function setupSidebar() {
+            document.getElementById('sidebar-toggle')?.addEventListener('click', () => {
+                document.querySelector('.sidebar').classList.toggle('sidebar-collapsed');
+            });
+        }
+
+        function setupSearch() {
+            const input = document.getElementById('global-search');
+            input?.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') input.blur();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === '/' && document.activeElement !== input) {
+                    e.preventDefault();
+                    input?.focus();
+                }
+            });
+        }
+
+        // Update rule preview on input change
+        ['ruleCategory', 'ruleTags', 'ruleMinPrice', 'ruleMaxPrice', 'ruleLimit'].forEach(id => {
+            document.getElementById(id)?.addEventListener('input', updatePreview);
+        });
+    </script>
+</body>
+
+</html>

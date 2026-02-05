@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AURA Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/admin/styles.css">
+</head>
+
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">A</div>
+                    <div class="sidebar-logo-text">AURA Admin</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Основное</div>
+                    <a href="index.html" class="sidebar-nav-link active">
+                        <span class="sidebar-nav-icon">📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Каталог</div>
+                    <a href="products.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📦</span>
+                        <span>Товары</span>
+                    </a>
+                    <a href="categories.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🏷️</span>
+                        <span>Категории</span>
+                    </a>
+                    <a href="collections.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📚</span>
+                        <span>Коллекции</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Маркетинг</div>
+                    <a href="discounts.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">💰</span>
+                        <span>Скидки</span>
+                    </a>
+                    <a href="promocodes.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🎫</span>
+                        <span>Промокоды</span>
+                    </a>
+                    <a href="banners.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🖼️</span>
+                        <span>Баннеры</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Продажи</div>
+                    <a href="orders.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🛍️</span>
+                        <span>Заказы</span>
+                    </a>
+                    <a href="customers.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">👥</span>
+                        <span>Клиенты</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Настройки</div>
+                    <a href="settings.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">⚙️</span>
+                        <span>Настройки</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Topbar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="topbar-btn" id="sidebar-toggle">☰</button>
+                    <div class="topbar-search">
+                        <input type="text" class="topbar-search-input" placeholder="Поиск... (нажмите /)"
+                            id="global-search">
+                        <span class="topbar-search-icon">🔍</span>
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <button class="topbar-btn" title="Уведомления">
+                        <span>🔔</span>
+                        <span class="topbar-btn-badge"></span>
+                    </button>
+
+                    <div class="topbar-profile" id="profile-btn">
+                        <div class="topbar-profile-avatar">A</div>
+                        <div class="topbar-profile-name">Администратор</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="page-content">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Dashboard</h1>
+                        <p class="page-subtitle">Обзор магазина</p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="btn btn-secondary" onclick="window.location.reload()">🔄 Обновить</button>
+                        <button class="btn btn-primary" onclick="window.location.href='product-edit.html'">➕ Создать
+                            товар</button>
+                    </div>
+                </div>
+
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-4">
+                    <div class="stat-card">
+                        <div class="stat-card-content">
+                            <div class="stat-card-label">Выручка</div>
+                            <div class="stat-card-value" id="revenue">—</div>
+                            <div class="stat-card-change positive">
+                                <span>↑</span>
+                                <span>12.5%</span>
+                            </div>
+                        </div>
+                        <div class="stat-card-icon accent">💰</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-card-content">
+                            <div class="stat-card-label">Заказы</div>
+                            <div class="stat-card-value" id="orders-count">—</div>
+                            <div class="stat-card-change positive">
+                                <span>↑</span>
+                                <span>8.3%</span>
+                            </div>
+                        </div>
+                        <div class="stat-card-icon success">🛍️</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-card-content">
+                            <div class="stat-card-label">Средний чек</div>
+                            <div class="stat-card-value" id="avg-order">—</div>
+                            <div class="stat-card-change negative">
+                                <span>↓</span>
+                                <span>2.1%</span>
+                            </div>
+                        </div>
+                        <div class="stat-card-icon info">📊</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-card-content">
+                            <div class="stat-card-label">Товары</div>
+                            <div class="stat-card-value" id="products-count">—</div>
+                            <div class="stat-card-change positive">
+                                <span>↑</span>
+                                <span>5 новых</span>
+                            </div>
+                        </div>
+                        <div class="stat-card-icon accent">📦</div>
+                    </div>
+                </div>
+
+                <!-- Recent Orders -->
+                <div class="card mt-lg">
+                    <div class="card-header">
+                        <h3 class="card-title">Последние заказы</h3>
+                    </div>
+                    <div class="card-body" id="recent-orders">
+                        <div class="skeleton skeleton-text"></div>
+                        <div class="skeleton skeleton-text"></div>
+                        <div class="skeleton skeleton-text"></div>
+                    </div>
+                </div>
+
+                <!-- Top Products -->
+                <div class="card mt-lg">
+                    <div class="card-header">
+                        <h3 class="card-title">Топ товары</h3>
+                    </div>
+                    <div class="card-body" id="top-products">
+                        <div class="skeleton skeleton-text"></div>
+                        <div class="skeleton skeleton-text"></div>
+                    </div>
+                </div>
+
+                <!-- Low Stock Products -->
+                <div class="card mt-lg">
+                    <div class="card-header">
+                        <h3 class="card-title">Товары с низким остатком</h3>
+                    </div>
+                    <div class="card-body" id="low-stock">
+                        <div class="skeleton skeleton-text"></div>
+                        <div class="skeleton skeleton-text"></div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="grid grid-cols-3 mt-lg">
+                    <button class="btn btn-secondary" onclick="window.location.href='product-edit.html'">
+                        ➕ Добавить товар
+                    </button>
+                    <button class="btn btn-secondary" onclick="window.location.href='banners.html'">
+                        🖼️ Создать баннер
+                    </button>
+                    <button class="btn btn-secondary" onclick="window.location.href='promocodes.html'">
+                        🎫 Создать промокод
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="/js/api.js"></script>
+    <script src="/admin/components.js"></script>
+    <script>
+        // Initialize Dashboard
+        async function initDashboard() {
+            try {
+                // Load stats from API
+                const stats = await API.stats.getDashboard(30);
+
+                // Update KPIs
+                document.getElementById('revenue').textContent = Components.formatPrice(stats.revenue.total);
+                document.getElementById('orders-count').textContent = stats.orders.total;
+                document.getElementById('avg-order').textContent = Components.formatPrice(stats.avgOrder);
+                document.getElementById('products-count').textContent = stats.products;
+
+                // Update revenue change indicator
+                const revenueChange = stats.revenue.change;
+                const revenueChangeEl = document.querySelector('#revenue').parentElement.querySelector('.stat-card-change');
+                if (revenueChangeEl) {
+                    revenueChangeEl.className = `stat-card-change ${revenueChange >= 0 ? 'positive' : 'negative'}`;
+                    revenueChangeEl.innerHTML = `
+                        <span class="stat-card-arrow">${revenueChange >= 0 ? '↑' : '↓'}</span>
+                        <span>${Math.abs(revenueChange).toFixed(1)}% с прошлого периода</span>
+                    `;
+                }
+
+                // Recent Orders
+                document.getElementById('recent-orders').innerHTML = Components.renderTable({
+                    data: stats.recentOrders.map(o => ({
+                        ...o,
+                        number: o.order_number,
+                        customer: { name: o.customer_name },
+                        createdAt: o.created_at
+                    })),
+                    columns: [
+                        { label: 'Номер', field: 'number' },
+                        { label: 'Клиент', field: 'customer', render: (row) => row.customer.name },
+                        { label: 'Сумма', field: 'total', render: (row) => Components.formatPrice(row.total) },
+                        {
+                            label: 'Статус', field: 'status', render: (row) => {
+                                const badges = {
+                                    new: { text: 'Новый', type: 'info' },
+                                    paid: { text: 'Оплачен', type: 'success' },
+                                    processing: { text: 'В обработке', type: 'warning' },
+                                    shipped: { text: 'Отправлен', type: 'warning' },
+                                    delivered: { text: 'Доставлен', type: 'success' },
+                                    completed: { text: 'Завершен', type: 'success' },
+                                    cancelled: { text: 'Отменен', type: 'error' }
+                                };
+                                const badge = badges[row.status] || { text: row.status, type: 'default' };
+                                return Components.renderBadge(badge.text, badge.type);
+                            }
+                        },
+                        { label: 'Дата', field: 'createdAt', render: (row) => Components.formatDate(row.createdAt) }
+                    ],
+                    actions: [
+                        { label: 'Открыть', handler: 'viewOrder' }
+                    ]
+                });
+
+                // Top Products
+                if (stats.topProducts && stats.topProducts.length > 0) {
+                    const topProductsHtml = stats.topProducts.map(p => `
+                        <div style="display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #E5E5E5;">
+                            <div>
+                                <strong>${p.title}</strong>
+                                <div style="color: #757575; font-size: 12px;">${p.sku}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div><strong>${Components.formatPrice(p.revenue)}</strong></div>
+                                <div style="color: #757575; font-size: 12px;">Продано: ${p.total_sold}</div>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    document.getElementById('top-products').innerHTML = topProductsHtml || '<p style="color: #757575;">Нет данных</p>';
+                } else {
+                    document.getElementById('top-products').innerHTML = '<p style="color: #757575;">Нет данных</p>';
+                }
+
+                // Load products for low stock check
+                const products = await API.products.getAll();
+                const lowStock = products.filter(p => p.stock <= 10 && p.stock > 0);
+
+                document.getElementById('low-stock').innerHTML = Components.renderTable({
+                    data: lowStock,
+                    columns: [
+                        { label: 'Товар', field: 'title' },
+                        { label: 'SKU', field: 'sku' },
+                        { label: 'Остаток', field: 'stock', render: (row) => `<span class="text-error">${row.stock}</span>` }
+                    ],
+                    emptyMessage: 'Все товары в наличии'
+                });
+
+            } catch (error) {
+                console.error('Failed to load dashboard stats:', error);
+                Components.showToast('Ошибка', 'Не удалось загрузить статистику', 'error');
+            }
+        }
+
+        function viewOrder(id) {
+            window.location.href = `order-view.html?id=${id}`;
+        }
+
+        // Sidebar toggle
+        document.getElementById('sidebar-toggle').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('open');
+        });
+
+        // Global search
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                e.preventDefault();
+                document.getElementById('global-search').focus();
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initDashboard, 300);
+        });
+    </script>
+</body>
+
+</html>

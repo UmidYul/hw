@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Корзина · AURA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:wght@300;400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-container">
+            <div class="header-left">
+                <button class="menu-btn" id="mobileMenuBtn" aria-label="Меню">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <a href="/" class="logo">
+                <span class="logo-text">AURA</span>
+                <span class="logo-dot">·</span>
+            </a>
+
+            <div class="header-right">
+                <button class="icon-btn search-btn" id="searchBtn" aria-label="Поиск">
+                    <i class="fas fa-search"></i>
+                </button>
+                <button class="icon-btn wishlist-btn" id="wishlistBtn" aria-label="Избранное">
+                    <i class="far fa-heart"></i>
+                    <span class="badge" id="wishlistBadge">0</span>
+                </button>
+                <button class="icon-btn cart-btn" id="cartBtn" aria-label="Корзина">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span class="badge" id="cartBadge">0</span>
+                </button>
+            </div>
+        </div>
+
+        <nav class="nav" id="mainNav">
+            <div class="container">
+                <ul class="nav-list">
+                    <li><a href="/catalog?category=all" class="nav-link">Все товары</a></li>
+                    <li><a href="/catalog?category=Outerwear" class="nav-link">Верхняя одежда</a></li>
+                    <li><a href="/catalog?category=Tops" class="nav-link">Топы</a></li>
+                    <li><a href="/catalog?category=Bottoms" class="nav-link">Низ</a></li>
+                    <li><a href="/catalog?category=Shoes" class="nav-link">Обувь</a></li>
+                    <li><a href="/catalog?category=Accessories" class="nav-link">Аксессуары</a></li>
+                    <li><a href="/catalog?tag=Sale" class="nav-link nav-link-sale">Sale</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Search Modal -->
+    <div class="modal" id="searchModal">
+        <div class="modal-overlay" id="searchModalOverlay"></div>
+        <div class="modal-content search-modal-content">
+            <button class="modal-close" id="searchModalClose" aria-label="Закрыть">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="search-modal-body">
+                <input type="text" class="search-input-large" id="searchInput" placeholder="Поиск товаров..." autofocus>
+                <div class="search-results" id="searchResults"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Page -->
+    <div class="cart-page">
+        <div class="container">
+            <!-- Breadcrumbs -->
+            <nav class="breadcrumbs" aria-label="breadcrumb">
+                <a href="/">Главная</a>
+                <span>/</span>
+                <span>Корзина</span>
+            </nav>
+
+            <h1 class="page-title">Корзина</h1>
+
+            <div class="cart-container">
+                <!-- Cart Items -->
+                <div class="cart-items" id="cartItems">
+                    <!-- Items will be inserted here -->
+                </div>
+
+                <!-- Cart Summary -->
+                <div class="cart-summary">
+                    <h3 class="summary-title">Итого</h3>
+
+                    <div class="summary-row">
+                        <span>Товары (<span id="summaryItemCount">0</span>)</span>
+                        <span id="summarySubtotal">0₽</span>
+                    </div>
+
+                    <div class="summary-row" id="discountRow" style="display: none;">
+                        <span>Скидка</span>
+                        <span class="text-success" id="summaryDiscount">-0₽</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Доставка</span>
+                        <span id="summaryDelivery">Бесплатно</span>
+                    </div>
+
+                    <div class="summary-row" id="vatRow" style="display: none;">
+                        <span>НДС</span>
+                        <span id="summaryVatAmount">0₽</span>
+                    </div>
+
+                    <div class="summary-divider"></div>
+
+                    <div class="summary-row summary-total">
+                        <span>К оплате</span>
+                        <span id="summaryTotal">0₽</span>
+                    </div>
+
+                    <!-- Promo Code -->
+                    <div class="promo-section">
+                        <h4 class="promo-title">Промокод</h4>
+                        <form class="promo-form" id="promoForm">
+                            <input type="text" class="promo-input" id="promoInput" placeholder="Введите промокод"
+                                aria-label="Промокод">
+                            <button type="submit" class="btn btn-outline btn-sm">Применить</button>
+                        </form>
+                        <div class="promo-message" id="promoMessage"></div>
+                        <div class="promo-applied" id="promoApplied" style="display: none;">
+                            <span>Промокод: <strong id="appliedPromoCode"></strong></span>
+                            <button class="promo-remove" id="removePromo" aria-label="Удалить промокод">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-dark btn-large btn-block" id="checkoutBtn">
+                        Оформить заказ
+                    </button>
+
+                    <div class="delivery-info">
+                        <i class="fas fa-truck"></i>
+                        <span id="deliveryInfoText">Бесплатная доставка от 5000₽</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state-large" id="emptyCart" style="display: none;">
+                <i class="fas fa-shopping-bag empty-icon-large"></i>
+                <h2>Корзина пуста</h2>
+                <p>Добавьте товары из каталога</p>
+                <a href="catalog.html" class="btn btn-primary">Перейти в каталог</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div class="modal" id="checkoutModal">
+        <div class="modal-overlay" id="checkoutModalOverlay"></div>
+        <div class="modal-content checkout-modal">
+            <button class="modal-close" id="checkoutModalClose" aria-label="Закрыть">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-body">
+                <h3 style="margin-bottom: 8px;">Оформление заказа</h3>
+                <p style="color: #757575; margin-bottom: 24px;">Заполните данные для оформления заявки</p>
+
+                <form id="checkoutForm">
+                    <div class="form-group">
+                        <label for="customerName">Имя <span style="color: #C9A26C;">*</span></label>
+                        <input type="text" id="customerName" class="form-input" placeholder="Ваше имя" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customerPhone">Телефон <span style="color: #C9A26C;">*</span></label>
+                        <input type="tel" id="customerPhone" class="form-input" placeholder="+998 (90) 123-45-67"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customerEmail">Email</label>
+                        <input type="email" id="customerEmail" class="form-input"
+                            placeholder="email@example.com (необязательно)">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customerAddress">Адрес доставки <span style="color: #C9A26C;">*</span></label>
+                        <textarea id="customerAddress" class="form-input" rows="3"
+                            placeholder="Город, улица, дом, квартира" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customerNotes">Комментарий к заказу</label>
+                        <textarea id="customerNotes" class="form-input" rows="2"
+                            placeholder="Пожелания по доставке или другие комментарии (необязательно)"></textarea>
+                    </div>
+
+                    <div class="checkout-summary">
+                        <div class="summary-row">
+                            <span>Товаров:</span>
+                            <span id="summaryItemCount">0</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Сумма:</span>
+                            <span id="summarySubtotal">0 ₽</span>
+                        </div>
+                        <div class="summary-row" id="summaryDiscountRow" style="display: none;">
+                            <span>Скидка:</span>
+                            <span id="summaryDiscountAmount" style="color: #4CAF50;">0 ₽</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Доставка:</span>
+                            <span id="summaryShipping">500 ₽</span>
+                        </div>
+                        <div class="summary-row" id="summaryVatRow" style="display: none;">
+                            <span>НДС:</span>
+                            <span id="summaryVat">0 ₽</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Итого:</span>
+                            <strong id="summaryTotal">0 ₽</strong>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">Оформить заказ</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-overlay" id="successModalOverlay"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="successModalClose" aria-label="Закрыть">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-body checkout-modal-body">
+                <i class="fas fa-check-circle checkout-icon"></i>
+                <h3>Заказ оформлен!</h3>
+                <p>Ваша заявка успешно отправлена.</p>
+                <p>Мы свяжемся с вами в ближайшее время для подтверждения.</p>
+                <p><strong>Номер заказа: <span id="orderNumber"></span></strong></p>
+                <button class="btn btn-primary" id="closeSuccessModal">Понятно</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="logo footer-logo">
+                        <span class="logo-text">AURA</span>
+                        <span class="logo-dot">·</span>
+                    </div>
+                    <p class="footer-text">Минималистичная мода для современной жизни</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link" aria-label="Pinterest"><i class="fab fa-pinterest-p"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-heading">Покупателям</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Доставка и оплата</a></li>
+                        <li><a href="#">Возврат и обмен</a></li>
+                        <li><a href="#">Таблица размеров</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-heading">О компании</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">О нас</a></li>
+                        <li><a href="#">Контакты</a></li>
+                        <li><a href="#">Вакансии</a></li>
+                        <li><a href="#">Sustainability</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-heading">Помощь</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Связаться с нами</a></li>
+                        <li><a href="#">Политика конфиденциальности</a></li>
+                        <li><a href="#">Условия использования</a></li>
+                        <li><a href="#">Программа лояльности</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 AURA. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Wishlist Drawer -->
+    <div class="drawer" id="wishlistDrawer">
+        <div class="drawer-overlay" id="wishlistDrawerOverlay"></div>
+        <div class="drawer-content">
+            <div class="drawer-header">
+                <h3 class="drawer-title">Избранное (<span id="drawerWishlistCount">0</span>)</h3>
+                <button class="drawer-close" id="wishlistDrawerClose" aria-label="Закрыть">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="drawer-body" id="drawerWishlistItems"></div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/discounts-loader.js"></script>
+    <script src="/js/products-loader.js"></script>
+    <script src="/js/promo-manager.js"></script>
+    <script src="/js/data.js"></script>
+    <script src="/js/utils.js"></script>
+    <script src="/js/app.js"></script>
+    <script src="/js/cart-page.js"></script>
+</body>
+
+</html>

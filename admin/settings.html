@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройки - AURA Admin</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/admin/styles.css">
+</head>
+
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">A</div>
+                    <div class="sidebar-logo-text">AURA Admin</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Основное</div>
+                    <a href="index.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Каталог</div>
+                    <a href="products.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📦</span>
+                        <span>Товары</span>
+                    </a>
+                    <a href="categories.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🏷️</span>
+                        <span>Категории</span>
+                    </a>
+                    <a href="collections.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📚</span>
+                        <span>Коллекции</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Маркетинг</div>
+                    <a href="discounts.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">💰</span>
+                        <span>Скидки</span>
+                    </a>
+                    <a href="promocodes.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🎫</span>
+                        <span>Промокоды</span>
+                    </a>
+                    <a href="banners.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🖼️</span>
+                        <span>Баннеры</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Продажи</div>
+                    <a href="orders.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🛍️</span>
+                        <span>Заказы</span>
+                    </a>
+                    <a href="customers.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">👥</span>
+                        <span>Клиенты</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Настройки</div>
+                    <a href="settings.html" class="sidebar-nav-link active">
+                        <span class="sidebar-nav-icon">⚙️</span>
+                        <span>Настройки</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="topbar-btn" id="sidebar-toggle">☰</button>
+                </div>
+                <div class="topbar-right">
+                    <div class="topbar-profile">
+                        <div class="topbar-profile-avatar">A</div>
+                        <div class="topbar-profile-name">Администратор</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Настройки</h1>
+                        <p class="page-subtitle">Конфигурация магазина</p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="btn btn-secondary" onclick="exportData()">📥 Экспорт данных</button>
+                        <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">📤
+                            Импорт данных</button>
+                        <input type="file" id="import-file" accept=".json" style="display:none"
+                            onchange="importData(event)">
+                        <button class="btn btn-error" onclick="resetData()">🗑️ Сбросить данные</button>
+                    </div>
+                </div>
+
+                <form id="settings-form">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Основная информация</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="grid grid-cols-2">
+                                <div class="form-group">
+                                    <label class="form-label">Название магазина</label>
+                                    <input type="text" class="form-input" name="storeName">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Логотип (текст)</label>
+                                    <input type="text" class="form-input" name="logoText">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Описание</label>
+                                <textarea class="form-textarea" name="storeDescription" rows="3"></textarea>
+                            </div>
+
+                            <div class="grid grid-cols-2">
+                                <div class="form-group">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-input" name="contactEmail">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Телефон</label>
+                                    <input type="tel" class="form-input" name="contactPhone">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">Валюта и цены</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="grid grid-cols-2">
+                                <div class="form-group">
+                                    <label class="form-label">Валюта</label>
+                                    <select class="form-select" name="currency">
+                                        <option value="RUB">Рубль (RUB)</option>
+                                        <option value="USD">Доллар (USD)</option>
+                                        <option value="EUR">Евро (EUR)</option>
+                                        <option value="UZS">Сум (UZS)</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Символ валюты</label>
+                                    <input type="text" class="form-input" name="currencySymbol">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">Доставка</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="grid grid-cols-2">
+                                <div class="form-group">
+                                    <label class="form-label">Бесплатная доставка от (₽)</label>
+                                    <input type="number" class="form-input" name="freeShippingThreshold" min="0">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Стоимость доставки (₽)</label>
+                                    <input type="number" class="form-input" name="flatShippingRate" min="0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">Налоги</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-checkbox">
+                                    <input type="checkbox" name="enableTaxes">
+                                    <span>Включить налоги</span>
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">НДС (%)</label>
+                                <input type="number" class="form-input" name="taxPercent" min="0" max="100" step="0.1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">Политики</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label">Политика возврата</label>
+                                <textarea class="form-textarea" name="returnPolicy" rows="3"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Политика конфиденциальности</label>
+                                <textarea class="form-textarea" name="privacyPolicy" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between mt-lg">
+                        <button type="button" class="btn btn-secondary" onclick="window.history.back()">Отмена</button>
+                        <button type="button" class="btn btn-primary" onclick="saveSettings()">Сохранить
+                            настройки</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/js/api.js"></script>
+    <script src="/admin/components.js"></script>
+    <script>
+        async function loadSettings() {
+            try {
+                const settings = await API.settings.get();
+                const form = document.getElementById('settings-form');
+
+                // Map database fields to form fields
+                const fieldMap = {
+                    'site_name': 'storeName',
+                    'logo_text': 'logoText',
+                    'store_description': 'storeDescription',
+                    'contact_email': 'contactEmail',
+                    'contact_phone': 'contactPhone',
+                    'currency': 'currency',
+                    'currency_symbol': 'currencySymbol',
+                    'free_shipping_threshold': 'freeShippingThreshold',
+                    'shipping_cost': 'flatShippingRate',
+                    'enable_taxes': 'enableTaxes',
+                    'vat_rate': 'taxPercent',
+                    'return_policy': 'returnPolicy',
+                    'privacy_policy': 'privacyPolicy'
+                };
+
+                Object.keys(fieldMap).forEach(dbKey => {
+                    const formKey = fieldMap[dbKey];
+                    const input = form.querySelector(`[name="${formKey}"]`);
+                    if (!input || settings[dbKey] === undefined) return;
+
+                    if (input.type === 'checkbox') {
+                        input.checked = !!settings[dbKey];
+                    } else {
+                        input.value = settings[dbKey] || '';
+                    }
+                });
+            } catch (error) {
+                console.error('Failed to load settings:', error);
+                Components.showToast('Ошибка', 'Не удалось загрузить настройки', 'error');
+            }
+        }
+
+        async function saveSettings() {
+            try {
+                const form = document.getElementById('settings-form');
+                const formData = new FormData(form);
+                const settings = {};
+
+                for (let [key, value] of formData.entries()) {
+                    const input = form.querySelector(`[name="${key}"]`);
+                    if (input.type === 'checkbox') {
+                        settings[key] = input.checked;
+                    } else if (input.type === 'number') {
+                        settings[key] = parseFloat(value) || 0;
+                    } else {
+                        settings[key] = value;
+                    }
+                }
+
+                await API.settings.update(settings);
+                Components.showToast('Успешно', 'Настройки сохранены', 'success');
+
+                // Reload settings to update formatPrice
+                await loadSettings();
+            } catch (error) {
+                console.error('Failed to save settings:', error);
+                Components.showToast('Ошибка', 'Не удалось сохранить настройки', 'error');
+            }
+        }
+
+        function exportData() {
+            const data = REPO.exportData();
+            const dataStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `aura-backup-${Date.now()}.json`;
+            a.click();
+            Components.showToast('Успешно', 'Данные экспортированы', 'success');
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    REPO.importData(data);
+                    Components.showToast('Успешно', 'Данные импортированы', 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                } catch (err) {
+                    Components.showToast('Ошибка', 'Неверный формат файла', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetData() {
+            Components.confirm(
+                'Сбросить все данные?',
+                'Это удалит все товары, заказы и настройки. Демо-данные будут восстановлены.',
+                () => {
+                    REPO.resetData();
+                    Components.showToast('Успешно', 'Данные сброшены', 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                }
+            );
+        }
+
+        document.addEventListener('DOMContentLoaded', loadSettings);
+    </script>
+</body>
+
+</html>

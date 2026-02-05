@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактор товара - AURA Admin</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/admin/styles.css">
+</head>
+
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">A</div>
+                    <div class="sidebar-logo-text">AURA Admin</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Основное</div>
+                    <a href="index.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Каталог</div>
+                    <a href="products.html" class="sidebar-nav-link active">
+                        <span class="sidebar-nav-icon">📦</span>
+                        <span>Товары</span>
+                    </a>
+                    <a href="categories.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🏷️</span>
+                        <span>Категории</span>
+                    </a>
+                    <a href="collections.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📚</span>
+                        <span>Коллекции</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Маркетинг</div>
+                    <a href="discounts.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">💰</span>
+                        <span>Скидки</span>
+                    </a>
+                    <a href="promocodes.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🎫</span>
+                        <span>Промокоды</span>
+                    </a>
+                    <a href="banners.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🖼️</span>
+                        <span>Баннеры</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Продажи</div>
+                    <a href="orders.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🛍️</span>
+                        <span>Заказы</span>
+                    </a>
+                    <a href="customers.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">👥</span>
+                        <span>Клиенты</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Настройки</div>
+                    <a href="settings.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">⚙️</span>
+                        <span>Настройки</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="topbar-btn" onclick="window.history.back()">← Назад</button>
+                </div>
+                <div class="topbar-right">
+                    <button class="btn btn-secondary" onclick="saveDraft()">Сохранить черновик</button>
+                    <button class="btn btn-primary" onclick="saveProduct()">Сохранить и опубликовать</button>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1 class="page-title" id="page-title">Новый товар</h1>
+
+                <div class="tabs">
+                    <button class="tab active" data-tab="basic">Основное</button>
+                    <button class="tab" data-tab="pricing">Цены</button>
+                    <button class="tab" data-tab="inventory">Остатки</button>
+                    <button class="tab" data-tab="description">Описание</button>
+                </div>
+
+                <form id="product-form">
+                    <!-- Tab: Basic -->
+                    <div class="tab-content active" id="tab-basic">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label class="form-label form-label-required">Название</label>
+                                    <input type="text" class="form-input" name="title" required>
+                                </div>
+
+                                <div class="grid grid-cols-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Категория</label>
+                                        <select class="form-select" name="category">
+                                            <option value="">Выберите категорию</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Статус</label>
+                                        <select class="form-select" name="status">
+                                            <option value="draft">Черновик</option>
+                                            <option value="active">Активен</option>
+                                            <option value="archived">Архив</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Теги</label>
+                                        <div class="flex gap-md">
+                                            <label class="form-checkbox">
+                                                <input type="checkbox" name="tags" value="New">
+                                                <span>New</span>
+                                            </label>
+                                            <label class="form-checkbox">
+                                                <input type="checkbox" name="tags" value="Sale">
+                                                <span>Sale</span>
+                                            </label>
+                                            <label class="form-checkbox">
+                                                <input type="checkbox" name="tags" value="Limited">
+                                                <span>Limited</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Pricing -->
+                    <div class="tab-content" id="tab-pricing">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="grid grid-cols-3">
+                                    <div class="form-group">
+                                        <label class="form-label form-label-required">Цена</label>
+                                        <input type="number" class="form-input" name="price" required min="0">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Старая цена</label>
+                                        <input type="number" class="form-input" name="oldPrice" min="0">
+                                        <div class="form-hint">Для скидок</div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Себестоимость</label>
+                                        <input type="number" class="form-input" name="cost" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Inventory -->
+                    <div class="tab-content" id="tab-inventory">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="grid grid-cols-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Остаток</label>
+                                        <input type="number" class="form-input" name="stock" value="0" min="0">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Порог низкого остатка</label>
+                                        <input type="number" class="form-input" name="lowStockThreshold" value="5"
+                                            min="0">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Цвета (через запятую)</label>
+                                    <input type="text" class="form-input" name="colors"
+                                        placeholder="Black, White, Grey">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Размеры (через запятую)</label>
+                                    <input type="text" class="form-input" name="sizes" placeholder="XS, S, M, L, XL">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Description -->
+                    <div class="tab-content" id="tab-description">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label class="form-label">Краткое описание</label>
+                                    <input type="text" class="form-input" name="shortDescription">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Полное описание</label>
+                                    <textarea class="form-textarea" name="fullDescription" rows="4"></textarea>
+                                </div>
+
+                                <div class="grid grid-cols-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Материал</label>
+                                        <input type="text" class="form-input" name="material">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Уход</label>
+                                        <input type="text" class="form-input" name="care">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Изображения товара</label>
+                                    <div id="product-images-container" class="product-images-container">
+                                        <!-- Images will be rendered here -->
+                                    </div>
+                                    <div class="flex gap-md" style="margin-top: 12px;">
+                                        <input type="url" class="form-input" id="new-image-url"
+                                            placeholder="https://..." style="flex: 1;">
+                                        <button type="button" class="btn btn-secondary" onclick="addImage()">➕ Добавить
+                                            фото</button>
+                                    </div>
+                                    <div class="form-hint">Добавьте несколько фотографий товара. Первое фото будет
+                                        главным.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/js/api.js"></script>
+    <script src="/admin/repo.js"></script>
+    <script src="/admin/seed.js"></script>
+    <script src="/admin/components.js"></script>
+    <script>
+        let editingId = null;
+        let allCategories = [];
+        let productImages = [];
+
+        async function loadCategories() {
+            try {
+                allCategories = await API.categories.getAll();
+                const select = document.querySelector('select[name="category"]');
+                allCategories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.slug || cat.id;
+                    option.textContent = cat.name;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Failed to load categories:', error);
+                // Fallback to REPO
+                const categories = REPO.getCategories();
+                const select = document.querySelector('select[name="category"]');
+                categories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.name;
+                    select.appendChild(option);
+                });
+            }
+        }
+
+        // Image Gallery Functions
+        function renderImages() {
+            const container = document.getElementById('product-images-container');
+
+            if (productImages.length === 0) {
+                container.innerHTML = '<div class="product-image-placeholder">Нет изображений. Добавьте фото товара.</div>';
+                return;
+            }
+
+            container.innerHTML = productImages.map((url, index) => `
+                <div class="product-image-item" draggable="true" data-index="${index}">
+                    ${index === 0 ? '<div class="product-image-badge">Главное</div>' : ''}
+                    <button class="product-image-remove" onclick="removeImage(${index})" type="button">✕</button>
+                    <img src="${url}" alt="Product ${index + 1}" onerror="this.src='https://via.placeholder.com/120?text=Error'">
+                </div>
+            `).join('');
+
+            // Add drag-and-drop functionality
+            const items = container.querySelectorAll('.product-image-item');
+            items.forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragover', handleDragOver);
+                item.addEventListener('drop', handleDrop);
+                item.addEventListener('dragend', handleDragEnd);
+            });
+        }
+
+        function addImage() {
+            const input = document.getElementById('new-image-url');
+            const url = input.value.trim();
+
+            if (!url) {
+                Components.showToast('Ошибка', 'Введите URL изображения', 'error');
+                return;
+            }
+
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                Components.showToast('Ошибка', 'URL должен начинаться с http:// или https://', 'error');
+                return;
+            }
+
+            productImages.push(url);
+            input.value = '';
+            renderImages();
+            Components.showToast('Успешно', 'Изображение добавлено', 'success');
+        }
+
+        function removeImage(index) {
+            Components.confirm('Удалить изображение?', 'Это действие нельзя отменить', () => {
+                productImages.splice(index, 1);
+                renderImages();
+                Components.showToast('Успешно', 'Изображение удалено', 'success');
+            });
+        }
+
+        // Drag and Drop handlers
+        let draggedIndex = null;
+
+        function handleDragStart(e) {
+            draggedIndex = parseInt(e.currentTarget.dataset.index);
+            e.currentTarget.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const dropIndex = parseInt(e.currentTarget.dataset.index);
+
+            if (draggedIndex !== dropIndex) {
+                const draggedItem = productImages[draggedIndex];
+                productImages.splice(draggedIndex, 1);
+                productImages.splice(dropIndex, 0, draggedItem);
+                renderImages();
+            }
+
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            e.currentTarget.classList.remove('dragging');
+            draggedIndex = null;
+        }
+
+        // Allow Enter key to add image
+        document.addEventListener('DOMContentLoaded', () => {
+            const imageInput = document.getElementById('new-image-url');
+            if (imageInput) {
+                imageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addImage();
+                    }
+                });
+            }
+        });
+
+        async function loadProduct() {
+            const params = new URLSearchParams(window.location.search);
+            editingId = params.get('id');
+
+            if (!editingId) {
+                renderImages();
+                return;
+            }
+
+            try {
+                const product = await API.products.getById(editingId);
+                if (!product) {
+                    Components.showToast('Ошибка', 'Товар не найден', 'error');
+                    return;
+                }
+                fillForm(product);
+            } catch (error) {
+                console.error('Failed to load product:', error);
+                Components.showToast('Ошибка', 'Не удалось загрузить товар', 'error');
+            }
+        }
+
+        function fillForm(product) {
+
+            document.getElementById('page-title').textContent = 'Редактирование: ' + product.title;
+
+            const form = document.getElementById('product-form');
+            const images = Array.isArray(product.images) ? product.images : (product.images ? JSON.parse(product.images) : []);
+            const colors = Array.isArray(product.colors) ? product.colors : (product.colors ? JSON.parse(product.colors) : []);
+            const sizes = Array.isArray(product.sizes) ? product.sizes : (product.sizes ? JSON.parse(product.sizes) : []);
+
+            // Load images
+            productImages = images.length > 0 ? images : [];
+            renderImages();
+
+            form.querySelector('[name="title"]').value = product.title;
+            form.querySelector('[name="category"]').value = product.category;
+            form.querySelector('[name="status"]').value = product.status;
+            form.querySelector('[name="price"]').value = product.price;
+            form.querySelector('[name="oldPrice"]').value = product.oldPrice || product.old_price || '';
+            form.querySelector('[name="cost"]').value = product.cost || '';
+            form.querySelector('[name="stock"]').value = product.stock;
+            form.querySelector('[name="lowStockThreshold"]').value = product.lowStockThreshold || product.low_stock_threshold || 10;
+            form.querySelector('[name="shortDescription"]').value = product.shortDescription || product.short_description || product.description || '';
+            form.querySelector('[name="fullDescription"]').value = product.fullDescription || product.full_description || product.description || '';
+            form.querySelector('[name="material"]').value = product.material || '';
+            form.querySelector('[name="care"]').value = product.care || '';
+
+            if (colors && colors.length > 0) {
+                form.querySelector('[name="colors"]').value = colors.join(', ');
+            }
+            if (sizes && sizes.length > 0) {
+                form.querySelector('[name="sizes"]').value = product.sizes.join(', ');
+            }
+
+            // Tags
+            if (product.tags) {
+                product.tags.forEach(tag => {
+                    const checkbox = form.querySelector(`[name="tags"][value="${tag}"]`);
+                    if (checkbox) checkbox.checked = true;
+                });
+            }
+        }
+
+        function getFormData() {
+            const form = document.getElementById('product-form');
+            const data = {
+                title: form.querySelector('[name="title"]').value,
+                category: form.querySelector('[name="category"]').value,
+                status: form.querySelector('[name="status"]').value,
+                price: parseInt(form.querySelector('[name="price"]').value) || 0,
+                oldPrice: parseInt(form.querySelector('[name="oldPrice"]').value) || null,
+                cost: parseInt(form.querySelector('[name="cost"]').value) || null,
+                stock: parseInt(form.querySelector('[name="stock"]').value) || 0,
+                lowStockThreshold: parseInt(form.querySelector('[name="lowStockThreshold"]').value) || 5,
+                shortDescription: form.querySelector('[name="shortDescription"]').value,
+                fullDescription: form.querySelector('[name="fullDescription"]').value,
+                description: form.querySelector('[name="fullDescription"]').value || form.querySelector('[name="shortDescription"]').value,
+                material: form.querySelector('[name="material"]').value,
+                care: form.querySelector('[name="care"]').value,
+                fit: 'Regular fit',
+                rating: 0,
+                reviewsCount: 0
+            };
+
+            // Tags
+            const tagCheckboxes = form.querySelectorAll('[name="tags"]:checked');
+            data.tags = Array.from(tagCheckboxes).map(cb => cb.value);
+
+            // Colors
+            const colorsInput = form.querySelector('[name="colors"]').value;
+            data.colors = colorsInput ? colorsInput.split(',').map(c => c.trim()) : [];
+
+            // Sizes
+            const sizesInput = form.querySelector('[name="sizes"]').value;
+            data.sizes = sizesInput ? sizesInput.split(',').map(s => s.trim()) : [];
+
+            // Images from gallery
+            data.images = productImages.length > 0 ? productImages : ['https://via.placeholder.com/400'];
+
+            return data;
+        }
+
+        function validateForm() {
+            const data = getFormData();
+
+            if (!data.title) {
+                Components.showToast('Ошибка', 'Укажите название товара', 'error');
+                return false;
+            }
+
+            if (data.price <= 0) {
+                Components.showToast('Ошибка', 'Укажите цену', 'error');
+                return false;
+            }
+
+            return true;
+        }
+
+        async function saveProduct() {
+            if (!validateForm()) return;
+
+            const data = getFormData();
+            data.status = 'active';
+
+            try {
+                if (editingId) {
+                    await API.products.update(editingId, data);
+                    Components.showToast('Успешно', 'Товар обновлен', 'success');
+                } else {
+                    await API.products.create(data);
+                    Components.showToast('Успешно', 'Товар создан', 'success');
+                }
+
+                setTimeout(() => {
+                    window.location.href = 'products.html';
+                }, 500);
+            } catch (error) {
+                console.error('Failed to save product:', error);
+                Components.showToast('Ошибка', 'Не удалось сохранить товар', 'error');
+            }
+        }
+
+        async function saveDraft() {
+            if (!validateForm()) return;
+
+            const data = getFormData();
+            data.status = 'draft';
+
+            try {
+                if (editingId) {
+                    await API.products.update(editingId, data);
+                } else {
+                    await API.products.create(data);
+                }
+
+                Components.showToast('Успешно', 'Черновик сохранен', 'success');
+            } catch (error) {
+                console.error('Failed to save draft:', error);
+                Components.showToast('Ошибка', 'Не удалось сохранить черновик', 'error');
+            }
+        }
+
+        // Tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.dataset.tab;
+
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                tab.classList.add('active');
+                document.getElementById('tab-' + tabId).classList.add('active');
+            });
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadCategories();
+            await loadProduct();
+        });
+    </script>
+</body>
+
+</html>

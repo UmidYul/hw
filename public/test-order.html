@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тестовое оформление заказа - AURA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #fafafa;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 32px;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #C9A26C;
+        }
+
+        .required {
+            color: #C9A26C;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: #C9A26C;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: #b8925d;
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .success-message {
+            display: none;
+            padding: 16px;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+            color: #155724;
+            margin-bottom: 24px;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .order-summary {
+            background: #f8f8f8;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 32px;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .order-total {
+            padding-top: 12px;
+            border-top: 2px solid #ddd;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .info-note {
+            background: #fff8e6;
+            border-left: 4px solid #C9A26C;
+            padding: 16px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .admin-link {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #eee;
+        }
+
+        .admin-link a {
+            color: #C9A26C;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .admin-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Оформление заказа</h1>
+        <p class="subtitle">Тестовая страница для демонстрации работы с клиентами</p>
+
+        <div class="info-note">
+            💡 <strong>Как это работает:</strong><br>
+            При оформлении заказа по номеру телефона автоматически создаётся карточка клиента в админке.
+            Если клиент с таким номером уже существует, его данные обновляются, а история заказов сохраняется.
+        </div>
+
+        <div id="successMessage" class="success-message">
+            ✅ Заказ успешно оформлен! Клиент автоматически добавлен в базу.
+        </div>
+
+        <div class="order-summary">
+            <h3 style="margin-bottom: 16px;">Состав заказа</h3>
+            <div class="order-item">
+                <span>Минималистичное пальто (M, Black)</span>
+                <span>12 990 ₽</span>
+            </div>
+            <div class="order-item">
+                <span>Доставка</span>
+                <span>500 ₽</span>
+            </div>
+            <div class="order-item order-total">
+                <span>Итого</span>
+                <span>13 490 ₽</span>
+            </div>
+        </div>
+
+        <form id="orderForm">
+            <div class="form-group">
+                <label for="phone">Телефон <span class="required">*</span></label>
+                <input type="tel" id="phone" placeholder="+7 (999) 999-99-99" required>
+            </div>
+
+            <div class="form-group">
+                <label for="name">Имя</label>
+                <input type="text" id="name" placeholder="Ваше имя">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="email@example.com">
+            </div>
+
+            <div class="form-group">
+                <label for="address">Адрес доставки <span class="required">*</span></label>
+                <textarea id="address" rows="3" placeholder="Город, улица, дом, квартира" required></textarea>
+            </div>
+
+            <button type="submit" class="btn">Оформить заказ</button>
+        </form>
+
+        <div class="admin-link">
+            После оформления перейдите в <a href="/admin/customers.html">админку</a>
+            и посмотрите на созданного клиента
+        </div>
+    </div>
+
+    <script src="/admin/repo.js"></script>
+    <script>
+        const form = document.getElementById('orderForm');
+        const successMessage = document.getElementById('successMessage');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const phone = document.getElementById('phone').value;
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const address = document.getElementById('address').value;
+
+            if (!phone || !address) {
+                alert('Заполните все обязательные поля');
+                return;
+            }
+
+            // Create order - customer will be auto-created
+            const order = REPO.createOrder({
+                customerPhone: phone,
+                customerName: name,
+                customerEmail: email,
+                items: [
+                    {
+                        productId: 'demo-product-1',
+                        title: 'Минималистичное пальто',
+                        sku: 'COAT-001',
+                        price: 12990,
+                        quantity: 1,
+                        size: 'M',
+                        color: 'Black'
+                    }
+                ],
+                subtotal: 12990,
+                shipping: 500,
+                discount: 0,
+                total: 13490,
+                status: 'pending',
+                shippingAddress: {
+                    address: address,
+                    city: 'Москва',
+                    postalCode: ''
+                },
+                paymentMethod: 'card',
+                notes: 'Тестовый заказ'
+            });
+
+            console.log('Order created:', order);
+            console.log('Customer auto-created/updated');
+
+            // Show success message
+            successMessage.classList.add('show');
+            form.reset();
+
+            // Scroll to success message
+            successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            // Hide message after 5 seconds
+            setTimeout(() => {
+                successMessage.classList.remove('show');
+            }, 5000);
+        });
+
+        // Phone mask
+        const phoneInput = document.getElementById('phone');
+        phoneInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.startsWith('7')) value = value.substring(1);
+            if (value.startsWith('8')) value = value.substring(1);
+
+            let formatted = '+7';
+            if (value.length > 0) formatted += ' (' + value.substring(0, 3);
+            if (value.length > 3) formatted += ') ' + value.substring(3, 6);
+            if (value.length > 6) formatted += '-' + value.substring(6, 8);
+            if (value.length > 8) formatted += '-' + value.substring(8, 10);
+
+            e.target.value = formatted;
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заказы - AURA Admin</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/admin/styles.css">
+</head>
+
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">A</div>
+                    <div class="sidebar-logo-text">AURA Admin</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Основное</div>
+                    <a href="index.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Каталог</div>
+                    <a href="products.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📦</span>
+                        <span>Товары</span>
+                    </a>
+                    <a href="categories.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🏷️</span>
+                        <span>Категории</span>
+                    </a>
+                    <a href="collections.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📚</span>
+                        <span>Коллекции</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Маркетинг</div>
+                    <a href="discounts.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">💰</span>
+                        <span>Скидки</span>
+                    </a>
+                    <a href="promocodes.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🎫</span>
+                        <span>Промокоды</span>
+                    </a>
+                    <a href="banners.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🖼️</span>
+                        <span>Баннеры</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Продажи</div>
+                    <a href="orders.html" class="sidebar-nav-link active">
+                        <span class="sidebar-nav-icon">🛍️</span>
+                        <span>Заказы</span>
+                    </a>
+                    <a href="customers.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">👥</span>
+                        <span>Клиенты</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Настройки</div>
+                    <a href="settings.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">⚙️</span>
+                        <span>Настройки</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="topbar-btn" id="sidebar-toggle">☰</button>
+                    <div class="topbar-search">
+                        <input type="text" class="topbar-search-input" placeholder="Поиск заказов..." id="search-input">
+                        <span class="topbar-search-icon">🔍</span>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="topbar-profile">
+                        <div class="topbar-profile-avatar">A</div>
+                        <div class="topbar-profile-name">Администратор</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Заказы</h1>
+                        <p class="page-subtitle">Управление заказами</p>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="grid grid-cols-4">
+                            <div class="form-group mb-0">
+                                <label class="form-label">Статус</label>
+                                <select class="form-select" id="filter-status" onchange="applyFilters()">
+                                    <option value="">Все</option>
+                                    <option value="new">Новые</option>
+                                    <option value="paid">Оплачены</option>
+                                    <option value="shipped">Отправлены</option>
+                                    <option value="completed">Завершены</option>
+                                    <option value="cancelled">Отменены</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">Сумма от</label>
+                                <input type="number" class="form-input" id="filter-min-total" placeholder="0"
+                                    onchange="applyFilters()">
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">Сортировка</label>
+                                <select class="form-select" id="sort-by" onchange="applyFilters()">
+                                    <option value="createdAt-desc">Новые первые</option>
+                                    <option value="createdAt-asc">Старые первые</option>
+                                    <option value="total-desc">Сумма ↓</option>
+                                    <option value="total-asc">Сумма ↑</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Orders Table -->
+                <div class="card mt-lg">
+                    <div id="orders-container">
+                        <div class="card-body">
+                            <div class="skeleton skeleton-text"></div>
+                            <div class="skeleton skeleton-text"></div>
+                            <div class="skeleton skeleton-text"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="pagination-container"></div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/admin/repo.js"></script>
+    <script src="/admin/seed.js"></script>
+    <script src="/admin/components.js"></script>
+    <script>
+        let currentPage = 1;
+        const itemsPerPage = 15;
+
+        const statusBadges = {
+            new: { text: 'Новый', type: 'info' },
+            paid: { text: 'Оплачен', type: 'success' },
+            shipped: { text: 'Отправлен', type: 'warning' },
+            completed: { text: 'Завершен', type: 'success' },
+            cancelled: { text: 'Отменен', type: 'error' }
+        };
+
+        function applyFilters() {
+            currentPage = 1;
+            loadOrders();
+        }
+
+        async function loadOrders() {
+            try {
+                let orders = await API.orders.getAll();
+
+                // Search
+                const searchTerm = document.getElementById('search-input').value.toLowerCase();
+                if (searchTerm) {
+                    orders = orders.filter(o =>
+                        (o.order_number || o.orderNumber || o.number || '').toLowerCase().includes(searchTerm) ||
+                        (o.customer_name || o.customerName || '').toLowerCase().includes(searchTerm) ||
+                        (o.customer_email || o.customerEmail || '').toLowerCase().includes(searchTerm)
+                    );
+                }
+
+                // Filters
+                const statusFilter = document.getElementById('filter-status').value;
+                if (statusFilter) {
+                    orders = orders.filter(o => o.status === statusFilter);
+                }
+
+                const minTotal = parseFloat(document.getElementById('filter-min-total').value) || 0;
+                if (minTotal > 0) {
+                    orders = orders.filter(o => o.total >= minTotal);
+                }
+
+                // Sort
+                const sortBy = document.getElementById('sort-by').value;
+                const [field, order] = sortBy.split('-');
+                orders.sort((a, b) => {
+                    let valA = field === 'createdAt' || field === 'created_at' ? new Date(a.created_at || a.createdAt) : a[field];
+                    let valB = field === 'createdAt' || field === 'created_at' ? new Date(b.created_at || b.createdAt) : b[field];
+                    return order === 'asc' ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
+                });
+
+                // Pagination
+                const totalPages = Math.ceil(orders.length / itemsPerPage);
+                const start = (currentPage - 1) * itemsPerPage;
+                const paginatedOrders = orders.slice(start, start + itemsPerPage);
+
+                renderOrders(paginatedOrders);
+                renderPagination(totalPages);
+            } catch (error) {
+                console.error('Failed to load orders:', error);
+                Components.showToast('Ошибка', 'Не удалось загрузить заказы', 'error');
+            }
+        }
+
+        function renderOrders(orders) {
+            const container = document.getElementById('orders-container');
+
+            if (orders.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🛍️</div><div class="empty-state-title">Заказов нет</div></div>';
+                return;
+            }
+
+            let html = '<table class="table"><thead><tr>';
+            html += '<th>Номер</th>';
+            html += '<th>Клиент</th>';
+            html += '<th>Товаров</th>';
+            html += '<th>Сумма</th>';
+            html += '<th>Статус</th>';
+            html += '<th>Дата</th>';
+            html += '<th>Действия</th>';
+            html += '</tr></thead><tbody>';
+
+            orders.forEach(order => {
+                const badge = statusBadges[order.status] || { text: order.status, type: 'default' };
+
+                // Get customer info from database fields
+                const customerName = order.customer_name || 'Без имени';
+                const customerPhone = order.customer_phone || '—';
+                const customerEmail = order.customer_email || '';
+                const orderNumber = order.order_number || order.id;
+                const orderDate = order.created_at || order.createdAt;
+
+                html += `<tr>
+                    <td><strong>${orderNumber}</strong></td>
+                    <td>
+                        <div>${customerName}</div>
+                        <small class="text-muted">${customerPhone}</small>
+                        ${customerEmail ? `<br><small class="text-muted">${customerEmail}</small>` : ''}
+                    </td>
+                    <td>${order.items.length}</td>
+                    <td><strong>${Components.formatPrice(order.total)}</strong></td>
+                    <td>${Components.renderBadge(badge.text, badge.type)}</td>
+                    <td><small>${Components.formatDate(orderDate)}</small></td>
+                    <td>
+                        <button class="btn btn-sm btn-ghost" onclick="viewOrder('${order.id}')" title="Открыть">👁️</button>
+                        <div class="dropdown" style="display:inline-block">
+                            <button class="btn btn-sm btn-ghost" onclick="toggleStatusMenu('${order.id}')" title="Статус">⚙️</button>
+                            <div class="dropdown-menu" id="status-menu-${order.id}">
+                                <div class="dropdown-item" onclick="changeStatus('${order.id}', 'processing')">⏳ В обработке</div>
+                                <div class="dropdown-item" onclick="changeStatus('${order.id}', 'completed')">✓ Завершен</div>
+                                <div class="dropdown-divider"></div>
+                                <div class="dropdown-item" onclick="changeStatus('${order.id}', 'cancelled')">✕ Отменить</div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function renderPagination(totalPages) {
+            const container = document.getElementById('pagination-container');
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '<div class="pagination">';
+            html += `<button class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">«</button>`;
+
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    html += `<button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    html += '<span>...</span>';
+                }
+            }
+
+            html += `<button class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">»</button>`;
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            loadOrders();
+        }
+
+        function viewOrder(id) {
+            window.location.href = `order-view.html?id=${id}`;
+        }
+
+        function toggleStatusMenu(id) {
+            const menu = document.getElementById(`status-menu-${id}`);
+            document.querySelectorAll('.dropdown-menu').forEach(m => {
+                if (m !== menu) m.classList.remove('show');
+            });
+            menu.classList.toggle('show');
+        }
+
+        async function changeStatus(id, status) {
+            try {
+                await API.orders.updateStatus(id, status);
+                await loadOrders();
+                Components.showToast('Успешно', 'Статус заказа обновлен', 'success');
+            } catch (error) {
+                console.error('Failed to update status:', error);
+                Components.showToast('Ошибка', 'Не удалось обновить статус', 'error');
+            }
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+        }
+
+        // Search
+        document.getElementById('search-input').addEventListener('input', applyFilters);
+
+        // Close dropdowns on click outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown')) {
+                document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(loadOrders, 300);
+        });
+    </script>
+</body>
+
+</html>

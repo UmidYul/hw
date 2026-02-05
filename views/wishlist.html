@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Избранное · AURA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:wght@300;400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-container">
+            <div class="header-left">
+                <button class="menu-btn" id="mobileMenuBtn" aria-label="Меню">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <a href="/" class="logo">
+                <span class="logo-text">AURA</span>
+                <span class="logo-dot">·</span>
+            </a>
+
+            <div class="header-right">
+                <button class="icon-btn search-btn" id="searchBtn" aria-label="Поиск">
+                    <i class="fas fa-search"></i>
+                </button>
+                <button class="icon-btn wishlist-btn" id="wishlistBtn" aria-label="Избранное">
+                    <i class="far fa-heart"></i>
+                    <span class="badge" id="wishlistBadge">0</span>
+                </button>
+                <button class="icon-btn cart-btn" id="cartBtn" aria-label="Корзина">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span class="badge" id="cartBadge">0</span>
+                </button>
+            </div>
+        </div>
+
+        <nav class="nav" id="mainNav">
+            <div class="container">
+                <ul class="nav-list">
+                    <li><a href="/catalog?category=all" class="nav-link">Все товары</a></li>
+                    <li><a href="/catalog?category=Outerwear" class="nav-link">Верхняя одежда</a></li>
+                    <li><a href="/catalog?category=Tops" class="nav-link">Топы</a></li>
+                    <li><a href="/catalog?category=Bottoms" class="nav-link">Низ</a></li>
+                    <li><a href="/catalog?category=Shoes" class="nav-link">Обувь</a></li>
+                    <li><a href="/catalog?category=Accessories" class="nav-link">Аксессуары</a></li>
+                    <li><a href="/catalog?tag=Sale" class="nav-link nav-link-sale">Sale</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Search Modal -->
+    <div class="modal" id="searchModal">
+        <div class="modal-overlay" id="searchModalOverlay"></div>
+        <div class="modal-content search-modal-content">
+            <button class="modal-close" id="searchModalClose" aria-label="Закрыть">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="search-modal-body">
+                <input type="text" class="search-input-large" id="searchInput" placeholder="Поиск товаров..." autofocus>
+                <div class="search-results" id="searchResults"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wishlist Page -->
+    <div class="wishlist-page">
+        <div class="container">
+            <!-- Breadcrumbs -->
+            <nav class="breadcrumbs" aria-label="breadcrumb">
+                <a href="/">Главная</a>
+                <span>/</span>
+                <span>Избранное</span>
+            </nav>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">Избранное</h1>
+                <button class="btn btn-outline" id="clearWishlistBtn" style="display: none;">
+                    <i class="fas fa-trash-alt"></i>
+                    Очистить всё
+                </button>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyWishlist" style="display: none;">
+                <i class="far fa-heart" style="font-size: 64px; color: #ddd; margin-bottom: 16px;"></i>
+                <h3>В избранном пока ничего нет</h3>
+                <p>Добавьте товары, чтобы не потерять их</p>
+                <a href="/catalog" class="btn btn-primary">Перейти в каталог</a>
+            </div>
+
+            <!-- Wishlist Grid -->
+            <div class="products-grid" id="wishlistGrid"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3 class="footer-title">О нас</h3>
+                    <p class="footer-text">AURA — это современный интернет-магазин модной одежды и аксессуаров с
+                        тщательно отобранными коллекциями.</p>
+                </div>
+                <div class="footer-col">
+                    <h3 class="footer-title">Информация</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">О компании</a></li>
+                        <li><a href="#">Доставка и оплата</a></li>
+                        <li><a href="#">Возврат товара</a></li>
+                        <li><a href="#">Контакты</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3 class="footer-title">Категории</h3>
+                    <ul class="footer-links">
+                        <li><a href="/catalog?category=Outerwear">Верхняя одежда</a></li>
+                        <li><a href="/catalog?category=Tops">Топы</a></li>
+                        <li><a href="/catalog?category=Bottoms">Низ</a></li>
+                        <li><a href="/catalog?category=Shoes">Обувь</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3 class="footer-title">Контакты</h3>
+                    <ul class="footer-contacts">
+                        <li><i class="fas fa-phone"></i> +7 (999) 123-45-67</li>
+                        <li><i class="fas fa-envelope"></i> info@aura-shop.ru</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Москва, ул. Примерная, д. 1</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="footer-copyright">© 2024 AURA. Все права защищены.</p>
+                <div class="footer-social">
+                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-telegram"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/discounts-loader.js"></script>
+    <script src="/js/products-loader.js"></script>
+    <script src="/js/data.js"></script>
+    <script src="/js/utils.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        let wishlistItems = [];
+        let allProducts = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load discounts and products
+            if (window.discountSystem) {
+                await window.discountSystem.loadActiveDiscounts();
+            }
+            await loadProducts();
+
+            allProducts = typeof getProducts === 'function' ? getProducts() : products;
+
+            loadWishlist();
+            initializeEventListeners();
+        });
+
+        // Load wishlist
+        function loadWishlist() {
+            const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+            wishlistItems = wishlist.map(item => {
+                const product = allProducts.find(p => p.id === item.id);
+                return product ? { ...product, wishlistId: item.id } : null;
+            }).filter(Boolean);
+
+            renderWishlist();
+        }
+
+        // Render wishlist
+        function renderWishlist() {
+            const grid = document.getElementById('wishlistGrid');
+            const emptyState = document.getElementById('emptyWishlist');
+            const clearBtn = document.getElementById('clearWishlistBtn');
+
+            if (wishlistItems.length === 0) {
+                grid.style.display = 'none';
+                emptyState.style.display = 'flex';
+                clearBtn.style.display = 'none';
+            } else {
+                grid.style.display = 'grid';
+                emptyState.style.display = 'none';
+                clearBtn.style.display = 'inline-flex';
+
+                // Use renderProductCard from utils.js for consistent display
+                grid.innerHTML = wishlistItems.map(product => renderProductCard(product)).join('');
+
+                // Attach product card listeners from utils.js
+                attachProductCardListeners(grid);
+
+                // Add custom remove from wishlist buttons
+                addRemoveButtons();
+            }
+
+            updateWishlistBadge();
+        }
+
+        // Add remove buttons to wishlist cards
+        function addRemoveButtons() {
+            document.querySelectorAll('.product-card').forEach(card => {
+                const productId = card.dataset.productId;
+                const actions = card.querySelector('.product-card-actions');
+
+                if (actions) {
+                    // Add remove button
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'product-card-btn remove-from-wishlist';
+                    removeBtn.dataset.id = productId;
+                    removeBtn.setAttribute('aria-label', 'Удалить из избранного');
+                    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                    removeBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        removeFromWishlist(productId);
+                    });
+                    actions.appendChild(removeBtn);
+                }
+            });
+        }
+
+        // Add remove buttons to wishlist cards
+        function addRemoveButtons() {
+            document.querySelectorAll('.product-card').forEach(card => {
+                const productId = card.dataset.productId;
+                const actions = card.querySelector('.product-card-actions');
+
+                if (actions) {
+                    // Add remove button
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'product-card-btn remove-from-wishlist';
+                    removeBtn.dataset.id = productId;
+                    removeBtn.setAttribute('aria-label', 'Удалить из избранного');
+                    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                    removeBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        removeFromWishlist(productId);
+                    });
+                    actions.appendChild(removeBtn);
+                }
+            });
+        }
+
+        // Remove from wishlist
+        function removeFromWishlist(productId) {
+            let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+            wishlist = wishlist.filter(item => item.id !== productId);
+            localStorage.setItem('wishlist', JSON.stringify(wishlist));
+            loadWishlist();
+            showNotification('Товар удален из избранного');
+        }
+
+        // Initialize event listeners
+        function initializeEventListeners() {
+            document.getElementById('clearWishlistBtn').addEventListener('click', () => {
+                if (confirm('Вы уверены, что хотите очистить избранное?')) {
+                    localStorage.setItem('wishlist', '[]');
+                    loadWishlist();
+                    showNotification('Избранное очищено');
+                }
+            });
+        }
+
+        // Update badges
+        function updateWishlistBadge() {
+            const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+            const badge = document.getElementById('wishlistBadge');
+            if (badge) {
+                badge.textContent = wishlist.length;
+            }
+        }
+
+        function updateCartBadge() {
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cartBadge');
+            if (badge) {
+                badge.textContent = totalItems;
+            }
+        }
+
+        // Show notification
+        function showNotification(message) {
+            // Use toast from utils if available, otherwise fallback
+            if (typeof showToast === 'function') {
+                showToast(message);
+            } else {
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                notification.textContent = message;
+                notification.style.cssText = `
+                    position: fixed;
+                    bottom: 24px;
+                    right: 24px;
+                    background: #000;
+                    color: #fff;
+                    padding: 16px 24px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    z-index: 10000;
+                    animation: slideIn 0.3s ease;
+                `;
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+        }
+
+        // Initial badge update
+        updateWishlistBadge();
+        updateCartBadge();
+    </script>
+</body>
+
+</html>

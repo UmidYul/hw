@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Клиенты - AURA Admin</title>
+    <link rel="stylesheet" href="/admin/styles.css">
+</head>
+
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">A</div>
+                    <div class="sidebar-logo-text">AURA Admin</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Основное</div>
+                    <a href="index.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Каталог</div>
+                    <a href="products.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📦</span>
+                        <span>Товары</span>
+                    </a>
+                    <a href="categories.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🏷️</span>
+                        <span>Категории</span>
+                    </a>
+                    <a href="collections.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📚</span>
+                        <span>Коллекции</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Маркетинг</div>
+                    <a href="discounts.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">💰</span>
+                        <span>Скидки</span>
+                    </a>
+                    <a href="promocodes.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🎫</span>
+                        <span>Промокоды</span>
+                    </a>
+                    <a href="banners.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🖼️</span>
+                        <span>Баннеры</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Продажи</div>
+                    <a href="orders.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🛍️</span>
+                        <span>Заказы</span>
+                    </a>
+                    <a href="customers.html" class="sidebar-nav-link active">
+                        <span class="sidebar-nav-icon">👥</span>
+                        <span>Клиенты</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Настройки</div>
+                    <a href="settings.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">⚙️</span>
+                        <span>Настройки</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="topbar-btn" id="sidebar-toggle">☰</button>
+                    <div class="topbar-search">
+                        <input type="text" class="topbar-search-input" placeholder="Поиск клиентов..." id="searchInput">
+                        <span class="topbar-search-icon">🔍</span>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="topbar-profile">
+                        <div class="topbar-profile-avatar">A</div>
+                        <div class="topbar-profile-name">Администратор</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Клиенты</h1>
+                        <p class="page-subtitle">База клиентов с историей заказов</p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="btn btn-secondary" id="exportBtn">
+                            <span>📥</span>
+                            Экспорт CSV
+                        </button>
+                        <button class="btn btn-primary" id="addCustomerBtn">
+                            <span>+</span>
+                            Добавить клиента
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Всего клиентов</div>
+                        <div class="stat-value" id="totalCustomers">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">С заказами</div>
+                        <div class="stat-value" id="activeCustomers">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Средний чек</div>
+                        <div class="stat-value" id="avgOrderValue">0 ₽</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Повторные покупки</div>
+                        <div class="stat-value" id="repeatCustomers">0</div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <div class="card-body">
+                        <div class="filters-row">
+                            <div class="form-group mb-0" style="flex: 1;">
+                                <label class="form-label">Сортировка</label>
+                                <select id="sortSelect" class="form-select">
+                                    <option value="recent">Недавние</option>
+                                    <option value="orders">По заказам</option>
+                                    <option value="total">По сумме</option>
+                                    <option value="name">По имени</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customers Table -->
+                <div class="card">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Клиент</th>
+                                <th>Телефон</th>
+                                <th>Email</th>
+                                <th>Заказов</th>
+                                <th>Сумма</th>
+                                <th>Последний заказ</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customersTableBody">
+                            <tr>
+                                <td colspan="7" class="empty-state">
+                                    <div class="empty-state-content">
+                                        <div class="empty-state-icon">👥</div>
+                                        <div class="empty-state-title">Клиентов пока нет</div>
+                                        <div class="empty-state-text">Клиенты появятся автоматически при оформлении
+                                            заказов
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Customer Details Modal -->
+    <div class="modal" id="customerModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 id="modalTitle">Информация о клиенте</h2>
+                <button class="modal-close" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="display: grid; gap: 24px;">
+                    <!-- Customer Info -->
+                    <div>
+                        <h3 style="margin-bottom: 16px;">Контактная информация</h3>
+                        <form id="customerForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="customerName">Имя</label>
+                                    <input type="text" id="customerName" class="form-control" placeholder="Имя клиента"
+                                        required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="customerPhone">Телефон *</label>
+                                    <input type="tel" id="customerPhone" class="form-control"
+                                        placeholder="+7 (999) 999-99-99" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="customerEmail">Email</label>
+                                    <input type="email" id="customerEmail" class="form-control"
+                                        placeholder="email@example.com">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="customerNotes">Примечания</label>
+                                <textarea id="customerNotes" class="form-control" rows="3"
+                                    placeholder="Дополнительная информация о клиенте"></textarea>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Order History -->
+                    <div id="orderHistorySection" style="display: none;">
+                        <h3 style="margin-bottom: 16px;">История заказов</h3>
+                        <div id="orderHistoryList" class="order-history-list"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelBtn">Отмена</button>
+                <button class="btn btn-primary" id="saveCustomerBtn">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/admin/repo.js"></script>
+    <script src="/admin/components.js"></script>
+    <script src="/js/api.js"></script>
+    <script>
+        let customers = [];
+        let orders = [];
+        let currentCustomer = null;
+        let searchTerm = '';
+        let sortBy = 'recent';
+
+        // Initialize
+        async function init() {
+            await loadData();
+            renderCustomers();
+            updateStats();
+            attachEventListeners();
+        }
+
+        async function loadData() {
+            try {
+                customers = await API.customers.getAll();
+                orders = await API.orders.getAll();
+            } catch (error) {
+                console.error('Ошибка загрузки данных:', error);
+                Components.showToast('Ошибка', 'Не удалось загрузить данные', 'error');
+                customers = [];
+                orders = [];
+            }
+        }
+
+        function attachEventListeners() {
+            document.getElementById('addCustomerBtn').addEventListener('click', () => openCustomerModal());
+            document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+            document.getElementById('cancelBtn').addEventListener('click', closeModal);
+            document.getElementById('saveCustomerBtn').addEventListener('click', saveCustomer);
+            document.getElementById('exportBtn').addEventListener('click', exportToCSV);
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                searchTerm = e.target.value.toLowerCase();
+                renderCustomers();
+            });
+            document.getElementById('sortSelect').addEventListener('change', (e) => {
+                sortBy = e.target.value;
+                renderCustomers();
+            });
+
+            // Sidebar toggle
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const sidebar = document.getElementById('sidebar');
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('collapsed');
+                });
+            }
+        }
+
+        function updateStats() {
+            const totalCustomers = customers.length;
+            const customersWithOrders = customers.filter(c => getCustomerOrders(c.id).length > 0).length;
+
+            let totalRevenue = 0;
+            let totalOrders = 0;
+            let repeatCustomers = 0;
+
+            customers.forEach(customer => {
+                const customerOrders = getCustomerOrders(customer.id);
+                if (customerOrders.length > 0) {
+                    totalOrders += customerOrders.length;
+                    customerOrders.forEach(order => {
+                        totalRevenue += order.total || 0;
+                    });
+                    if (customerOrders.length > 1) {
+                        repeatCustomers++;
+                    }
+                }
+            });
+
+            const avgOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
+
+            document.getElementById('totalCustomers').textContent = totalCustomers;
+            document.getElementById('activeCustomers').textContent = customersWithOrders;
+            document.getElementById('avgOrderValue').textContent = avgOrderValue.toLocaleString('ru-RU') + ' ₽';
+            document.getElementById('repeatCustomers').textContent = repeatCustomers;
+        }
+
+        function getCustomerOrders(customerId) {
+            return orders.filter(order =>
+                order.customer_id === customerId ||
+                order.customerId === customerId
+            );
+        }
+
+        function getCustomerStats(customer) {
+            const customerOrders = getCustomerOrders(customer.id);
+            const totalSpent = customerOrders.reduce((sum, order) => sum + (order.total || 0), 0);
+            const lastOrder = customerOrders.sort((a, b) =>
+                new Date(b.createdAt) - new Date(a.createdAt)
+            )[0];
+
+            return {
+                ordersCount: customerOrders.length,
+                totalSpent,
+                lastOrderDate: lastOrder ? lastOrder.createdAt : null
+            };
+        }
+
+        function filterAndSortCustomers() {
+            let filtered = customers;
+
+            // Search filter
+            if (searchTerm) {
+                filtered = filtered.filter(customer => {
+                    const searchStr = [
+                        customer.name || '',
+                        customer.phone || '',
+                        customer.email || ''
+                    ].join(' ').toLowerCase();
+                    return searchStr.includes(searchTerm);
+                });
+            }
+
+            // Sort
+            filtered.sort((a, b) => {
+                const statsA = getCustomerStats(a);
+                const statsB = getCustomerStats(b);
+
+                switch (sortBy) {
+                    case 'orders':
+                        return statsB.ordersCount - statsA.ordersCount;
+                    case 'total':
+                        return statsB.totalSpent - statsA.totalSpent;
+                    case 'name':
+                        return (a.name || '').localeCompare(b.name || '');
+                    case 'recent':
+                    default:
+                        const dateA = statsA.lastOrderDate || a.createdAt || '';
+                        const dateB = statsB.lastOrderDate || b.createdAt || '';
+                        return new Date(dateB) - new Date(dateA);
+                }
+            });
+
+            return filtered;
+        }
+
+        function renderCustomers() {
+            const tbody = document.getElementById('customersTableBody');
+            const filtered = filterAndSortCustomers();
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <div class="empty-state-content">
+                                <div class="empty-state-icon">👥</div>
+                                <div class="empty-state-title">
+                                    ${searchTerm ? 'Клиенты не найдены' : 'Клиентов пока нет'}
+                                </div>
+                                <div class="empty-state-text">
+                                    ${searchTerm ? 'Попробуйте изменить параметры поиска' : 'Клиенты появятся автоматически при оформлении заказов'}
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(customer => {
+                const stats = getCustomerStats(customer);
+                const lastOrderDate = stats.lastOrderDate
+                    ? new Date(stats.lastOrderDate).toLocaleDateString('ru-RU')
+                    : '—';
+
+                return `
+                    <tr>
+                        <td>
+                            <div class="customer-info">
+                                <div class="customer-avatar">${(customer.name || 'A')[0].toUpperCase()}</div>
+                                <div>
+                                    <div class="customer-name">${customer.name || 'Без имени'}</div>
+                                    ${customer.notes ? `<div class="customer-note">${customer.notes}</div>` : ''}
+                                </div>
+                            </div>
+                        </td>
+                        <td>${customer.phone || '—'}</td>
+                        <td>${customer.email || '—'}</td>
+                        <td>
+                            <span class="badge ${stats.ordersCount > 0 ? 'badge-success' : 'badge-secondary'}">
+                                ${stats.ordersCount}
+                            </span>
+                        </td>
+                        <td>${stats.totalSpent.toLocaleString('ru-RU')} ₽</td>
+                        <td>${lastOrderDate}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button 
+                                    class="btn-icon" 
+                                    onclick="openCustomerModal('${customer.id}')"
+                                    title="Подробнее"
+                                >
+                                    👁️
+                                </button>
+                                <button 
+                                    class="btn-icon" 
+                                    onclick="deleteCustomer('${customer.id}')"
+                                    title="Удалить"
+                                >
+                                    🗑️
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openCustomerModal(customerId = null) {
+            currentCustomer = customerId ? customers.find(c => c.id === customerId) : null;
+
+            document.getElementById('modalTitle').textContent =
+                currentCustomer ? 'Информация о клиенте' : 'Добавить клиента';
+
+            if (currentCustomer) {
+                document.getElementById('customerName').value = currentCustomer.name || '';
+                document.getElementById('customerPhone').value = currentCustomer.phone || '';
+                document.getElementById('customerEmail').value = currentCustomer.email || '';
+                document.getElementById('customerNotes').value = currentCustomer.notes || '';
+
+                // Show order history
+                const orderHistory = getCustomerOrders(currentCustomer.id);
+                const historySection = document.getElementById('orderHistorySection');
+                const historyList = document.getElementById('orderHistoryList');
+
+                if (orderHistory.length > 0) {
+                    historySection.style.display = 'block';
+                    historyList.innerHTML = orderHistory
+                        .sort((a, b) => new Date(b.createdAt || b.created_at) - new Date(a.createdAt || a.created_at))
+                        .map(order => {
+                            const orderNumber = order.order_number || order.orderNumber || 'N/A';
+                            const createdAt = order.created_at || order.createdAt;
+                            return `
+                            <div class="order-history-item">
+                                <div class="order-history-header">
+                                    <strong>Заказ #${orderNumber}</strong>
+                                    <span class="badge badge-${getStatusClass(order.status)}">${getStatusText(order.status)}</span>
+                                </div>
+                                <div class="order-history-details">
+                                    <div>Дата: ${new Date(createdAt).toLocaleDateString('ru-RU')}</div>
+                                    <div>Сумма: ${(order.total || 0).toLocaleString('ru-RU')} ₽</div>
+                                </div>
+                                <a href="order-view?id=${order.id}" class="order-link">Подробнее →</a>
+                            </div>
+                        `;
+                        }).join('');
+                } else {
+                    historySection.style.display = 'none';
+                }
+            } else {
+                document.getElementById('customerForm').reset();
+                document.getElementById('orderHistorySection').style.display = 'none';
+            }
+
+            document.getElementById('customerModal').classList.add('active');
+        }
+
+        function getStatusClass(status) {
+            const statusClasses = {
+                'pending': 'warning',
+                'processing': 'info',
+                'completed': 'success',
+                'cancelled': 'danger'
+            };
+            return statusClasses[status] || 'secondary';
+        }
+
+        function getStatusText(status) {
+            const statusTexts = {
+                'pending': 'Ожидает',
+                'processing': 'В обработке',
+                'completed': 'Выполнен',
+                'cancelled': 'Отменён'
+            };
+            return statusTexts[status] || status;
+        }
+
+        function closeModal() {
+            document.getElementById('customerModal').classList.remove('active');
+            currentCustomer = null;
+        }
+
+        async function saveCustomer() {
+            const name = document.getElementById('customerName').value.trim();
+            const phone = document.getElementById('customerPhone').value.trim();
+            const email = document.getElementById('customerEmail').value.trim();
+            const notes = document.getElementById('customerNotes').value.trim();
+
+            if (!phone) {
+                Components.showToast('Ошибка', 'Укажите номер телефона', 'error');
+                return;
+            }
+
+            const customerData = {
+                name,
+                phone,
+                email,
+                notes
+            };
+
+            try {
+                if (currentCustomer) {
+                    await API.customers.update(currentCustomer.id, customerData);
+                    Components.showToast('Успешно', 'Клиент обновлен', 'success');
+                } else {
+                    await API.customers.create(customerData);
+                    Components.showToast('Успешно', 'Клиент создан', 'success');
+                }
+
+                await loadData();
+                renderCustomers();
+                updateStats();
+                closeModal();
+            } catch (error) {
+                console.error('Ошибка сохранения клиента:', error);
+                Components.showToast('Ошибка', 'Не удалось сохранить клиента', 'error');
+            }
+        }
+
+        async function deleteCustomer(customerId) {
+            try {
+                const customer = await API.customers.getById(customerId);
+
+                if (!customer) {
+                    Components.showToast('Ошибка', 'Клиент не найден', 'error');
+                    return;
+                }
+
+                const customerOrders = getCustomerOrders(customerId);
+
+                if (customerOrders.length > 0) {
+                    if (!confirm(`У клиента "${customer.name || customer.phone}" есть ${customerOrders.length} заказ(ов). Удалить?`)) {
+                        return;
+                    }
+                } else {
+                    if (!confirm(`Удалить клиента "${customer.name || customer.phone}"?`)) {
+                        return;
+                    }
+                }
+
+                await API.customers.delete(customerId);
+                Components.showToast('Успешно', 'Клиент удален', 'success');
+                await loadData();
+                renderCustomers();
+                updateStats();
+            } catch (error) {
+                console.error('Ошибка удаления клиента:', error);
+                Components.showToast('Ошибка', 'Не удалось удалить клиента', 'error');
+            }
+        }
+
+        function exportToCSV() {
+            if (customers.length === 0) {
+                alert('Нет данных для экспорта');
+                return;
+            }
+
+            const csvRows = [];
+
+            // Header
+            csvRows.push(['Имя', 'Телефон', 'Email', 'Заказов', 'Сумма заказов', 'Последний заказ', 'Примечания'].join(','));
+
+            // Data
+            customers.forEach(customer => {
+                const stats = getCustomerStats(customer);
+                const lastOrderDate = stats.lastOrderDate
+                    ? new Date(stats.lastOrderDate).toLocaleDateString('ru-RU')
+                    : '';
+
+                const row = [
+                    customer.name || '',
+                    customer.phone || '',
+                    customer.email || '',
+                    stats.ordersCount,
+                    stats.totalSpent,
+                    lastOrderDate,
+                    (customer.notes || '').replace(/,/g, ';')
+                ].map(field => `"${field}"`).join(',');
+
+                csvRows.push(row);
+            });
+
+            // Create and download
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+
+            link.setAttribute('href', url);
+            link.setAttribute('download', `customers_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>

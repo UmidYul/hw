@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Баннеры — AURA Admin</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="/admin/styles.css">
+</head>
+
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">A</div>
+                    <div class="sidebar-logo-text">AURA Admin</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Основное</div>
+                    <a href="index.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Каталог</div>
+                    <a href="products.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📦</span>
+                        <span>Товары</span>
+                    </a>
+                    <a href="categories.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🏷️</span>
+                        <span>Категории</span>
+                    </a>
+                    <a href="collections.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📚</span>
+                        <span>Коллекции</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Маркетинг</div>
+                    <a href="discounts.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">💰</span>
+                        <span>Скидки</span>
+                    </a>
+                    <a href="promocodes.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🎫</span>
+                        <span>Промокоды</span>
+                    </a>
+                    <a href="banners.html" class="sidebar-nav-link active">
+                        <span class="sidebar-nav-icon">🖼️</span>
+                        <span>Баннеры</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Продажи</div>
+                    <a href="orders.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🛍️</span>
+                        <span>Заказы</span>
+                    </a>
+                    <a href="customers.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">👥</span>
+                        <span>Клиенты</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Настройки</div>
+                    <a href="settings.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">⚙️</span>
+                        <span>Настройки</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="topbar-btn" id="sidebar-toggle">☰</button>
+                    <div class="topbar-search">
+                        <input type="text" class="topbar-search-input" placeholder="Поиск... (нажмите /)"
+                            id="global-search">
+                        <span class="topbar-search-icon">🔍</span>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="topbar-profile">
+                        <div class="topbar-profile-avatar">A</div>
+                        <div class="topbar-profile-name">Администратор</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="page-content">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Баннеры</h1>
+                        <p class="page-subtitle">Управление рекламными баннерами</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openBannerModal()">
+                        + Создать баннер
+                    </button>
+                </div>
+
+                <!-- Banners Table -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;">Превью</th>
+                                        <th>Заголовок</th>
+                                        <th>Размещение</th>
+                                        <th>Период</th>
+                                        <th>Статус</th>
+                                        <th style="width: 80px;">Порядок</th>
+                                        <th class="text-right">Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bannersTable">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Banner Modal -->
+    <div class="modal" id="bannerModal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="modalTitle">Новый баннер</h2>
+                    <button class="modal-close" onclick="closeBannerModal()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <form id="bannerForm">
+                        <input type="hidden" name="id" id="bannerId">
+
+                        <div class="form-group">
+                            <label for="title">Заголовок *</label>
+                            <input type="text" id="title" name="title" placeholder="Летняя распродажа" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="subtitle">Подзаголовок</label>
+                            <input type="text" id="subtitle" name="subtitle" placeholder="Скидки до 50%">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Описание</label>
+                            <textarea id="description" name="description" rows="3"
+                                placeholder="Дополнительное описание баннера"></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ctaText">Текст кнопки</label>
+                                <input type="text" id="ctaText" name="ctaText" placeholder="Смотреть коллекцию">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ctaLink">Ссылка кнопки</label>
+                                <input type="text" id="ctaLink" name="ctaLink" placeholder="/collections/sale">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="placement">Размещение *</label>
+                                <select id="placement" name="placement" required>
+                                    <option value="home_hero">Главная — Герой</option>
+                                    <option value="home_strip">Главная — Полоса</option>
+                                    <option value="catalog_top">Каталог — Верх</option>
+                                    <option value="collection_page">Страница коллекции</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="theme">Тема</label>
+                                <select id="theme" name="theme" onchange="updatePreview()">
+                                    <option value="light">Светлая</option>
+                                    <option value="dark">Темная</option>
+                                    <option value="accent">Акцент (золото)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="imageUrl">URL изображения</label>
+                            <input type="url" id="imageUrl" name="imageUrl"
+                                placeholder="https://images.unsplash.com/..." onchange="updatePreview()">
+                            <small class="text-muted">Рекомендуемый размер: 1920x600px</small>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="startDate">Дата начала</label>
+                                <input type="datetime-local" id="startDate" name="startDate">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="endDate">Дата окончания</label>
+                                <input type="datetime-local" id="endDate" name="endDate">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="order">Порядок отображения</label>
+                                <input type="number" id="order" name="order" value="0" min="0">
+                                <small class="text-muted">Чем меньше число, тем выше баннер</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" name="isActive" id="isActive" checked>
+                                    Показывать на сайте
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Preview -->
+                        <div class="form-group">
+                            <label>Предпросмотр</label>
+                            <div id="bannerPreview" class="banner-preview">
+                                <!-- Dynamic preview -->
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeBannerModal()">Отмена</button>
+                    <button type="button" class="btn btn-primary" onclick="saveBanner()">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/admin/repo.js"></script>
+    <script src="/admin/seed.js"></script>
+    <script src="/admin/components.js"></script>
+
+    <script>
+        let currentBannerId = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBanners();
+            setupSidebar();
+            setupSearch();
+        });
+
+        // Load banners
+        async function loadBanners() {
+            try {
+                const banners = await API.banners.getAll();
+                const tbody = document.getElementById('bannersTable');
+
+                if (banners.length === 0) {
+                    tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center">
+                            <div class="empty-state">
+                                <p>Нет баннеров</p>
+                                <button class="btn btn-primary" onclick="openBannerModal()">Создать первый баннер</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                    return;
+                }
+
+                // Sort by order
+                const sorted = [...banners].sort((a, b) => a.order - b.order);
+
+                tbody.innerHTML = sorted.map(banner => {
+                    const isActive = banner.is_active !== undefined ? banner.is_active : (banner.isActive !== undefined ? banner.isActive : 1);
+                    const statusBadge = isActive
+                        ? '<span class="badge badge-success">Активен</span>'
+                        : '<span class="badge badge-secondary">Скрыт</span>';
+
+                    const placementLabels = {
+                        home_hero: 'Главная — Герой',
+                        home_strip: 'Главная — Полоса',
+                        catalog_top: 'Каталог — Верх',
+                        collection_page: 'Коллекция'
+                    };
+
+                    const now = new Date();
+                    const start = banner.startDate ? new Date(banner.startDate) : null;
+                    const end = banner.endDate ? new Date(banner.endDate) : null;
+
+                    let period = 'Без ограничений';
+                    if (start && end) {
+                        period = `${formatShortDate(start)} - ${formatShortDate(end)}`;
+                    } else if (start) {
+                        period = `С ${formatShortDate(start)}`;
+                    } else if (end) {
+                        period = `До ${formatShortDate(end)}`;
+                    }
+
+                    // Check if banner is currently active based on dates
+                    const isScheduleActive = (!start || now >= start) && (!end || now <= end);
+                    const scheduleIndicator = !isScheduleActive && isActive
+                        ? ' <small class="text-muted">(не в расписании)</small>'
+                        : '';
+
+                    return `
+                    <tr>
+                        <td>
+                            <div class="banner-thumb" style="background: ${banner.theme === 'dark' ? '#2D2D2D' : banner.theme === 'accent' ? '#C9A26C' : '#FAFAFA'};">
+                                ${banner.imageUrl ? `<img src="${banner.imageUrl}" alt="${banner.title}">` : '🖼️'}
+                            </div>
+                        </td>
+                        <td>
+                            <strong>${banner.title}</strong>
+                            ${banner.subtitle ? `<br><small class="text-muted">${banner.subtitle}</small>` : ''}
+                        </td>
+                        <td>${placementLabels[banner.placement] || banner.placement}</td>
+                        <td><small>${period}</small></td>
+                        <td>${statusBadge}${scheduleIndicator}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-icon" onclick="moveBanner('${banner.id}', 'up')" ${banner.order === 0 ? 'disabled' : ''}>↑</button>
+                            <button class="btn btn-sm btn-icon" onclick="moveBanner('${banner.id}', 'down')">↓</button>
+                        </td>
+                        <td class="text-right">
+                            <button class="btn btn-sm btn-secondary" onclick="editBanner('${banner.id}')">Изменить</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteBanner('${banner.id}')">Удалить</button>
+                        </td>
+                    </tr>
+                `;
+                }).join('');
+            } catch (error) {
+                console.error('Failed to load banners:', error);
+                document.getElementById('bannersTable').innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center">
+                            <div class="empty-state">
+                                <p>Не удалось загрузить баннеры</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Format short date
+        function formatShortDate(date) {
+            return new Intl.DateTimeFormat('ru-RU', {
+                day: 'numeric',
+                month: 'short'
+            }).format(date);
+        }
+
+        // Open modal
+        async function openBannerModal(id = null) {
+            const modal = document.getElementById('bannerModal');
+            const form = document.getElementById('bannerForm');
+            const title = document.getElementById('modalTitle');
+
+            currentBannerId = id;
+            form.reset();
+
+            try {
+                if (id) {
+                    title.textContent = 'Редактировать баннер';
+                    console.log('Loading banner with id:', id);
+                    const banner = await API.banners.getById(id);
+                    console.log('Banner loaded:', banner);
+
+                    document.getElementById('bannerId').value = banner.id;
+                    document.getElementById('title').value = banner.title;
+                    document.getElementById('subtitle').value = banner.subtitle || '';
+                    document.getElementById('description').value = banner.description || '';
+                    document.getElementById('ctaText').value = banner.button_text || banner.ctaText || '';
+                    document.getElementById('ctaLink').value = banner.button_link || banner.ctaLink || '';
+                    document.getElementById('placement').value = banner.placement;
+                    document.getElementById('theme').value = banner.theme || banner.text_color || 'light';
+                    document.getElementById('imageUrl').value = banner.image || banner.imageUrl || '';
+                    document.getElementById('order').value = banner.order_index || banner.order || 0;
+                    const isActive = banner.is_active !== undefined ? banner.is_active : (banner.isActive !== undefined ? banner.isActive : 1);
+                    document.getElementById('isActive').checked = Boolean(isActive);
+
+                    const startDate = banner.start_date || banner.startDate;
+                    if (startDate) {
+                        document.getElementById('startDate').value = new Date(startDate).toISOString().slice(0, 16);
+                    }
+                    const endDate = banner.end_date || banner.endDate;
+                    if (endDate) {
+                        document.getElementById('endDate').value = new Date(endDate).toISOString().slice(0, 16);
+                    }
+                } else {
+                    title.textContent = 'Новый баннер';
+                    const banners = await API.banners.getAll();
+                    document.getElementById('order').value = banners.length;
+                }
+
+                updatePreview();
+                modal.classList.add('active');
+            } catch (error) {
+                console.error('Error loading banner:', error);
+                Components.showToast('Ошибка', 'Не удалось загрузить данные баннера', 'error');
+            }
+        }
+
+        // Close modal
+        function closeBannerModal() {
+            document.getElementById('bannerModal').classList.remove('active');
+            currentBannerId = null;
+        }
+
+        // Update preview
+        function updatePreview() {
+            const container = document.getElementById('bannerPreview');
+            const title = document.getElementById('title').value || 'Заголовок баннера';
+            const subtitle = document.getElementById('subtitle').value || 'Подзаголовок';
+            const ctaText = document.getElementById('ctaText').value || 'Перейти';
+            const theme = document.getElementById('theme').value;
+            const imageUrl = document.getElementById('imageUrl').value;
+
+            const bgColors = {
+                light: '#FAFAFA',
+                dark: '#2D2D2D',
+                accent: '#C9A26C'
+            };
+
+            const textColors = {
+                light: '#2D2D2D',
+                dark: '#FFFFFF',
+                accent: '#FFFFFF'
+            };
+
+            container.innerHTML = `
+                <div class="banner-preview-content" style="background: ${bgColors[theme]}; color: ${textColors[theme]}; ${imageUrl ? `background-image: url(${imageUrl}); background-size: cover; background-position: center;` : ''}">
+                    <div class="banner-preview-text" style="${imageUrl ? 'background: rgba(0,0,0,0.5); padding: 20px; border-radius: 2px;' : ''}">
+                        <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 32px; margin: 0 0 8px 0; ${imageUrl ? 'color: white;' : ''}">${title}</h2>
+                        <p style="margin: 0 0 16px 0; ${imageUrl ? 'color: white;' : ''}">${subtitle}</p>
+                        <button class="btn ${theme === 'light' ? 'btn-primary' : theme === 'dark' ? 'btn-secondary' : 'btn-primary'}" style="pointer-events: none;">
+                            ${ctaText}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Save banner
+        async function saveBanner() {
+            const title = document.getElementById('title').value.trim();
+            const subtitle = document.getElementById('subtitle').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const ctaText = document.getElementById('ctaText').value.trim();
+            const ctaLink = document.getElementById('ctaLink').value.trim();
+            const placement = document.getElementById('placement').value;
+            const theme = document.getElementById('theme').value;
+            const imageUrl = document.getElementById('imageUrl').value.trim();
+            const order = parseInt(document.getElementById('order').value) || 0;
+            const isActive = document.getElementById('isActive').checked;
+            const startDate = document.getElementById('startDate').value ? new Date(document.getElementById('startDate').value).toISOString() : null;
+            const endDate = document.getElementById('endDate').value ? new Date(document.getElementById('endDate').value).toISOString() : null;
+
+            if (!title || !placement) {
+                Components.showToast('Ошибка', 'Заполните обязательные поля', 'error');
+                return;
+            }
+
+            const data = {
+                title,
+                subtitle,
+                description,
+                buttonText: ctaText,
+                buttonLink: ctaLink,
+                placement,
+                image: imageUrl,
+                backgroundColor: theme === 'dark' ? '#2D2D2D' : theme === 'accent' ? '#C9A26C' : '#FAFAFA',
+                textColor: theme === 'dark' || theme === 'accent' ? '#FFFFFF' : '#2D2D2D',
+                orderIndex: order,
+                isActive: isActive,
+                startDate: startDate,
+                endDate: endDate
+            };
+
+            try {
+                if (currentBannerId) {
+                    await API.banners.update(currentBannerId, data);
+                    Components.showToast('Успех', 'Баннер обновлен', 'success');
+                } else {
+                    await API.banners.create(data);
+                    Components.showToast('Успех', 'Баннер создан', 'success');
+                }
+
+                closeBannerModal();
+                await loadBanners();
+            } catch (error) {
+                console.error('Failed to save banner:', error);
+                Components.showToast('Ошибка', 'Не удалось сохранить баннер', 'error');
+            }
+        }
+
+        // Edit banner
+        function editBanner(id) {
+            openBannerModal(id);
+        }
+
+        // Delete banner
+        async function deleteBanner(id) {
+            try {
+                const banner = await API.banners.getById(id);
+
+                Components.confirm(
+                    'Удалить баннер?',
+                    `Вы уверены, что хотите удалить баннер "${banner.title}"?`,
+                    async () => {
+                        try {
+                            await API.banners.delete(id);
+                            Components.showToast('Успех', 'Баннер удален', 'success');
+                            await loadBanners();
+                        } catch (error) {
+                            console.error('Failed to delete banner:', error);
+                            Components.showToast('Ошибка', 'Не удалось удалить баннер', 'error');
+                        }
+                    }
+                );
+            } catch (error) {
+                console.error('Failed to load banner:', error);
+                Components.showToast('Ошибка', 'Не удалось загрузить баннер', 'error');
+            }
+        }
+
+        // Move banner
+        async function moveBanner(id, direction) {
+            try {
+                const banners = await API.banners.getAll();
+                const sorted = [...banners].sort((a, b) => (a.order || a.order_index || 0) - (b.order || b.order_index || 0));
+                const index = sorted.findIndex(b => b.id === id);
+
+                if (index === -1) return;
+
+                if (direction === 'up' && index > 0) {
+                    const temp = sorted[index].order || sorted[index].order_index || 0;
+                    await API.banners.update(sorted[index].id, { order_index: sorted[index - 1].order || sorted[index - 1].order_index || 0 });
+                    await API.banners.update(sorted[index - 1].id, { order_index: temp });
+                } else if (direction === 'down' && index < sorted.length - 1) {
+                    const temp = sorted[index].order || sorted[index].order_index || 0;
+                    await API.banners.update(sorted[index].id, { order_index: sorted[index + 1].order || sorted[index + 1].order_index || 0 });
+                    await API.banners.update(sorted[index + 1].id, { order_index: temp });
+                }
+
+                await loadBanners();
+                Components.showToast('Успех', 'Порядок баннеров обновлен', 'success');
+            } catch (error) {
+                console.error('Error moving banner:', error);
+                Components.showToast('Ошибка', 'Не удалось изменить порядок', 'error');
+            }
+        }
+
+        // Sidebar & Search
+        function setupSidebar() {
+            document.getElementById('sidebar-toggle')?.addEventListener('click', () => {
+                document.querySelector('.sidebar').classList.toggle('sidebar-collapsed');
+            });
+        }
+
+        function setupSearch() {
+            const input = document.getElementById('global-search');
+            input?.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') input.blur();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === '/' && document.activeElement !== input) {
+                    e.preventDefault();
+                    input?.focus();
+                }
+            });
+        }
+
+        // Update preview on input
+        ['title', 'subtitle', 'ctaText'].forEach(id => {
+            document.getElementById(id)?.addEventListener('input', updatePreview);
+        });
+    </script>
+
+    <style>
+        .banner-thumb {
+            width: 50px;
+            height: 50px;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            overflow: hidden;
+        }
+
+        .banner-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .banner-preview {
+            border: 1px solid #E5E5E5;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .banner-preview-content {
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            position: relative;
+        }
+
+        .banner-preview-text {
+            text-align: center;
+            max-width: 600px;
+        }
+
+        .btn-icon {
+            padding: 4px 8px;
+            font-size: 14px;
+            line-height: 1;
+        }
+    </style>
+</body>
+
+</html>

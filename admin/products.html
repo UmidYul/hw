@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Товары - AURA Admin</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/admin/styles.css">
+</head>
+
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">A</div>
+                    <div class="sidebar-logo-text">AURA Admin</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Основное</div>
+                    <a href="index.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Каталог</div>
+                    <a href="products.html" class="sidebar-nav-link active">
+                        <span class="sidebar-nav-icon">📦</span>
+                        <span>Товары</span>
+                    </a>
+                    <a href="categories.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🏷️</span>
+                        <span>Категории</span>
+                    </a>
+                    <a href="collections.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">📚</span>
+                        <span>Коллекции</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Маркетинг</div>
+                    <a href="discounts.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">💰</span>
+                        <span>Скидки</span>
+                    </a>
+                    <a href="promocodes.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🎫</span>
+                        <span>Промокоды</span>
+                    </a>
+                    <a href="banners.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🖼️</span>
+                        <span>Баннеры</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Продажи</div>
+                    <a href="orders.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">🛍️</span>
+                        <span>Заказы</span>
+                    </a>
+                    <a href="customers.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">👥</span>
+                        <span>Клиенты</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Настройки</div>
+                    <a href="settings.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon">⚙️</span>
+                        <span>Настройки</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="topbar-btn" id="sidebar-toggle">☰</button>
+                    <div class="topbar-search">
+                        <input type="text" class="topbar-search-input" placeholder="Поиск товаров..." id="search-input">
+                        <span class="topbar-search-icon">🔍</span>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="topbar-profile">
+                        <div class="topbar-profile-avatar">A</div>
+                        <div class="topbar-profile-name">Администратор</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Товары</h1>
+                        <p class="page-subtitle">Управление каталогом товаров</p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="btn btn-secondary" onclick="exportProducts()">📥 Экспорт</button>
+                        <button class="btn btn-secondary" onclick="document.getElementById('import-input').click()">📤
+                            Импорт</button>
+                        <input type="file" id="import-input" accept=".json" style="display:none"
+                            onchange="importProducts(event)">
+                        <button class="btn btn-primary" onclick="window.location.href='product-edit.html'">➕ Добавить
+                            товар</button>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="grid grid-cols-4">
+                            <div class="form-group mb-0">
+                                <label class="form-label">Категория</label>
+                                <select class="form-select" id="filter-category" onchange="applyFilters()">
+                                    <option value="">Все</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">Статус</label>
+                                <select class="form-select" id="filter-status" onchange="applyFilters()">
+                                    <option value="">Все</option>
+                                    <option value="active">Активный</option>
+                                    <option value="draft">Черновик</option>
+                                    <option value="archived">Архив</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">Наличие</label>
+                                <select class="form-select" id="filter-stock" onchange="applyFilters()">
+                                    <option value="">Все</option>
+                                    <option value="in">В наличии</option>
+                                    <option value="low">Мало</option>
+                                    <option value="out">Нет в наличии</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">Сортировка</label>
+                                <select class="form-select" id="sort-by" onchange="applyFilters()">
+                                    <option value="updatedAt-desc">По дате ↓</option>
+                                    <option value="updatedAt-asc">По дате ↑</option>
+                                    <option value="price-asc">По цене ↑</option>
+                                    <option value="price-desc">По цене ↓</option>
+                                    <option value="title-asc">По названию А-Я</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bulk Actions -->
+                <div class="card mt-lg" id="bulk-actions" style="display:none">
+                    <div class="card-body">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span id="selected-count">0</span> выбрано
+                            </div>
+                            <div class="flex gap-md">
+                                <button class="btn btn-sm btn-secondary" onclick="bulkAction('activate')">✓
+                                    Активировать</button>
+                                <button class="btn btn-sm btn-secondary" onclick="bulkAction('archive')">📦 В
+                                    архив</button>
+                                <button class="btn btn-sm btn-error" onclick="bulkAction('delete')">🗑️ Удалить</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Table -->
+                <div class="card mt-lg">
+                    <div id="products-container">
+                        <div class="card-body">
+                            <div class="skeleton skeleton-text"></div>
+                            <div class="skeleton skeleton-text"></div>
+                            <div class="skeleton skeleton-text"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="pagination-container"></div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/js/api.js"></script>
+    <script src="/admin/repo.js"></script>
+    <script src="/admin/seed.js"></script>
+    <script src="/admin/components.js"></script>
+    <script>
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let selectedProducts = new Set();
+        let allCategories = [];
+
+        async function loadCategories() {
+            try {
+                allCategories = await API.categories.getAll();
+                const select = document.getElementById('filter-category');
+                allCategories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.slug || cat.id;
+                    option.textContent = cat.name;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Failed to load categories:', error);
+                // Fallback to REPO
+                allCategories = REPO.getCategories();
+                const select = document.getElementById('filter-category');
+                allCategories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.name;
+                    select.appendChild(option);
+                });
+            }
+        }
+
+        function applyFilters() {
+            currentPage = 1;
+            loadProducts();
+        }
+
+        async function loadProducts() {
+            try {
+                let products = await API.products.getAll();
+
+                // Search
+                const searchTerm = document.getElementById('search-input').value.toLowerCase();
+                if (searchTerm) {
+                    products = products.filter(p =>
+                        p.title.toLowerCase().includes(searchTerm) ||
+                        (p.sku && p.sku.toLowerCase().includes(searchTerm))
+                    );
+                }
+
+                // Filters
+                const categoryFilter = document.getElementById('filter-category').value;
+                if (categoryFilter) {
+                    products = products.filter(p => p.category === categoryFilter);
+                }
+
+                const statusFilter = document.getElementById('filter-status').value;
+                if (statusFilter) {
+                    products = products.filter(p => p.status === statusFilter);
+                }
+
+                const stockFilter = document.getElementById('filter-stock').value;
+                if (stockFilter === 'in') {
+                    products = products.filter(p => p.stock > (p.lowStockThreshold || p.low_stock_threshold || 10));
+                } else if (stockFilter === 'low') {
+                    products = products.filter(p => p.stock > 0 && p.stock <= (p.lowStockThreshold || p.low_stock_threshold || 10));
+                } else if (stockFilter === 'out') {
+                    products = products.filter(p => p.stock === 0);
+                }
+
+                // Sort
+                const sortBy = document.getElementById('sort-by').value;
+                const [field, order] = sortBy.split('-');
+                products.sort((a, b) => {
+                    let valA = a[field];
+                    let valB = b[field];
+                    if (field === 'title') {
+                        valA = valA.toLowerCase();
+                        valB = valB.toLowerCase();
+                    }
+                    if (field === 'updatedAt' || field === 'updated_at') {
+                        valA = new Date(a.updatedAt || a.updated_at);
+                        valB = new Date(b.updatedAt || b.updated_at);
+                    }
+                    if (order === 'asc') {
+                        return valA > valB ? 1 : -1;
+                    } else {
+                        return valA < valB ? 1 : -1;
+                    }
+                });
+
+                // Pagination
+                const totalPages = Math.ceil(products.length / itemsPerPage);
+                const start = (currentPage - 1) * itemsPerPage;
+                const paginatedProducts = products.slice(start, start + itemsPerPage);
+
+                renderProducts(paginatedProducts);
+                renderPagination(totalPages);
+            } catch (error) {
+                console.error('Failed to load products:', error);
+                Components.showToast('Ошибка', 'Не удалось загрузить товары', 'error');
+            }
+        }
+
+        function renderProducts(products) {
+            const container = document.getElementById('products-container');
+
+            if (products.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📦</div><div class="empty-state-title">Товары не найдены</div></div>';
+                return;
+            }
+
+            let html = '<table class="table"><thead><tr>';
+            html += '<th><input type="checkbox" id="select-all" onchange="selectAll(this.checked)"></th>';
+            html += '<th>Название</th>';
+            html += '<th>SKU</th>';
+            html += '<th>Категория</th>';
+            html += '<th>Цена</th>';
+            html += '<th>Остаток</th>';
+            html += '<th>Статус</th>';
+            html += '<th>Действия</th>';
+            html += '</tr></thead><tbody>';
+
+            products.forEach(p => {
+                const category = allCategories.find(c => c.id === p.category || c.slug === p.category);
+                const isActive = p.is_active !== undefined ? p.is_active : true;
+                const status = isActive ? { text: 'Активен', type: 'success' } : { text: 'Неактивен', type: 'default' };
+
+                const tags = Array.isArray(p.tags) ? p.tags : (p.tags ? JSON.parse(p.tags) : []);
+                const oldPrice = p.oldPrice || p.old_price;
+
+                html += `<tr>
+                <td><input type="checkbox" class="product-checkbox" value="${p.id}" ${selectedProducts.has(p.id) ? 'checked' : ''} onchange="toggleProduct('${p.id}', this.checked)"></td>
+                <td><strong>${p.title}</strong>${tags.length ? '<br><small>' + tags.map(t => Components.renderBadge(t, 'accent')).join(' ') + '</small>' : ''}</td>
+                <td><code>${p.sku || '—'}</code></td>
+                <td>${category ? category.name : p.category || '—'}</td>
+                <td>${Components.formatPrice(p.price)}${oldPrice ? '<br><small style="text-decoration:line-through;color:#999">' + Components.formatPrice(oldPrice) + '</small>' : ''}</td>
+                <td><span class="${p.stock <= (p.lowStockThreshold || p.low_stock_threshold || 10) ? 'text-error' : ''}">${p.stock}</span></td>
+                <td>${Components.renderBadge(status.text, status.type)}</td>
+                <td>
+                    <button class="btn btn-sm btn-ghost" onclick="editProduct('${p.id}')" title="Редактировать">✏️</button>
+                    <button class="btn btn-sm btn-ghost" onclick="duplicateProduct('${p.id}')" title="Дублировать">📋</button>
+                    <button class="btn btn-sm btn-ghost" onclick="deleteProduct('${p.id}')" title="Удалить">🗑️</button>
+                </td>
+            </tr>`;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function renderPagination(totalPages) {
+            const container = document.getElementById('pagination-container');
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '<div class="pagination">';
+            html += `<button class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">«</button>`;
+
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    html += `<button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    html += '<span>...</span>';
+                }
+            }
+
+            html += `<button class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">»</button>`;
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            loadProducts();
+        }
+
+        function selectAll(checked) {
+            const checkboxes = document.querySelectorAll('.product-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = checked;
+                toggleProduct(cb.value, checked);
+            });
+        }
+
+        function toggleProduct(id, checked) {
+            if (checked) {
+                selectedProducts.add(id);
+            } else {
+                selectedProducts.delete(id);
+            }
+            updateBulkActions();
+        }
+
+        function updateBulkActions() {
+            const count = selectedProducts.size;
+            document.getElementById('selected-count').textContent = count;
+            document.getElementById('bulk-actions').style.display = count > 0 ? 'block' : 'none';
+        }
+
+        async function bulkAction(action) {
+            const ids = Array.from(selectedProducts);
+            if (ids.length === 0) return;
+
+            if (action === 'delete') {
+                Components.confirm('Удалить товары?', `Будет удалено товаров: ${ids.length}`, async () => {
+                    try {
+                        for (const id of ids) {
+                            await API.products.delete(id);
+                        }
+                        selectedProducts.clear();
+                        await loadProducts();
+                        Components.showToast('Успешно', 'Товары удалены', 'success');
+                    } catch (error) {
+                        console.error('Bulk delete failed:', error);
+                        Components.showToast('Ошибка', 'Не удалось удалить товары', 'error');
+                    }
+                });
+            } else if (action === 'activate') {
+                try {
+                    for (const id of ids) {
+                        await API.products.update(id, { status: 'active' });
+                    }
+                    selectedProducts.clear();
+                    await loadProducts();
+                    Components.showToast('Успешно', 'Товары активированы', 'success');
+                } catch (error) {
+                    console.error('Bulk activate failed:', error);
+                    Components.showToast('Ошибка', 'Не удалось активировать товары', 'error');
+                }
+            } else if (action === 'archive') {
+                try {
+                    for (const id of ids) {
+                        await API.products.update(id, { status: 'archived' });
+                    }
+                    selectedProducts.clear();
+                    await loadProducts();
+                    Components.showToast('Успешно', 'Товары перемещены в архив', 'success');
+                } catch (error) {
+                    console.error('Bulk archive failed:', error);
+                    Components.showToast('Ошибка', 'Не удалось архивировать товары', 'error');
+                }
+            }
+        }
+
+        function editProduct(id) {
+            window.location.href = `product-edit.html?id=${id}`;
+        }
+
+        async function duplicateProduct(id) {
+            try {
+                const product = await API.products.getById(id);
+                const duplicate = { ...product };
+                delete duplicate.id;
+                delete duplicate.created_at;
+                delete duplicate.updated_at;
+                delete duplicate.createdAt;
+                delete duplicate.updatedAt;
+                duplicate.title = product.title + ' (копия)';
+                duplicate.sku = (product.sku || '') + '-COPY';
+                duplicate.status = 'draft';
+
+                await API.products.create(duplicate);
+                await loadProducts();
+                Components.showToast('Успешно', 'Товар дублирован', 'success');
+            } catch (error) {
+                console.error('Duplicate failed:', error);
+                Components.showToast('Ошибка', 'Не удалось дублировать товар', 'error');
+            }
+        }
+
+        async function deleteProduct(id) {
+            Components.confirm('Удалить товар?', 'Это действие нельзя отменить', async () => {
+                try {
+                    await API.products.delete(id);
+                    await loadProducts();
+                    Components.showToast('Успешно', 'Товар удален', 'success');
+                } catch (error) {
+                    console.error('Delete failed:', error);
+                    Components.showToast('Ошибка', 'Не удалось удалить товар', 'error');
+                }
+            });
+        }
+
+        async function exportProducts() {
+            try {
+                const products = await API.products.getAll();
+                const dataStr = JSON.stringify(products, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `products-${Date.now()}.json`;
+                a.click();
+                Components.showToast('Успешно', 'Товары экспортированы', 'success');
+            } catch (error) {
+                console.error('Export failed:', error);
+                Components.showToast('Ошибка', 'Не удалось экспортировать товары', 'error');
+            }
+        }
+
+        async function importProducts(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const products = JSON.parse(e.target.result);
+                    if (!Array.isArray(products)) throw new Error('Invalid format');
+
+                    for (const p of products) {
+                        delete p.id;
+                        await API.products.create(p);
+                    }
+
+                    await loadProducts();
+                    Components.showToast('Успешно', `Импортировано товаров: ${products.length}`, 'success');
+                } catch (err) {
+                    console.error('Import failed:', err);
+                    Components.showToast('Ошибка', 'Неверный формат файла', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Search
+        document.getElementById('search-input').addEventListener('input', () => {
+            applyFilters();
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'n' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                window.location.href = 'product-edit.html';
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCategories();
+            setTimeout(loadProducts, 300);
+        });
+    </script>
+</body>
+
+</html>

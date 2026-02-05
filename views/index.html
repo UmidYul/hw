@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA · Минималистичная мода</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:wght@300;400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-container">
+            <div class="header-left">
+                <button class="menu-btn" id="mobileMenuBtn" aria-label="Меню">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <a href="/" class="logo">
+                <span class="logo-text">AURA</span>
+                <span class="logo-dot">·</span>
+            </a>
+
+            <div class="header-right">
+                <button class="icon-btn search-btn" id="searchBtn" aria-label="Поиск">
+                    <i class="fas fa-search"></i>
+                </button>
+                <button class="icon-btn wishlist-btn" id="wishlistBtn" aria-label="Избранное">
+                    <i class="far fa-heart"></i>
+                    <span class="badge" id="wishlistBadge">0</span>
+                </button>
+                <button class="icon-btn cart-btn" id="cartBtn" aria-label="Корзина">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span class="badge" id="cartBadge">0</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="nav" id="mainNav">
+            <div class="container">
+                <ul class="nav-list">
+                    <li><a href="/catalog?category=all" class="nav-link">Все товары</a></li>
+                    <li><a href="/catalog?category=Outerwear" class="nav-link">Верхняя одежда</a></li>
+                    <li><a href="/catalog?category=Tops" class="nav-link">Топы</a></li>
+                    <li><a href="/catalog?category=Bottoms" class="nav-link">Низ</a></li>
+                    <li><a href="/catalog?category=Shoes" class="nav-link">Обувь</a></li>
+                    <li><a href="/catalog?category=Accessories" class="nav-link">Аксессуары</a></li>
+                    <li><a href="/catalog?tag=Sale" class="nav-link nav-link-sale">Sale</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Search Modal -->
+    <div class="modal" id="searchModal">
+        <div class="modal-overlay" id="searchModalOverlay"></div>
+        <div class="modal-content search-modal-content">
+            <button class="modal-close" id="searchModalClose" aria-label="Закрыть">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="search-modal-body">
+                <input type="text" class="search-input-large" id="searchInput" placeholder="Поиск товаров..." autofocus>
+                <div class="search-results" id="searchResults"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <span class="hero-subtitle">Новая коллекция</span>
+            <h1 class="hero-title">Минималистичная<br>элегантность</h1>
+            <p class="hero-text">Откройте для себя изысканные вещи, созданные для современной жизни</p>
+            <a href="/catalog?tag=New" class="btn btn-primary">Смотреть коллекцию</a>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features">
+        <div class="container">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-truck feature-icon"></i>
+                    <h3 class="feature-title">Бесплатная доставка</h3>
+                    <p class="feature-text">При заказе от 5000₽</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-undo feature-icon"></i>
+                    <h3 class="feature-title">Легкий возврат</h3>
+                    <p class="feature-text">30 дней на возврат</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt feature-icon"></i>
+                    <h3 class="feature-title">Безопасная оплата</h3>
+                    <p class="feature-text">Защита данных</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Collections -->
+    <section class="section" id="featuredCollectionsSection" style="display: none;">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Избранные коллекции</h2>
+                <a href="catalog.html" class="section-link">Все коллекции</a>
+            </div>
+            <div class="collections-grid" id="featuredCollections">
+                <!-- Collections will be inserted here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Sale Section -->
+    <section class="section" id="saleSection" style="display: none;">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Акции недели</h2>
+                <a href="/catalog?tag=Sale" class="section-link">Все акции</a>
+            </div>
+            <div class="products-grid products-grid-4" id="saleProducts">
+                <!-- Products will be inserted here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- New Arrivals -->
+    <section class="section section-alt" id="newSection" style="display: none;">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Новинки</h2>
+                <a href="/catalog?tag=New" class="section-link">Смотреть все</a>
+            </div>
+            <div class="products-grid products-grid-4" id="newProducts">
+                <!-- Products will be inserted here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Essentials -->
+    <section class="section" id="essentialSection" style="display: none;">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Популярные товары</h2>
+                <a href="/catalog?category=all" class="section-link">В каталог</a>
+            </div>
+            <div class="products-grid products-grid-4" id="essentialProducts">
+                <!-- Products will be inserted here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter -->
+    <section class="newsletter">
+        <div class="container">
+            <div class="newsletter-content">
+                <h2 class="newsletter-title">Будьте в курсе</h2>
+                <p class="newsletter-text">Подпишитесь на рассылку и получите скидку 10% на первый заказ</p>
+                <form class="newsletter-form" id="newsletterForm">
+                    <input type="email" class="newsletter-input" placeholder="Ваш email" required>
+                    <button type="submit" class="btn btn-dark">Подписаться</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="logo footer-logo">
+                        <span class="logo-text">AURA</span>
+                        <span class="logo-dot">·</span>
+                    </div>
+                    <p class="footer-text">Минималистичная мода для современной жизни</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link" aria-label="Pinterest"><i class="fab fa-pinterest-p"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-heading">Покупателям</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Доставка и оплата</a></li>
+                        <li><a href="#">Возврат и обмен</a></li>
+                        <li><a href="#">Таблица размеров</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-heading">О компании</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">О нас</a></li>
+                        <li><a href="#">Контакты</a></li>
+                        <li><a href="#">Вакансии</a></li>
+                        <li><a href="#">Sustainability</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-heading">Помощь</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Связаться с нами</a></li>
+                        <li><a href="#">Политика конфиденциальности</a></li>
+                        <li><a href="#">Условия использования</a></li>
+                        <li><a href="#">Программа лояльности</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 AURA. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cart Drawer -->
+    <div class="drawer" id="cartDrawer">
+        <div class="drawer-overlay" id="cartDrawerOverlay"></div>
+        <div class="drawer-content">
+            <div class="drawer-header">
+                <h3 class="drawer-title">Корзина (<span id="drawerCartCount">0</span>)</h3>
+                <button class="drawer-close" id="cartDrawerClose" aria-label="Закрыть">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="drawer-body" id="drawerCartItems">
+                <div class="empty-state">
+                    <i class="fas fa-shopping-bag empty-icon"></i>
+                    <p>Корзина пуста</p>
+                </div>
+            </div>
+            <div class="drawer-footer" id="drawerFooter" style="display: none;">
+                <div class="drawer-total">
+                    <span>Итого:</span>
+                    <span id="drawerTotal">0₽</span>
+                </div>
+                <a href="/cart" class="btn btn-dark btn-block">Оформить заказ</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wishlist Drawer -->
+    <div class="drawer" id="wishlistDrawer">
+        <div class="drawer-overlay" id="wishlistDrawerOverlay"></div>
+        <div class="drawer-content">
+            <div class="drawer-header">
+                <h3 class="drawer-title">Избранное (<span id="drawerWishlistCount">0</span>)</h3>
+                <button class="drawer-close" id="wishlistDrawerClose" aria-label="Закрыть">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="drawer-body" id="drawerWishlistItems">
+                <div class="empty-state">
+                    <i class="far fa-heart empty-icon"></i>
+                    <p>Избранное пусто</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Load scripts in correct order -->
+    <script src="/js/api.js"></script>
+    <script src="/js/discounts-loader.js"></script>
+    <script src="/js/products-loader.js"></script>
+    <script src="/js/banners-loader.js"></script>
+    <script src="/js/data.js"></script>
+    <script src="/js/utils.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        // Load home page products from API
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Load products from API
+                await loadProducts();
+
+                // Initialize dynamic hero banner
+                await initHero();
+
+                // Load featured collections
+                await loadFeaturedCollections();
+
+                // Get products array and apply discounts
+                let allProducts = getProducts();
+                if (window.discountSystem && window.discountSystem.loaded) {
+                    allProducts = window.discountSystem.applyDiscountsToProducts(allProducts);
+                }
+
+                if (allProducts.length > 0) {
+                    // Sale products - товары со скидкой (old_price) или тегом Sale
+                    const saleProducts = allProducts.filter(p => {
+                        const hasOldPrice = p.old_price || p.oldPrice;
+                        const tags = Array.isArray(p.tags) ? p.tags : [];
+                        const hasSaleTag = tags.includes('Sale');
+                        return hasOldPrice || hasSaleTag;
+                    }).slice(0, 4);
+                    if (saleProducts.length > 0) {
+                        renderProducts(saleProducts, 'saleProducts');
+                        document.getElementById('saleSection').style.display = 'block';
+                    }
+
+                    // New products - только товары с тегом New
+                    const newProducts = allProducts.filter(p => {
+                        const tags = Array.isArray(p.tags) ? p.tags : [];
+                        return tags.includes('New');
+                    }).slice(0, 4);
+                    if (newProducts.length > 0) {
+                        renderProducts(newProducts, 'newProducts');
+                        document.getElementById('newSection').style.display = 'block';
+                    }
+
+                    // Essential products - популярные товары без специальных тегов
+                    const essentialProducts = allProducts.filter(p => {
+                        const tags = Array.isArray(p.tags) ? p.tags : [];
+                        return !tags.includes('New') && !tags.includes('Sale') && !tags.includes('Limited');
+                    }).slice(0, 4);
+                    if (essentialProducts.length > 0) {
+                        renderProducts(essentialProducts, 'essentialProducts');
+                        document.getElementById('essentialSection').style.display = 'block';
+                    }
+                } else {
+                    console.warn('No products loaded');
+                }
+            } catch (error) {
+                console.error('Failed to load page data:', error);
+                // Fallback to static data.js if API fails
+                const saleProducts = products.filter(p => {
+                    return p.oldPrice || (p.tags && p.tags.includes('Sale'));
+                }).slice(0, 4);
+                renderProducts(saleProducts, 'saleProducts');
+
+                const newProducts = products.filter(p => p.tags && p.tags.includes('New')).slice(0, 4);
+                renderProducts(newProducts, 'newProducts');
+
+                const essentialProducts = products.filter(p => {
+                    return !p.tags || (!p.tags.includes('New') && !p.tags.includes('Sale') && !p.tags.includes('Limited'));
+                }).slice(0, 4);
+                renderProducts(essentialProducts, 'essentialProducts');
+            }
+        });
+
+        // Newsletter form
+        document.getElementById('newsletterForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            showToast('Спасибо за подписку! Проверьте почту.', 'success');
+            e.target.reset();
+        });
+
+        // Load featured collections from API
+        async function loadFeaturedCollections() {
+            try {
+                const response = await fetch('/api/content/featured/collections');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch featured collections');
+                }
+
+                const collections = await response.json();
+
+                if (collections && collections.length > 0) {
+                    const section = document.getElementById('featuredCollectionsSection');
+                    const container = document.getElementById('featuredCollections');
+
+                    // Render collection cards
+                    container.innerHTML = collections.map(collection => {
+                        const imageUrl = collection.image_url || '/images/placeholder-collection.jpg';
+                        const productCount = collection.productCount || 0;
+
+                        return `
+                            <a href="/collection?slug=${collection.slug}" class="collection-card">
+                                <div class="collection-image">
+                                    <img src="${imageUrl}" alt="${collection.name}" loading="lazy">
+                                </div>
+                                <div class="collection-content">
+                                    <h3 class="collection-name">${collection.name}</h3>
+                                    <p class="collection-description">${collection.description || ''}</p>
+                                    <span class="collection-count">${productCount} ${productCount === 1 ? 'товар' : productCount < 5 ? 'товара' : 'товаров'}</span>
+                                </div>
+                            </a>
+                        `;
+                    }).join('');
+
+                    // Show section
+                    section.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Failed to load featured collections:', error);
+            }
+        }
+    </script>
+</body>
+
+</html>
