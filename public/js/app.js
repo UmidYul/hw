@@ -118,8 +118,7 @@ function initializeWishlistDrawer() {
 
     if (wishlistBtn) {
         wishlistBtn.addEventListener('click', () => {
-            wishlistDrawer.classList.add('open');
-            document.body.style.overflow = 'hidden';
+            window.location.href = '/wishlist';
         });
     }
 

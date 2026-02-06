@@ -67,7 +67,7 @@
                 <i class="fas fa-times"></i>
             </button>
             <div class="search-modal-body">
-                <input type="text" class="search-input-large" id="searchInput" placeholder="Поиск товаров..." autofocus>
+                <input type="text" class="search-input-large" id="searchInput" placeholder="Поиск товаров...">
                 <div class="search-results" id="searchResults"></div>
             </div>
         </div>
@@ -101,7 +101,7 @@
             </div>
 
             <!-- Wishlist Grid -->
-            <div class="products-grid" id="wishlistGrid"></div>
+            <div class="products-grid products-grid-4" id="wishlistGrid"></div>
         </div>
     </div>
 
@@ -179,9 +179,9 @@
         // Load wishlist
         function loadWishlist() {
             const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-            wishlistItems = wishlist.map(item => {
-                const product = allProducts.find(p => p.id === item.id);
-                return product ? { ...product, wishlistId: item.id } : null;
+            wishlistItems = wishlist.map(id => {
+                const product = allProducts.find(p => p.id === id);
+                return product || null;
             }).filter(Boolean);
 
             renderWishlist();
@@ -218,10 +218,16 @@
         // Add remove buttons to wishlist cards
         function addRemoveButtons() {
             document.querySelectorAll('.product-card').forEach(card => {
-                const productId = card.dataset.productId;
+                const productId = parseInt(card.dataset.productId);
                 const actions = card.querySelector('.product-card-actions');
 
                 if (actions) {
+                    // Remove existing wishlist toggle button
+                    const wishlistToggle = actions.querySelector('.wishlist-toggle');
+                    if (wishlistToggle) {
+                        wishlistToggle.remove();
+                    }
+
                     // Add remove button
                     const removeBtn = document.createElement('button');
                     removeBtn.className = 'product-card-btn remove-from-wishlist';
@@ -232,29 +238,7 @@
                         e.stopPropagation();
                         removeFromWishlist(productId);
                     });
-                    actions.appendChild(removeBtn);
-                }
-            });
-        }
-
-        // Add remove buttons to wishlist cards
-        function addRemoveButtons() {
-            document.querySelectorAll('.product-card').forEach(card => {
-                const productId = card.dataset.productId;
-                const actions = card.querySelector('.product-card-actions');
-
-                if (actions) {
-                    // Add remove button
-                    const removeBtn = document.createElement('button');
-                    removeBtn.className = 'product-card-btn remove-from-wishlist';
-                    removeBtn.dataset.id = productId;
-                    removeBtn.setAttribute('aria-label', 'Удалить из избранного');
-                    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
-                    removeBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        removeFromWishlist(productId);
-                    });
-                    actions.appendChild(removeBtn);
+                    actions.insertBefore(removeBtn, actions.firstChild);
                 }
             });
         }
@@ -262,7 +246,7 @@
         // Remove from wishlist
         function removeFromWishlist(productId) {
             let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-            wishlist = wishlist.filter(item => item.id !== productId);
+            wishlist = wishlist.filter(id => id !== parseInt(productId));
             localStorage.setItem('wishlist', JSON.stringify(wishlist));
             loadWishlist();
             showNotification('Товар удален из избранного');

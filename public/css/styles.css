@@ -461,6 +461,7 @@ textarea {
     line-height: 1.6;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -2669,6 +2670,7 @@ textarea.form-input {
 
     .container {
         padding: 0 var(--spacing-sm);
+        overflow-x: hidden;
     }
 
     .header-container {
@@ -2698,35 +2700,71 @@ textarea.form-input {
         gap: var(--spacing-md);
     }
 
+    .product-card {
+        font-size: 12px;
+    }
+
+    .product-card-image {
+        height: auto;
+        aspect-ratio: 2/3;
+    }
+
     .product-card-title {
-        font-size: 14px;
+        font-size: 12px;
+        margin-bottom: 4px;
+        line-height: 1.3;
     }
 
     .product-card-body {
-        padding: var(--spacing-sm);
+        padding: 8px;
     }
 
-    .product-card-actions {
-        gap: 6px;
+    .product-card-rating {
+        margin-bottom: 4px;
     }
 
-    .product-card-btn {
-        width: 36px;
-        height: 36px;
+    .rating-stars {
+        font-size: 10px;
+    }
+
+    .rating-count {
+        font-size: 10px;
+    }
+
+    .product-card-price {
+        margin-bottom: 8px;
+    }
+
+    .price-current {
         font-size: 14px;
     }
 
-    .product-card-badges {
-        top: var(--spacing-sm);
-        left: var(--spacing-sm);
+    .price-old {
+        font-size: 11px;
+    }
+
+    .product-card-actions {
         gap: 4px;
+    }
+
+    .product-card-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
+    }
+
+    .product-card-badges {
+        top: 6px;
+        left: 6px;
+        gap: 3px;
     }
 
     .badge-sale,
     .badge-new,
     .badge-limited {
-        padding: 4px 8px;
-        font-size: 10px;
+        padding: 2px 5px;
+        font-size: 8px;
+        letter-spacing: 0.3px;
     }
 
     .btn-sm {
@@ -2787,12 +2825,14 @@ textarea.form-input {
     }
 
     .btn {
-        padding: 12px 20px;
-        font-size: 14px;
+        padding: 10px 16px;
+        font-size: 13px;
     }
 
     .btn-block {
         width: 100%;
+        padding: 10px 16px;
+        font-size: 13px;
     }
 
     .gallery-thumbs {
@@ -2898,7 +2938,14 @@ textarea.form-input {
     }
 
     .cart-summary {
-        padding: var(--spacing-md);
+        padding: var(--spacing-sm);
+        border: none;
+        box-shadow: none;
+    }
+
+    .summary-title {
+        font-size: 16px;
+        margin-bottom: var(--spacing-sm);
     }
 
     .summary-row {
@@ -2910,13 +2957,48 @@ textarea.form-input {
     }
 
     .drawer-content {
-        padding: var(--spacing-md);
+        max-width: 90vw;
+        padding: var(--spacing-sm);
     }
 
     .drawer-header {
-        padding: var(--spacing-md);
-        margin: calc(var(--spacing-md) * -1);
-        margin-bottom: var(--spacing-md);
+        padding: var(--spacing-sm);
+        margin: calc(var(--spacing-sm) * -1);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .drawer-body {
+        padding: var(--spacing-sm);
+    }
+
+    .promo-section {
+        padding: var(--spacing-sm) 0;
+        margin: var(--spacing-sm) 0;
+    }
+
+    .promo-title {
+        font-size: 13px;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .promo-form {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+
+    .promo-input {
+        padding: 8px;
+        font-size: 13px;
+    }
+
+    .promo-form .btn-sm {
+        width: 100%;
+        padding: 8px;
+    }
+
+    .delivery-info {
+        padding: var(--spacing-xs);
+        font-size: 11px;
     }
 
     .drawer-title {
@@ -2924,7 +3006,9 @@ textarea.form-input {
     }
 
     .drawer-item {
-        gap: var(--spacing-sm);
+        gap: var(--spacing-xs);
+        padding: var(--spacing-sm);
+        margin-bottom: var(--spacing-sm);
     }
 
     .drawer-item-image {
@@ -2938,6 +3022,15 @@ textarea.form-input {
 
     .drawer-item-price {
         font-size: 14px;
+    }
+
+    .drawer-footer {
+        padding: var(--spacing-sm);
+    }
+
+    .drawer-total {
+        font-size: 16px;
+        margin-bottom: var(--spacing-sm);
     }
 
     .footer-grid {
@@ -2956,8 +3049,33 @@ textarea.form-input {
     }
 
     .modal-content {
-        margin: var(--spacing-md);
+        margin: var(--spacing-sm);
+        padding: 0;
+    }
+
+    .modal-close {
+        top: var(--spacing-sm);
+        right: var(--spacing-sm);
+        width: 36px;
+        height: 36px;
+    }
+
+    .checkout-modal .modal-body {
         padding: var(--spacing-md);
+    }
+
+    .form-group {
+        margin-bottom: var(--spacing-md);
+    }
+
+    .form-input {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+
+    .checkout-summary {
+        padding: var(--spacing-md);
+        margin: var(--spacing-md) 0;
     }
 
     .modal-title {
