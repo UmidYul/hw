@@ -39,7 +39,6 @@ app.use(cookieParser());
 app.use('/css', express.static(path.join(__dirname, '../public/css')));
 app.use('/js', express.static(path.join(__dirname, '../public/js')));
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
-app.use('/partials', express.static(path.join(__dirname, '../public/partials')));
 app.get('/robots.txt', (req, res) => res.sendFile(path.join(__dirname, '../public/robots.txt')));
 app.get('/sitemap.xml', (req, res) => res.sendFile(path.join(__dirname, '../public/sitemap.xml')));
 

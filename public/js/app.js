@@ -1,14 +1,7 @@
 // Main Application Logic
 // This file handles common functionality across all pages
 
-document.addEventListener('DOMContentLoaded', async () => {
-    if (window.layoutReady) {
-        try {
-            await window.layoutReady;
-        } catch (error) {
-            console.error('Failed to load layout partials:', error);
-        }
-    }
+document.addEventListener('DOMContentLoaded', () => {
     // Initialize badges
     updateCartBadge();
     updateWishlistBadge();
