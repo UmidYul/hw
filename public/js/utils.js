@@ -72,7 +72,7 @@ const cart = {
         updateCartDrawer();
     },
 
-    addItem(product, quantity = 1, size = null, color = null) {
+    addItem(product, quantity = 1, size = null, color = null, variantId = null) {
         const items = this.getItems();
 
         // Create unique key based on product id, size, and color
@@ -86,6 +86,9 @@ const cart = {
 
         if (existingItem) {
             existingItem.quantity += quantity;
+            if (variantId) {
+                existingItem.variantId = variantId;
+            }
         } else {
             items.push({
                 id: product.id,
@@ -96,7 +99,8 @@ const cart = {
                 quantity,
                 size,
                 color,
-                key
+                key,
+                variantId
             });
         }
 
@@ -110,11 +114,13 @@ const cart = {
         this.setItems(filtered);
     },
 
-    updateQuantity(key, quantity) {
+    updateQuantity(key, quantity, maxQuantity = 10) {
         const items = this.getItems();
         const item = items.find(item => item.key === key);
         if (item) {
-            item.quantity = Math.max(1, Math.min(10, quantity));
+            const limit = Number.isFinite(maxQuantity) ? maxQuantity : 10;
+            const effectiveMax = Math.max(1, limit);
+            item.quantity = Math.max(1, Math.min(effectiveMax, quantity));
             this.setItems(items);
         }
     },
@@ -128,6 +134,7 @@ const cart = {
             if (updates.size || updates.color) {
                 const item = items[index];
                 const newKey = `${item.id}-${updates.size || item.size}-${updates.color || item.color}`;
+                const newVariantId = updates.variantId !== undefined ? updates.variantId : item.variantId;
 
                 // Check if item with new key already exists
                 const existingIndex = items.findIndex(i => i.key === newKey);
@@ -138,7 +145,7 @@ const cart = {
                     items.splice(index, 1);
                 } else {
                     // Update item
-                    items[index] = { ...item, ...updates, key: newKey };
+                    items[index] = { ...item, ...updates, key: newKey, variantId: newVariantId };
                 }
             } else {
                 items[index] = { ...items[index], ...updates };
@@ -315,7 +322,10 @@ function renderProductCard(product) {
     const hasDiscount = discountPercent > 0;
 
     // Check if product is out of stock
-    const stockCount = product.stock || 0;
+    const variants = Array.isArray(product.variants) ? product.variants : [];
+    const stockCount = variants.length > 0
+        ? variants.reduce((sum, v) => sum + (v.stock || 0), 0)
+        : (product.stock || 0);
     const isOutOfStock = stockCount === 0;
 
     // Get first image
@@ -444,9 +454,19 @@ function attachProductCardListeners(container) {
             const product = products.find(p => p.id === productId);
 
             if (product) {
-                const defaultSize = product.sizes[0];
-                const defaultColor = product.colors[0];
-                cart.addItem(product, 1, defaultSize, defaultColor);
+                const productVariants = Array.isArray(product.variants) ? product.variants : [];
+                if (productVariants.length > 0) {
+                    const availableVariant = productVariants.find(v => (v.stock || 0) > 0);
+                    if (!availableVariant) {
+                        showToast('Нет в наличии', 'error');
+                        return;
+                    }
+                    cart.addItem(product, 1, availableVariant.size, availableVariant.color, availableVariant.id);
+                } else {
+                    const defaultSize = product.sizes[0];
+                    const defaultColor = product.colors[0];
+                    cart.addItem(product, 1, defaultSize, defaultColor);
+                }
                 showToast('Товар добавлен в корзину', 'success');
             }
         });

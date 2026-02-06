@@ -2038,6 +2038,13 @@ textarea {
     transform: scale(1.1);
 }
 
+.color-swatch-large.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: none;
+    border-color: transparent;
+}
+
 .size-chips {
     display: flex;
     flex-wrap: wrap;
@@ -2058,6 +2065,14 @@ textarea {
     background: var(--color-primary);
     color: var(--color-surface);
     border-color: var(--color-primary);
+}
+
+.size-chip.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: transparent;
+    color: var(--color-secondary);
+    border-color: var(--color-border);
 }
 
 .quantity-selector {

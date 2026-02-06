@@ -3,6 +3,41 @@ import { dbAll, dbGet, dbRun } from '../database/db.js';
 
 const router = express.Router();
 
+function normalizeVariants(variants) {
+    if (!Array.isArray(variants)) return [];
+    return variants
+        .filter(v => v && v.color && v.size)
+        .map(v => ({
+            color: String(v.color).trim(),
+            size: String(v.size).trim(),
+            stock: Math.max(0, parseInt(v.stock) || 0)
+        }));
+}
+
+async function loadVariantsForProducts(productIds) {
+    if (!productIds.length) return {};
+
+    const placeholders = productIds.map(() => '?').join(',');
+    const rows = await dbAll(
+        `SELECT id, product_id, color, size, stock FROM product_variants WHERE product_id IN (${placeholders})`,
+        productIds
+    );
+
+    const map = {};
+    rows.forEach(row => {
+        if (!map[row.product_id]) map[row.product_id] = [];
+        map[row.product_id].push({
+            id: row.id,
+            productId: row.product_id,
+            color: row.color,
+            size: row.size,
+            stock: row.stock
+        });
+    });
+
+    return map;
+}
+
 // Get all products
 router.get('/', async (req, res) => {
     try {
@@ -49,7 +84,13 @@ router.get('/', async (req, res) => {
             images: JSON.parse(p.images || '[]')
         }));
 
-        res.json(parsedProducts);
+        const variantsByProduct = await loadVariantsForProducts(parsedProducts.map(p => p.id));
+        const withVariants = parsedProducts.map(p => ({
+            ...p,
+            variants: variantsByProduct[p.id] || []
+        }));
+
+        res.json(withVariants);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -73,7 +114,21 @@ router.get('/:id', async (req, res) => {
             images: JSON.parse(product.images || '[]')
         };
 
-        res.json(parsedProduct);
+        const variants = await dbAll(
+            'SELECT id, product_id, color, size, stock FROM product_variants WHERE product_id = ?',
+            [req.params.id]
+        );
+
+        res.json({
+            ...parsedProduct,
+            variants: variants.map(v => ({
+                id: v.id,
+                productId: v.product_id,
+                color: v.color,
+                size: v.size,
+                stock: v.stock
+            }))
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -82,7 +137,12 @@ router.get('/:id', async (req, res) => {
 // Create product
 router.post('/', async (req, res) => {
     try {
-        const { title, category, price, oldPrice, stock, tags, colors, sizes, description, material, care, fit, deliveryInfo, images } = req.body;
+        const { title, category, price, oldPrice, stock, tags, colors, sizes, description, material, care, fit, deliveryInfo, images, variants } = req.body;
+
+        const normalizedVariants = normalizeVariants(variants);
+        const totalStock = normalizedVariants.length > 0
+            ? normalizedVariants.reduce((sum, v) => sum + v.stock, 0)
+            : (stock || 0);
 
         // Generate SKU automatically
         const timestamp = Date.now().toString().slice(-6);
@@ -97,7 +157,7 @@ router.post('/', async (req, res) => {
     `;
 
         const result = await dbRun(sql, [
-            title, sku, category, price, oldPrice || null, stock || 0,
+            title, sku, category, price, oldPrice || null, totalStock,
             JSON.stringify(tags || []),
             JSON.stringify(colors || []),
             JSON.stringify(sizes || []),
@@ -105,6 +165,15 @@ router.post('/', async (req, res) => {
             deliveryInfo || '',
             JSON.stringify(images || [])
         ]);
+
+        if (normalizedVariants.length > 0) {
+            for (const variant of normalizedVariants) {
+                await dbRun(
+                    'INSERT INTO product_variants (product_id, color, size, stock) VALUES (?, ?, ?, ?)',
+                    [result.id, variant.color, variant.size, variant.stock]
+                );
+            }
+        }
 
         res.status(201).json({ id: result.id, message: 'Product created successfully' });
     } catch (error) {
@@ -115,7 +184,13 @@ router.post('/', async (req, res) => {
 // Update product
 router.put('/:id', async (req, res) => {
     try {
-        const { title, category, price, oldPrice, stock, tags, colors, sizes, description, material, care, fit, deliveryInfo, images, isActive } = req.body;
+        const { title, category, price, oldPrice, stock, tags, colors, sizes, description, material, care, fit, deliveryInfo, images, isActive, variants } = req.body;
+
+        const hasVariants = Array.isArray(variants);
+        const normalizedVariants = normalizeVariants(variants);
+        const totalStock = hasVariants
+            ? normalizedVariants.reduce((sum, v) => sum + v.stock, 0)
+            : (stock || 0);
 
         const sql = `
       UPDATE products SET
@@ -127,7 +202,7 @@ router.put('/:id', async (req, res) => {
     `;
 
         await dbRun(sql, [
-            title, category, price, oldPrice || null, stock || 0,
+            title, category, price, oldPrice || null, totalStock,
             JSON.stringify(tags || []),
             JSON.stringify(colors || []),
             JSON.stringify(sizes || []),
@@ -137,6 +212,16 @@ router.put('/:id', async (req, res) => {
             isActive !== undefined ? isActive : 1,
             req.params.id
         ]);
+
+        if (hasVariants) {
+            await dbRun('DELETE FROM product_variants WHERE product_id = ?', [req.params.id]);
+            for (const variant of normalizedVariants) {
+                await dbRun(
+                    'INSERT INTO product_variants (product_id, color, size, stock) VALUES (?, ?, ?, ?)',
+                    [req.params.id, variant.color, variant.size, variant.stock]
+                );
+            }
+        }
 
         res.json({ message: 'Product updated successfully' });
     } catch (error) {

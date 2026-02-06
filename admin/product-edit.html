@@ -208,6 +208,12 @@
                                     <label class="form-label">Размеры (через запятую)</label>
                                     <input type="text" class="form-input" name="sizes" placeholder="XS, S, M, L, XL">
                                 </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Остатки по вариантам</label>
+                                    <div id="variants-matrix" class="variants-matrix"></div>
+                                    <div class="form-hint">Укажите остаток для каждой комбинации цвета и размера.</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -308,7 +314,7 @@
                 <div class="product-image-item" draggable="true" data-index="${index}">
                     ${index === 0 ? '<div class="product-image-badge">Главное</div>' : ''}
                     <button class="product-image-remove" onclick="removeImage(${index})" type="button">✕</button>
-                    <img src="${url}" alt="Product ${index + 1}" onerror="this.src='https://via.placeholder.com/120?text=Error'">
+                    <img src="${url}" alt="Product ${index + 1}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"120\" height=\"120\" viewBox=\"0 0 120 120\"><rect width=\"120\" height=\"120\" fill=\"%23f0f0f0\"/><text x=\"50%\" y=\"50%\" text-anchor=\"middle\" dominant-baseline=\"middle\" font-family=\"Arial\" font-size=\"12\" fill=\"%23999\">No image</text></svg>'">
                 </div>
             `).join('');
 
@@ -384,6 +390,77 @@
             draggedIndex = null;
         }
 
+        function parseListInput(value) {
+            return value
+                .split(',')
+                .map(item => item.trim())
+                .filter(item => item.length > 0);
+        }
+
+        function getVariantsFromMatrix() {
+            return Array.from(document.querySelectorAll('.variants-input')).map(input => ({
+                color: input.dataset.color,
+                size: input.dataset.size,
+                stock: parseInt(input.value, 10) || 0
+            }));
+        }
+
+        function renderVariantsMatrix(colors, sizes, variants = []) {
+            const container = document.getElementById('variants-matrix');
+
+            if (!colors.length || !sizes.length) {
+                container.innerHTML = '<div class="form-hint">Добавьте цвета и размеры, чтобы задать остатки.</div>';
+                return;
+            }
+
+            const variantMap = new Map();
+            variants.forEach(v => {
+                const key = `${v.color}||${v.size}`;
+                variantMap.set(key, Math.max(0, parseInt(v.stock, 10) || 0));
+            });
+
+            let html = '<div class="variants-table">';
+            html += '<div class="variants-row">';
+            html += '<div class="variants-cell variants-cell-head"></div>';
+            html += sizes.map(size => `<div class="variants-cell variants-cell-head">${size}</div>`).join('');
+            html += '</div>';
+
+            colors.forEach(color => {
+                html += '<div class="variants-row">';
+                html += `<div class="variants-cell variants-cell-head">${color}</div>`;
+                sizes.forEach(size => {
+                    const key = `${color}||${size}`;
+                    const stock = variantMap.has(key) ? variantMap.get(key) : 0;
+                    html += `
+                        <div class="variants-cell">
+                            <input type="number" class="variants-input" data-color="${color}" data-size="${size}" min="0" value="${stock}">
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function initializeVariantsMatrix() {
+            const colorsInput = document.querySelector('[name="colors"]');
+            const sizesInput = document.querySelector('[name="sizes"]');
+
+            const updateMatrix = () => {
+                const colors = parseListInput(colorsInput.value);
+                const sizes = parseListInput(sizesInput.value);
+                const existingVariants = getVariantsFromMatrix();
+                renderVariantsMatrix(colors, sizes, existingVariants);
+            };
+
+            colorsInput.addEventListener('input', updateMatrix);
+            sizesInput.addEventListener('input', updateMatrix);
+
+            updateMatrix();
+        }
+
         // Allow Enter key to add image
         document.addEventListener('DOMContentLoaded', () => {
             const imageInput = document.getElementById('new-image-url');
@@ -452,6 +529,9 @@
                 form.querySelector('[name="sizes"]').value = product.sizes.join(', ');
             }
 
+            renderVariantsMatrix(colors, sizes, product.variants || []);
+            initializeVariantsMatrix();
+
             // Tags
             if (product.tags) {
                 product.tags.forEach(tag => {
@@ -493,6 +573,13 @@
             // Sizes
             const sizesInput = form.querySelector('[name="sizes"]').value;
             data.sizes = sizesInput ? sizesInput.split(',').map(s => s.trim()) : [];
+
+            // Variants
+            const variants = getVariantsFromMatrix();
+            if (variants.length > 0) {
+                data.variants = variants;
+                data.stock = variants.reduce((sum, v) => sum + v.stock, 0);
+            }
 
             // Images from gallery
             data.images = productImages.length > 0 ? productImages : ['https://via.placeholder.com/400'];
@@ -577,6 +664,9 @@
         document.addEventListener('DOMContentLoaded', async () => {
             await loadCategories();
             await loadProduct();
+            if (!editingId) {
+                initializeVariantsMatrix();
+            }
         });
     </script>
 </body>

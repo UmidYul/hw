@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Header interactions
     initializeHeader();
+    loadNavbarCategories();
 
     // Drawers
     initializeCartDrawer();
@@ -31,6 +32,38 @@ function initializeHeader() {
             mainNav.classList.toggle('nav-open');
             mobileMenuBtn.classList.toggle('active');
         });
+    }
+}
+
+async function loadNavbarCategories() {
+    const navList = document.querySelector('#mainNav .nav-list');
+    if (!navList || typeof API === 'undefined' || !API.categories) return;
+
+    try {
+        const categories = API.categories.getVisible
+            ? await API.categories.getVisible()
+            : await API.categories.getAll();
+
+        if (!Array.isArray(categories) || categories.length === 0) return;
+
+        const visibleCategories = categories
+            .filter(cat => cat && cat.is_visible !== false && cat.slug)
+            .sort((a, b) => (a.order_index || 0) - (b.order_index || 0));
+
+        if (visibleCategories.length === 0) return;
+
+        const categoryLinks = visibleCategories.map(cat => {
+            const slug = encodeURIComponent(cat.slug);
+            return `<li><a href="/catalog?category=${slug}" class="nav-link">${cat.name}</a></li>`;
+        }).join('');
+
+        navList.innerHTML = `
+            <li><a href="/catalog?category=all" class="nav-link">Все товары</a></li>
+            ${categoryLinks}
+            <li><a href="/catalog?tag=Sale" class="nav-link nav-link-sale">Sale</a></li>
+        `;
+    } catch (error) {
+        console.error('Failed to load navbar categories:', error);
     }
 }
 

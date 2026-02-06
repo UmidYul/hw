@@ -45,7 +45,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function renderCart() {
-    const items = cart.getItems();
+    let items = cart.getItems();
+    items = clampCartQuantities(items);
     const cartItems = document.getElementById('cartItems');
     const emptyCart = document.getElementById('emptyCart');
     const cartContainer = document.querySelector('.cart-container');
@@ -100,6 +101,12 @@ async function applyDiscountsToCartItems(items) {
 
 function renderCartItem(item) {
     const hasDiscount = item.appliedDiscount && item.originalPrice && item.originalPrice > item.price;
+    const variants = getProductVariants(item.id);
+    const colors = getProductColors(item.id);
+    const sizes = getProductSizes(item.id);
+    const maxQty = getMaxQtyForItem(item);
+    const effectiveMax = Math.max(1, maxQty);
+    const controlsDisabled = maxQty <= 0;
 
     return `
         <div class="cart-item" data-key="${item.key}">
@@ -115,18 +122,20 @@ function renderCartItem(item) {
                     <div class="cart-item-option">
                         <label>Цвет:</label>
                         <select class="cart-item-select color-select" data-key="${item.key}">
-                            ${getProductColors(item.id).map(color =>
-        `<option value="${color}" ${color === item.color ? 'selected' : ''}>${color}</option>`
-    ).join('')}
+                            ${colors.map(color => {
+        const available = isColorAvailable(variants, color, item.size, item.color);
+        return `<option value="${color}" ${color === item.color ? 'selected' : ''} ${available ? '' : 'disabled'}>${color}</option>`;
+    }).join('')}
                         </select>
                     </div>
                     
                     <div class="cart-item-option">
                         <label>Размер:</label>
                         <select class="cart-item-select size-select" data-key="${item.key}">
-                            ${getProductSizes(item.id).map(size =>
-        `<option value="${size}" ${size === item.size ? 'selected' : ''}>${size}</option>`
-    ).join('')}
+                            ${sizes.map(size => {
+        const available = isSizeAvailable(variants, size, item.color, item.size);
+        return `<option value="${size}" ${size === item.size ? 'selected' : ''} ${available ? '' : 'disabled'}>${size}</option>`;
+    }).join('')}
                         </select>
                     </div>
                 </div>
@@ -143,11 +152,11 @@ function renderCartItem(item) {
             
             <div class="cart-item-actions">
                 <div class="quantity-selector">
-                    <button class="qty-btn qty-minus" data-key="${item.key}" aria-label="Уменьшить">
+                    <button class="qty-btn qty-minus" data-key="${item.key}" aria-label="Уменьшить" ${controlsDisabled ? 'disabled' : ''}>
                         <i class="fas fa-minus"></i>
                     </button>
-                    <input type="number" class="qty-input" value="${item.quantity}" min="1" max="10" data-key="${item.key}">
-                    <button class="qty-btn qty-plus" data-key="${item.key}" aria-label="Увеличить">
+                    <input type="number" class="qty-input" value="${item.quantity}" min="1" max="${effectiveMax}" data-key="${item.key}" ${controlsDisabled ? 'disabled' : ''}>
+                    <button class="qty-btn qty-plus" data-key="${item.key}" aria-label="Увеличить" ${controlsDisabled ? 'disabled' : ''}>
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
@@ -174,6 +183,69 @@ function getProductSizes(productId) {
     return product ? product.sizes : [];
 }
 
+function getProductVariants(productId) {
+    const product = products.find(p => p.id === productId);
+    return Array.isArray(product?.variants) ? product.variants : [];
+}
+
+function findVariant(productId, color, size) {
+    const variants = getProductVariants(productId);
+    return variants.find(v => v.color === color && v.size === size) || null;
+}
+
+function isColorAvailable(variants, color, selectedSize, currentColor) {
+    if (!variants.length) return true;
+    if (selectedSize) {
+        return variants.some(v => v.color === color && v.size === selectedSize && (v.stock || 0) > 0)
+            || color === currentColor;
+    }
+    return variants.some(v => v.color === color && (v.stock || 0) > 0) || color === currentColor;
+}
+
+function isSizeAvailable(variants, size, selectedColor, currentSize) {
+    if (!variants.length) return true;
+    if (selectedColor) {
+        return variants.some(v => v.size === size && v.color === selectedColor && (v.stock || 0) > 0)
+            || size === currentSize;
+    }
+    return variants.some(v => v.size === size && (v.stock || 0) > 0) || size === currentSize;
+}
+
+function getMaxQtyForItem(item) {
+    const variants = getProductVariants(item.id);
+    if (variants.length > 0) {
+        let variant = null;
+        if (item.variantId !== undefined && item.variantId !== null) {
+            variant = variants.find(v => String(v.id) === String(item.variantId));
+        }
+        if (!variant) {
+            variant = variants.find(v => v.color === item.color && v.size === item.size);
+        }
+        return variant ? (variant.stock || 0) : 0;
+    }
+
+    const product = products.find(p => p.id === item.id);
+    return product?.stock ?? item.stock ?? 0;
+}
+
+function clampCartQuantities(items) {
+    let changed = false;
+    const updated = items.map(item => {
+        const maxQty = getMaxQtyForItem(item);
+        if (maxQty > 0 && item.quantity > maxQty) {
+            changed = true;
+            return { ...item, quantity: maxQty };
+        }
+        return item;
+    });
+
+    if (changed) {
+        cart.setItems(updated);
+    }
+
+    return updated;
+}
+
 function attachCartItemListeners() {
     // Quantity controls
     document.querySelectorAll('.qty-minus').forEach(btn => {
@@ -181,7 +253,8 @@ function attachCartItemListeners() {
             const key = btn.dataset.key;
             const item = cart.getItems().find(i => i.key === key);
             if (item) {
-                cart.updateQuantity(key, item.quantity - 1);
+                const maxQty = getMaxQtyForItem(item);
+                cart.updateQuantity(key, item.quantity - 1, maxQty > 0 ? maxQty : 1);
                 renderCart();
             }
         });
@@ -192,7 +265,18 @@ function attachCartItemListeners() {
             const key = btn.dataset.key;
             const item = cart.getItems().find(i => i.key === key);
             if (item) {
-                cart.updateQuantity(key, item.quantity + 1);
+                const maxQty = getMaxQtyForItem(item);
+                if (maxQty <= 0) {
+                    showToast('Нет в наличии для выбранного варианта', 'error');
+                    cart.updateQuantity(key, 1, 1);
+                    renderCart();
+                    return;
+                }
+                if (item.quantity >= maxQty) {
+                    showToast('Доступно меньшее количество', 'info');
+                    return;
+                }
+                cart.updateQuantity(key, item.quantity + 1, maxQty);
                 renderCart();
             }
         });
@@ -201,8 +285,21 @@ function attachCartItemListeners() {
     document.querySelectorAll('.qty-input').forEach(input => {
         input.addEventListener('change', () => {
             const key = input.dataset.key;
+            const item = cart.getItems().find(i => i.key === key);
+            if (!item) return;
+            const maxQty = getMaxQtyForItem(item);
+            if (maxQty <= 0) {
+                showToast('Нет в наличии для выбранного варианта', 'error');
+                cart.updateQuantity(key, 1, 1);
+                renderCart();
+                return;
+            }
             const quantity = parseInt(input.value) || 1;
-            cart.updateQuantity(key, quantity);
+            const clamped = Math.max(1, Math.min(maxQty, quantity));
+            if (quantity > maxQty) {
+                showToast('Доступно меньшее количество', 'info');
+            }
+            cart.updateQuantity(key, clamped, maxQty);
             renderCart();
         });
     });
@@ -212,7 +309,22 @@ function attachCartItemListeners() {
         select.addEventListener('change', () => {
             const key = select.dataset.key;
             const color = select.value;
-            cart.updateItem(key, { color });
+            const item = cart.getItems().find(i => i.key === key);
+            if (!item) return;
+
+            const variants = getProductVariants(item.id);
+            if (variants.length > 0) {
+                const variant = findVariant(item.id, color, item.size);
+                if (!variant || (variant.stock || 0) <= 0) {
+                    showToast('Нет в наличии для выбранного варианта', 'error');
+                    select.value = item.color;
+                    return;
+                }
+                cart.updateItem(key, { color, variantId: variant.id });
+            } else {
+                cart.updateItem(key, { color });
+            }
+
             renderCart();
         });
     });
@@ -221,7 +333,22 @@ function attachCartItemListeners() {
         select.addEventListener('change', () => {
             const key = select.dataset.key;
             const size = select.value;
-            cart.updateItem(key, { size });
+            const item = cart.getItems().find(i => i.key === key);
+            if (!item) return;
+
+            const variants = getProductVariants(item.id);
+            if (variants.length > 0) {
+                const variant = findVariant(item.id, item.color, size);
+                if (!variant || (variant.stock || 0) <= 0) {
+                    showToast('Нет в наличии для выбранного варианта', 'error');
+                    select.value = item.size;
+                    return;
+                }
+                cart.updateItem(key, { size, variantId: variant.id });
+            } else {
+                cart.updateItem(key, { size });
+            }
+
             renderCart();
         });
     });
@@ -515,6 +642,7 @@ function initializeCartPage() {
                 shippingAddress: address,
                 items: itemsWithDiscounts.map(item => ({
                     productId: item.id,
+                    variantId: item.variantId ?? item.variant_id ?? null,
                     title: item.title,
                     sku: item.sku || `SKU-${item.id}`,
                     price: item.price, // Price after discount
