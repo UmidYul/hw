@@ -83,6 +83,20 @@ CREATE TABLE IF NOT EXISTS banners (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Customers
+CREATE TABLE IF NOT EXISTS customers (
+    id SERIAL PRIMARY KEY,
+    name TEXT,
+    email TEXT,
+    phone TEXT UNIQUE NOT NULL,
+    total_orders INTEGER DEFAULT 0,
+    total_spent NUMERIC DEFAULT 0,
+    last_order_date TIMESTAMPTZ,
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Orders
 CREATE TABLE IF NOT EXISTS orders (
     id SERIAL PRIMARY KEY,
@@ -102,20 +116,6 @@ CREATE TABLE IF NOT EXISTS orders (
     payment_status TEXT DEFAULT 'pending',
     notes TEXT,
     promo_code TEXT,
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-);
-
--- Customers
-CREATE TABLE IF NOT EXISTS customers (
-    id SERIAL PRIMARY KEY,
-    name TEXT,
-    email TEXT,
-    phone TEXT UNIQUE NOT NULL,
-    total_orders INTEGER DEFAULT 0,
-    total_spent NUMERIC DEFAULT 0,
-    last_order_date TIMESTAMPTZ,
-    notes TEXT,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
