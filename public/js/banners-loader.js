@@ -6,10 +6,10 @@ let activeBanners = [];
 async function loadBanners() {
     try {
         activeBanners = await API.banners.getActive();
-        console.log('✅ Banners loaded from API:', activeBanners.length);
+        console.log('Banners loaded from API:', activeBanners.length);
         return activeBanners;
     } catch (error) {
-        console.error('❌ Failed to load banners from API:', error);
+        console.error('Failed to load banners from API:', error);
         return [];
     }
 }

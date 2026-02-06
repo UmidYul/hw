@@ -23,7 +23,7 @@
                 <div class="sidebar-nav-section">
                     <div class="sidebar-nav-title">Основное</div>
                     <a href="index.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">📊</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Dashboard</span>
                     </a>
                 </div>
@@ -31,15 +31,15 @@
                 <div class="sidebar-nav-section">
                     <div class="sidebar-nav-title">Каталог</div>
                     <a href="products.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">📦</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Товары</span>
                     </a>
                     <a href="categories.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">🏷️</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Категории</span>
                     </a>
                     <a href="collections.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">📚</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Коллекции</span>
                     </a>
                 </div>
@@ -47,15 +47,15 @@
                 <div class="sidebar-nav-section">
                     <div class="sidebar-nav-title">Маркетинг</div>
                     <a href="discounts.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">💰</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Скидки</span>
                     </a>
                     <a href="promocodes.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">🎫</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Промокоды</span>
                     </a>
                     <a href="banners.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">🖼️</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Баннеры</span>
                     </a>
                 </div>
@@ -63,11 +63,11 @@
                 <div class="sidebar-nav-section">
                     <div class="sidebar-nav-title">Продажи</div>
                     <a href="orders.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">🛍️</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Заказы</span>
                     </a>
                     <a href="customers.html" class="sidebar-nav-link active">
-                        <span class="sidebar-nav-icon">👥</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Клиенты</span>
                     </a>
                 </div>
@@ -75,7 +75,7 @@
                 <div class="sidebar-nav-section">
                     <div class="sidebar-nav-title">Настройки</div>
                     <a href="settings.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">⚙️</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Настройки</span>
                     </a>
                 </div>
@@ -86,10 +86,10 @@
         <main class="main-content">
             <header class="topbar">
                 <div class="topbar-left">
-                    <button class="topbar-btn" id="sidebar-toggle">☰</button>
+                    <button class="topbar-btn" id="sidebar-toggle">Меню</button>
                     <div class="topbar-search">
                         <input type="text" class="topbar-search-input" placeholder="Поиск клиентов..." id="searchInput">
-                        <span class="topbar-search-icon">🔍</span>
+                        <span class="topbar-search-icon">Поиск</span>
                     </div>
                 </div>
                 <div class="topbar-right">
@@ -107,10 +107,7 @@
                         <p class="page-subtitle">База клиентов с историей заказов</p>
                     </div>
                     <div class="page-actions">
-                        <button class="btn btn-secondary" id="exportBtn">
-                            <span>📥</span>
-                            Экспорт CSV
-                        </button>
+                        <button class="btn btn-secondary" id="exportBtn">Экспорт CSV</button>
                         <button class="btn btn-primary" id="addCustomerBtn">
                             <span>+</span>
                             Добавить клиента
@@ -173,7 +170,7 @@
                             <tr>
                                 <td colspan="7" class="empty-state">
                                     <div class="empty-state-content">
-                                        <div class="empty-state-icon">👥</div>
+                                        <div class="empty-state-icon"></div>
                                         <div class="empty-state-title">Клиентов пока нет</div>
                                         <div class="empty-state-text">Клиенты появятся автоматически при оформлении
                                             заказов
@@ -193,7 +190,7 @@
         <div class="modal-content" style="max-width: 800px;">
             <div class="modal-header">
                 <h2 id="modalTitle">Информация о клиенте</h2>
-                <button class="modal-close" id="closeModalBtn">&times;</button>
+                <button class="modal-close" id="closeModalBtn">Закрыть</button>
             </div>
             <div class="modal-body">
                 <div style="display: grid; gap: 24px;">
@@ -394,7 +391,7 @@
                     <tr>
                         <td colspan="7" class="empty-state">
                             <div class="empty-state-content">
-                                <div class="empty-state-icon">👥</div>
+                                <div class="empty-state-icon"></div>
                                 <div class="empty-state-title">
                                     ${searchTerm ? 'Клиенты не найдены' : 'Клиентов пока нет'}
                                 </div>
@@ -441,14 +438,14 @@
                                     onclick="openCustomerModal('${customer.id}')"
                                     title="Подробнее"
                                 >
-                                    👁️
+                                    Подробнее
                                 </button>
                                 <button 
                                     class="btn-icon" 
                                     onclick="deleteCustomer('${customer.id}')"
                                     title="Удалить"
                                 >
-                                    🗑️
+                                    Удалить
                                 </button>
                             </div>
                         </td>

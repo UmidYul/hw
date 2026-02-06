@@ -30,7 +30,7 @@
                 <div class="sidebar-nav-section">
                     <div class="sidebar-nav-title">Основное</div>
                     <a href="index.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">📊</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Dashboard</span>
                     </a>
                 </div>
@@ -38,15 +38,15 @@
                 <div class="sidebar-nav-section">
                     <div class="sidebar-nav-title">Каталог</div>
                     <a href="products.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">📦</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Товары</span>
                     </a>
                     <a href="categories.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">🏷️</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Категории</span>
                     </a>
                     <a href="collections.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">📚</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Коллекции</span>
                     </a>
                 </div>
@@ -54,15 +54,15 @@
                 <div class="sidebar-nav-section">
                     <div class="sidebar-nav-title">Маркетинг</div>
                     <a href="discounts.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">💰</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Скидки</span>
                     </a>
                     <a href="promocodes.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">🎫</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Промокоды</span>
                     </a>
                     <a href="banners.html" class="sidebar-nav-link active">
-                        <span class="sidebar-nav-icon">🖼️</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Баннеры</span>
                     </a>
                 </div>
@@ -70,11 +70,11 @@
                 <div class="sidebar-nav-section">
                     <div class="sidebar-nav-title">Продажи</div>
                     <a href="orders.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">🛍️</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Заказы</span>
                     </a>
                     <a href="customers.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">👥</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Клиенты</span>
                     </a>
                 </div>
@@ -82,7 +82,7 @@
                 <div class="sidebar-nav-section">
                     <div class="sidebar-nav-title">Настройки</div>
                     <a href="settings.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">⚙️</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Настройки</span>
                     </a>
                 </div>
@@ -93,11 +93,11 @@
         <main class="main-content">
             <header class="topbar">
                 <div class="topbar-left">
-                    <button class="topbar-btn" id="sidebar-toggle">☰</button>
+                    <button class="topbar-btn" id="sidebar-toggle">Меню</button>
                     <div class="topbar-search">
                         <input type="text" class="topbar-search-input" placeholder="Поиск... (нажмите /)"
                             id="global-search">
-                        <span class="topbar-search-icon">🔍</span>
+                        <span class="topbar-search-icon">Поиск</span>
                     </div>
                 </div>
                 <div class="topbar-right">
@@ -154,7 +154,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="modal-title" id="modalTitle">Новый баннер</h2>
-                    <button class="modal-close" onclick="closeBannerModal()">✕</button>
+                    <button class="modal-close" onclick="closeBannerModal()">Закрыть</button>
                 </div>
                 <div class="modal-body">
                     <form id="bannerForm">
@@ -334,7 +334,7 @@
                     <tr>
                         <td>
                             <div class="banner-thumb" style="background: ${banner.theme === 'dark' ? '#2D2D2D' : banner.theme === 'accent' ? '#C9A26C' : '#FAFAFA'};">
-                                ${banner.imageUrl ? `<img src="${banner.imageUrl}" alt="${banner.title}">` : '🖼️'}
+                                ${banner.imageUrl ? `<img src="${banner.imageUrl}" alt="${banner.title}">` : 'Нет'}
                             </div>
                         </td>
                         <td>

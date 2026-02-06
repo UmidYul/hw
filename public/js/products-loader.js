@@ -13,7 +13,7 @@ async function loadProducts() {
     try {
         window.products = await API.products.getAll();
         productsLoaded = true;
-        console.log('✅ Products loaded from API:', window.products.length);
+        console.log('Products loaded from API:', window.products.length);
 
         // Apply discounts if discount system is available
         if (window.discountSystem) {
@@ -21,12 +21,12 @@ async function loadProducts() {
                 await window.discountSystem.loadActiveDiscounts();
             }
             window.products = window.discountSystem.applyDiscountsToProducts(window.products);
-            console.log('✅ Discounts applied to products');
+            console.log('Discounts applied to products');
         }
 
         return window.products;
     } catch (error) {
-        console.error('❌ Failed to load products from API, using fallback:', error);
+        console.error('Failed to load products from API, using fallback:', error);
         // Fallback to data.js if API fails
         if (typeof window.productsFromDataJS !== 'undefined') {
             window.products = window.productsFromDataJS;

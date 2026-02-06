@@ -691,10 +691,10 @@ function initializeCartPage() {
             promo.remove(); // Clear applied promo code
             renderCart();
 
-            console.log('✅ Order created successfully:', order);
+            console.log('Order created successfully:', order);
             showToast('Заказ успешно оформлен!', 'success');
         } catch (error) {
-            console.error('❌ Order creation failed:', error);
+            console.error('Order creation failed:', error);
             showToast('Ошибка при оформлении заказа. Попробуйте еще раз.', 'error');
         }
     });

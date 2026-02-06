@@ -10,10 +10,10 @@ const Components = {
         if (!container) return;
 
         const icons = {
-            success: '✓',
-            error: '✕',
-            warning: '⚠',
-            info: 'ℹ'
+            success: 'OK',
+            error: 'ERR',
+            warning: 'WARN',
+            info: 'INFO'
         };
 
         const toast = document.createElement('div');
@@ -24,7 +24,7 @@ const Components = {
                 <div class="toast-title">${title}</div>
                 ${message ? `<div class="toast-message">${message}</div>` : ''}
             </div>
-            <button class="toast-close" onclick="this.parentElement.remove()">✕</button>
+            <button class="toast-close" onclick="this.parentElement.remove()">X</button>
         `;
 
         container.appendChild(toast);
@@ -44,7 +44,7 @@ const Components = {
             <div class="modal-dialog">
                 <div class="modal-header">
                     <h3 class="modal-title">${title}</h3>
-                    <button class="modal-close" onclick="this.closest('.modal').remove()">✕</button>
+                    <button class="modal-close" onclick="this.closest('.modal').remove()">Закрыть</button>
                 </div>
                 <div class="modal-body">
                     <p>${message}</p>
@@ -97,7 +97,7 @@ const Components = {
         if (!data || data.length === 0) {
             return `
                 <div class="empty-state">
-                    <div class="empty-state-icon">📭</div>
+                    <div class="empty-state-icon">Нет</div>
                     <div class="empty-state-title">${emptyMessage}</div>
                 </div>
             `;

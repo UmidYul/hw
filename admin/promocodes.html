@@ -25,7 +25,7 @@
                 <div class="sidebar-nav-section">
                     <div class="sidebar-nav-title">Основное</div>
                     <a href="index.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">📊</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Dashboard</span>
                     </a>
                 </div>
@@ -33,15 +33,15 @@
                 <div class="sidebar-nav-section">
                     <div class="sidebar-nav-title">Каталог</div>
                     <a href="products.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">📦</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Товары</span>
                     </a>
                     <a href="categories.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">🏷️</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Категории</span>
                     </a>
                     <a href="collections.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">📚</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Коллекции</span>
                     </a>
                 </div>
@@ -49,15 +49,15 @@
                 <div class="sidebar-nav-section">
                     <div class="sidebar-nav-title">Маркетинг</div>
                     <a href="discounts.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">💰</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Скидки</span>
                     </a>
                     <a href="promocodes.html" class="sidebar-nav-link active">
-                        <span class="sidebar-nav-icon">🎫</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Промокоды</span>
                     </a>
                     <a href="banners.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">🖼️</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Баннеры</span>
                     </a>
                 </div>
@@ -65,11 +65,11 @@
                 <div class="sidebar-nav-section">
                     <div class="sidebar-nav-title">Продажи</div>
                     <a href="orders.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">🛍️</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Заказы</span>
                     </a>
                     <a href="customers.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">👥</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Клиенты</span>
                     </a>
                 </div>
@@ -77,7 +77,7 @@
                 <div class="sidebar-nav-section">
                     <div class="sidebar-nav-title">Настройки</div>
                     <a href="settings.html" class="sidebar-nav-link">
-                        <span class="sidebar-nav-icon">⚙️</span>
+                        <span class="sidebar-nav-icon"></span>
                         <span>Настройки</span>
                     </a>
                 </div>
@@ -87,7 +87,7 @@
         <main class="main-content">
             <header class="topbar">
                 <div class="topbar-left">
-                    <button class="topbar-btn" id="sidebar-toggle">☰</button>
+                    <button class="topbar-btn" id="sidebar-toggle">Меню</button>
                 </div>
                 <div class="topbar-right">
                     <div class="topbar-profile">
@@ -104,7 +104,7 @@
                         <p class="page-subtitle">Управление промокодами</p>
                     </div>
                     <div class="page-actions">
-                        <button class="btn btn-primary" onclick="openPromoModal()">➕ Создать промокод</button>
+                        <button class="btn btn-primary" onclick="openPromoModal()">Создать промокод</button>
                     </div>
                 </div>
 
@@ -126,7 +126,7 @@
         <div class="modal-dialog modal-dialog-lg">
             <div class="modal-header">
                 <h3 class="modal-title" id="modal-title">Новый промокод</h3>
-                <button class="modal-close" onclick="closePromoModal()">✕</button>
+                <button class="modal-close" onclick="closePromoModal()">Закрыть</button>
             </div>
             <div class="modal-body">
                 <form id="promo-form">
@@ -135,8 +135,8 @@
                             <label class="form-label form-label-required">Код</label>
                             <div class="flex gap-md">
                                 <input type="text" class="form-input" name="code" style="flex:1" required>
-                                <button type="button" class="btn btn-secondary" onclick="generateCode()">🎲
-                                    Генерировать</button>
+                                <button type="button" class="btn btn-secondary"
+                                    onclick="generateCode()">Генерировать</button>
                             </div>
                         </div>
 
@@ -211,7 +211,7 @@
                 const container = document.getElementById('promos-container');
 
                 if (promos.length === 0) {
-                    container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🎫</div><div class="empty-state-title">Промокодов нет</div></div>';
+                    container.innerHTML = '<div class="empty-state"><div class="empty-state-icon"></div><div class="empty-state-title">Промокодов нет</div></div>';
                     return;
                 }
 
@@ -256,9 +256,9 @@
                     <td style="min-width: 180px;">${usedText}</td>
                     <td>${promo.is_active ? Components.renderBadge('Активен', 'success') : Components.renderBadge('Неактивен', 'default')}</td>
                     <td>
-                        <button class="btn btn-sm btn-ghost" onclick="editPromo('${promo.id}')">✏️</button>
-                        <button class="btn btn-sm btn-ghost" onclick="viewStats('${promo.id}')">📊</button>
-                        <button class="btn btn-sm btn-ghost" onclick="deletePromo('${promo.id}')">🗑️</button>
+                        <button class="btn btn-sm btn-ghost" onclick="editPromo('${promo.id}')">Редактировать</button>
+                        <button class="btn btn-sm btn-ghost" onclick="viewStats('${promo.id}')">Статистика</button>
+                        <button class="btn btn-sm btn-ghost" onclick="deletePromo('${promo.id}')">Удалить</button>
                     </td>
                 </tr>`;
                 });
@@ -267,7 +267,7 @@
                 container.innerHTML = html;
             } catch (error) {
                 console.error('Failed to load promocodes:', error);
-                document.getElementById('promos-container').innerHTML = '<div class="empty-state"><div class="empty-state-icon">❌</div><div class="empty-state-title">Не удалось загрузить промокоды</div></div>';
+                document.getElementById('promos-container').innerHTML = '<div class="empty-state"><div class="empty-state-icon">Ошибка</div><div class="empty-state-title">Не удалось загрузить промокоды</div></div>';
             }
         }
 
@@ -436,7 +436,7 @@
                     <div class="modal-dialog" style="max-width: 700px;">
                         <div class="modal-header">
                             <h3 class="modal-title">Статистика промокода: ${stats.code}</h3>
-                            <button class="modal-close" onclick="this.closest('.modal').remove()">✕</button>
+                            <button class="modal-close" onclick="this.closest('.modal').remove()">Закрыть</button>
                         </div>
                         <div class="modal-body">
                             <div class="grid grid-cols-3" style="gap: 16px; margin-bottom: 24px;">
