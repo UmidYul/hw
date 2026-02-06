@@ -181,7 +181,7 @@
                                 <label for="ruleType">Тип подборки *</label>
                                 <select id="ruleType" name="ruleType" onchange="toggleRuleType()">
                                     <option value="manual">Ручной выбор товаров</option>
-                                    <option value="rule">Автоматически по правилам</option>
+                                    <option value="auto">Автоматически по правилам</option>
                                 </select>
                             </div>
 
@@ -291,7 +291,11 @@
                 }
 
                 tbody.innerHTML = collections.map(collection => {
-                    const productIds = Array.isArray(collection.product_ids) ? collection.product_ids : (collection.product_ids ? JSON.parse(collection.product_ids) : []);
+                    const productIds = Array.isArray(collection.productIds)
+                        ? collection.productIds
+                        : (Array.isArray(collection.product_ids)
+                            ? collection.product_ids
+                            : (collection.product_ids ? JSON.parse(collection.product_ids) : []));
                     const conditions = collection.conditions ? (typeof collection.conditions === 'string' ? JSON.parse(collection.conditions) : collection.conditions) : null;
                     const isVisible = collection.is_visible !== undefined ? collection.is_visible : (collection.isVisible !== undefined ? collection.isVisible : 1);
                     const statusBadge = isVisible
@@ -359,7 +363,10 @@
                     document.getElementById('name').value = collection.name;
                     document.getElementById('slug').value = collection.slug;
                     document.getElementById('description').value = collection.description || '';
-                    const ruleType = collection.type || collection.collection_type || collection.ruleType || 'manual';
+                    let ruleType = collection.type || collection.collection_type || collection.ruleType || 'manual';
+                    if (ruleType === 'rule') {
+                        ruleType = 'auto';
+                    }
                     document.getElementById('ruleType').value = ruleType;
                     const isVisible = collection.is_visible !== undefined ? collection.is_visible : (collection.isVisible !== undefined ? collection.isVisible : 1);
                     document.getElementById('isActive').checked = Boolean(isVisible);
@@ -368,9 +375,9 @@
                         const conditions = collection.conditions ? (typeof collection.conditions === 'string' ? JSON.parse(collection.conditions) : collection.conditions) : {};
                         document.getElementById('ruleCategory').value = conditions.category || conditions.categoryId || '';
                         document.getElementById('ruleTags').value = conditions.tags ? conditions.tags.join(', ') : '';
-                        document.getElementById('ruleMinPrice').value = collection.rule.minPrice || '';
-                        document.getElementById('ruleMaxPrice').value = collection.rule.maxPrice || '';
-                        document.getElementById('ruleLimit').value = collection.rule.limit || 20;
+                        document.getElementById('ruleMinPrice').value = conditions.min_price || conditions.minPrice || '';
+                        document.getElementById('ruleMaxPrice').value = conditions.max_price || conditions.maxPrice || '';
+                        document.getElementById('ruleLimit').value = conditions.limit || 20;
                     }
                 } else {
                     title.textContent = 'Новая коллекция';
@@ -566,7 +573,10 @@
 
             if (ruleType === 'manual') {
                 const checkboxes = document.querySelectorAll('#productSelector input[type="checkbox"]:checked');
-                data.productIds = Array.from(checkboxes).map(cb => cb.value);
+                data.productIds = Array.from(checkboxes)
+                    .map(cb => Number(cb.value))
+                    .filter(id => Number.isFinite(id));
+                data.conditions = null;
             } else {
                 const tags = document.getElementById('ruleTags').value.split(',').map(t => t.trim().toLowerCase()).filter(t => t);
                 data.conditions = {
@@ -576,6 +586,7 @@
                     max_price: parseFloat(document.getElementById('ruleMaxPrice').value) || null,
                     limit: parseInt(document.getElementById('ruleLimit').value) || 20
                 };
+                data.productIds = [];
             }
 
             try {
