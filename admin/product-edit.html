@@ -199,26 +199,9 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label class="form-label">Цвета (через запятую)</label>
-                                    <input type="text" class="form-input" name="colors"
-                                        placeholder="Black, White, Grey">
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">Доступные цвета</label>
-                                    <div class="color-options" id="colorPaletteSelect"></div>
-                                    <div class="form-hint">Выберите из палитры или введите свои значения.</div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">Размеры (через запятую)</label>
-                                    <input type="text" class="form-input" name="sizes" placeholder="XS, S, M, L, XL">
-                                </div>
-
-                                <div class="form-group">
                                     <label class="form-label">Остатки по вариантам</label>
                                     <div id="variants-matrix" class="variants-matrix"></div>
-                                    <div class="form-hint">Укажите остаток для каждой комбинации цвета и размера.</div>
+                                    <div class="form-hint">Цвета и размеры берутся из настроек магазина.</div>
                                 </div>
                             </div>
                         </div>
@@ -290,6 +273,7 @@
         let allCategories = [];
         let productImages = [];
         let paletteColors = [];
+        let settingsSizes = [];
 
         async function loadCategories() {
             try {
@@ -442,13 +426,6 @@
             draggedIndex = null;
         }
 
-        function parseListInput(value) {
-            return value
-                .split(',')
-                .map(item => item.trim())
-                .filter(item => item.length > 0);
-        }
-
         const defaultPalette = [
             { name: 'Black', hex: '#2D2D2D' },
             { name: 'White', hex: '#FFFFFF' },
@@ -457,6 +434,8 @@
             { name: 'Grey', hex: '#8B8B8B' },
             { name: 'Brown', hex: '#6B4423' }
         ];
+
+        const defaultSizes = ['XS', 'S', 'M', 'L', 'XL'];
 
         function normalizePalette(value) {
             if (!value) return [...defaultPalette];
@@ -476,62 +455,29 @@
             }
         }
 
-        async function loadColorPalette() {
+        function normalizeSizesList(value) {
+            if (!value) return [...defaultSizes];
+            try {
+                const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+                if (!Array.isArray(parsed)) return [...defaultSizes];
+                const cleaned = parsed
+                    .map(item => String(item).trim())
+                    .filter(item => item.length > 0);
+                return cleaned.length > 0 ? cleaned : [...defaultSizes];
+            } catch (error) {
+                return [...defaultSizes];
+            }
+        }
+
+        async function loadVariantOptions() {
             try {
                 const settings = await API.settings.get();
                 paletteColors = normalizePalette(settings.color_palette);
+                settingsSizes = normalizeSizesList(settings.sizes_list || settings.sizesList);
             } catch (error) {
                 paletteColors = [...defaultPalette];
+                settingsSizes = [...defaultSizes];
             }
-
-            renderColorPaletteOptions();
-        }
-
-        function renderColorPaletteOptions() {
-            const container = document.getElementById('colorPaletteSelect');
-            if (!container) return;
-
-            container.innerHTML = paletteColors.map(color => {
-                const hex = color.hex || '#CCCCCC';
-                return `
-                    <label class="form-checkbox color-option">
-                        <input type="checkbox" value="${color.name}">
-                        <span><span class="color-dot" style="background: ${hex}"></span>${color.name}</span>
-                    </label>
-                `;
-            }).join('');
-
-            container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-                cb.addEventListener('change', () => {
-                    syncColorsInputFromPalette();
-                });
-            });
-
-            syncPaletteFromInput();
-        }
-
-        function syncPaletteFromInput() {
-            const colorsInput = document.querySelector('[name="colors"]');
-            if (!colorsInput) return;
-            const current = parseListInput(colorsInput.value);
-            document.querySelectorAll('#colorPaletteSelect input[type="checkbox"]').forEach(cb => {
-                cb.checked = current.includes(cb.value);
-            });
-        }
-
-        function syncColorsInputFromPalette() {
-            const colorsInput = document.querySelector('[name="colors"]');
-            if (!colorsInput) return;
-
-            const selected = Array.from(document.querySelectorAll('#colorPaletteSelect input[type="checkbox"]'))
-                .filter(cb => cb.checked)
-                .map(cb => cb.value);
-
-            const paletteNames = paletteColors.map(color => color.name);
-            const manual = parseListInput(colorsInput.value).filter(value => !paletteNames.includes(value));
-            const merged = [...manual, ...selected];
-
-            colorsInput.value = merged.join(', ');
         }
 
         function getVariantsFromMatrix() {
@@ -581,21 +527,10 @@
             container.innerHTML = html;
         }
 
-        function initializeVariantsMatrix() {
-            const colorsInput = document.querySelector('[name="colors"]');
-            const sizesInput = document.querySelector('[name="sizes"]');
-
-            const updateMatrix = () => {
-                const colors = parseListInput(colorsInput.value);
-                const sizes = parseListInput(sizesInput.value);
-                const existingVariants = getVariantsFromMatrix();
-                renderVariantsMatrix(colors, sizes, existingVariants);
-            };
-
-            colorsInput.addEventListener('input', updateMatrix);
-            sizesInput.addEventListener('input', updateMatrix);
-
-            updateMatrix();
+        function initializeVariantsMatrix(variants = []) {
+            const colors = paletteColors.map(color => color.name);
+            const sizes = [...settingsSizes];
+            renderVariantsMatrix(colors, sizes, variants);
         }
 
         // Allow Enter key to add image
@@ -641,6 +576,9 @@
             const images = Array.isArray(product.images) ? product.images : (product.images ? JSON.parse(product.images) : []);
             const colors = Array.isArray(product.colors) ? product.colors : (product.colors ? JSON.parse(product.colors) : []);
             const sizes = Array.isArray(product.sizes) ? product.sizes : (product.sizes ? JSON.parse(product.sizes) : []);
+            const settingsColors = paletteColors.map(color => color.name);
+            const mergedColors = Array.from(new Set([...settingsColors, ...colors]));
+            const mergedSizes = Array.from(new Set([...settingsSizes, ...sizes]));
 
             // Load images
             productImages = images.length > 0 ? images : [];
@@ -659,17 +597,7 @@
             form.querySelector('[name="material"]').value = product.material || '';
             form.querySelector('[name="care"]').value = product.care || '';
 
-            if (colors && colors.length > 0) {
-                form.querySelector('[name="colors"]').value = colors.join(', ');
-            }
-            if (sizes && sizes.length > 0) {
-                form.querySelector('[name="sizes"]').value = product.sizes.join(', ');
-            }
-
-            renderVariantsMatrix(colors, sizes, product.variants || []);
-            initializeVariantsMatrix();
-
-            syncPaletteFromInput();
+            renderVariantsMatrix(mergedColors, mergedSizes, product.variants || []);
 
             // Tags
             if (product.tags) {
@@ -705,13 +633,9 @@
             const tagCheckboxes = form.querySelectorAll('[name="tags"]:checked');
             data.tags = Array.from(tagCheckboxes).map(cb => cb.value);
 
-            // Colors
-            const colorsInput = form.querySelector('[name="colors"]').value;
-            data.colors = colorsInput ? colorsInput.split(',').map(c => c.trim()) : [];
-
-            // Sizes
-            const sizesInput = form.querySelector('[name="sizes"]').value;
-            data.sizes = sizesInput ? sizesInput.split(',').map(s => s.trim()) : [];
+            // Colors and sizes from settings
+            data.colors = paletteColors.map(color => color.name);
+            data.sizes = [...settingsSizes];
 
             // Variants
             const variants = getVariantsFromMatrix();
@@ -802,22 +726,13 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
             await loadCategories();
-            await loadColorPalette();
+            await loadVariantOptions();
             await loadProduct();
             if (!editingId) {
                 initializeVariantsMatrix();
-            }
-
-            const colorsInput = document.querySelector('[name="colors"]');
-            if (colorsInput) {
-                colorsInput.addEventListener('input', syncPaletteFromInput);
             }
         });
     </script>
 </body>
 
 </html>
-
-
-
-

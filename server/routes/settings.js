@@ -18,6 +18,7 @@ const initSettingsTable = async () => {
             social_facebook TEXT,
             social_telegram TEXT,
             color_palette JSONB,
+            sizes_list JSONB,
             currency TEXT DEFAULT 'UZS',
             currency_symbol TEXT DEFAULT 'Сумм',
             vat_rate REAL DEFAULT 0,
@@ -47,6 +48,7 @@ const initSettingsTable = async () => {
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS social_facebook TEXT');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS social_telegram TEXT');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS color_palette JSONB');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS sizes_list JSONB');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS enable_taxes INTEGER DEFAULT 0');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS return_policy TEXT');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS privacy_policy TEXT');
@@ -86,6 +88,7 @@ router.put('/', requireAdmin, async (req, res) => {
             socialFacebook,
             socialTelegram,
             colorPalette,
+            sizesList,
             currency,
             currencySymbol,
             freeShippingThreshold,
@@ -114,6 +117,7 @@ router.put('/', requireAdmin, async (req, res) => {
                 social_facebook = ?,
                 social_telegram = ?,
                 color_palette = ?,
+                sizes_list = ?,
                 currency = ?,
                 currency_symbol = ?,
                 shipping_cost = ?,
@@ -134,6 +138,7 @@ router.put('/', requireAdmin, async (req, res) => {
             socialFacebook || null,
             socialTelegram || null,
             colorPalette || null,
+            sizesList || null,
             currency || 'UZS',
             currencySymbol || 'Сумм',
             flatShippingRate || 0,

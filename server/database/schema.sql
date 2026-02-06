@@ -188,6 +188,7 @@ CREATE TABLE IF NOT EXISTS settings (
     social_facebook TEXT,
     social_telegram TEXT,
     color_palette JSONB,
+    sizes_list JSONB,
     currency TEXT DEFAULT 'UZS',
     currency_symbol TEXT DEFAULT 'Сумм',
     vat_rate NUMERIC DEFAULT 0,

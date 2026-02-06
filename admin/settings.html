@@ -193,6 +193,19 @@
 
                     <div class="card mt-lg">
                         <div class="card-header">
+                            <h3 class="card-title">Размеры</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label">Список размеров (через запятую)</label>
+                                <input type="text" class="form-input" name="sizesList" placeholder="XS, S, M, L, XL">
+                                <div class="form-hint">Используется в таблице остатков по вариантам.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-lg">
+                        <div class="card-header">
                             <h3 class="card-title">Доставка</h3>
                         </div>
                         <div class="card-body">
@@ -277,6 +290,7 @@
                     'social_facebook': 'socialFacebook',
                     'social_telegram': 'socialTelegram',
                     'color_palette': 'colorPalette',
+                    'sizes_list': 'sizesList',
                     'free_shipping_threshold': 'freeShippingThreshold',
                     'shipping_cost': 'flatShippingRate',
                     'enable_taxes': 'enableTaxes',
@@ -297,6 +311,11 @@
                     }
                 });
 
+                const sizesInput = form.querySelector('[name="sizesList"]');
+                if (sizesInput) {
+                    sizesInput.value = normalizeSizesList(settings.sizes_list).join(', ');
+                }
+
                 loadColorPalette(settings.color_palette);
             } catch (error) {
                 console.error('Failed to load settings:', error);
@@ -313,6 +332,8 @@
             { name: 'Grey', hex: '#8B8B8B' },
             { name: 'Brown', hex: '#6B4423' }
         ];
+
+        const defaultSizes = ['XS', 'S', 'M', 'L', 'XL'];
 
         let paletteState = [...defaultPalette];
 
@@ -332,6 +353,27 @@
             } catch (error) {
                 return [...defaultPalette];
             }
+        }
+
+        function normalizeSizesList(value) {
+            if (!value) return [...defaultSizes];
+            try {
+                const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+                if (!Array.isArray(parsed)) return [...defaultSizes];
+                const cleaned = parsed
+                    .map(item => String(item).trim())
+                    .filter(item => item.length > 0);
+                return cleaned.length > 0 ? cleaned : [...defaultSizes];
+            } catch (error) {
+                return [...defaultSizes];
+            }
+        }
+
+        function parseSizesInput(value) {
+            return value
+                .split(',')
+                .map(item => item.trim())
+                .filter(item => item.length > 0);
         }
 
         function updatePaletteValue() {
@@ -408,6 +450,7 @@
 
                 updatePaletteValue();
                 settings.colorPalette = document.getElementById('colorPaletteValue')?.value || '';
+                settings.sizesList = JSON.stringify(parseSizesInput(settings.sizesList || ''));
 
                 await API.settings.update(settings);
                 Components.showToast('Успешно', 'Настройки сохранены', 'success');
@@ -467,7 +510,3 @@
 </body>
 
 </html>
-
-
-
-
