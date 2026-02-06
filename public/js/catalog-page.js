@@ -4,6 +4,7 @@ let filteredProducts = [];
 let currentPage = 1;
 const itemsPerPage = 12;
 let currentGridCols = 3;
+const BASE_URL = 'https://higherwaist.uz';
 
 // Filters state
 const filters = {
@@ -18,6 +19,43 @@ const filters = {
     search: '',
     sort: 'default'
 };
+
+function setMetaTag(name, content, isProperty = false) {
+    const selector = isProperty ? `meta[property="${name}"]` : `meta[name="${name}"]`;
+    let element = document.querySelector(selector);
+    if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute(isProperty ? 'property' : 'name', name);
+        document.head.appendChild(element);
+    }
+    element.setAttribute('content', content);
+}
+
+function setCanonical(url) {
+    let link = document.querySelector('link[rel="canonical"]');
+    if (!link) {
+        link = document.createElement('link');
+        link.rel = 'canonical';
+        document.head.appendChild(link);
+    }
+    link.href = url;
+}
+
+function updateCatalogSeo(titleSuffix, description) {
+    const title = titleSuffix ? `${titleSuffix} · AURA` : 'Каталог · AURA';
+    const desc = description || 'Каталог AURA: одежда и аксессуары, подборки и сезонные предложения.';
+    const canonicalUrl = `${BASE_URL}${window.location.pathname}${window.location.search}`;
+
+    document.title = title;
+    setMetaTag('description', desc);
+    setMetaTag('og:site_name', 'AURA', true);
+    setMetaTag('og:title', title, true);
+    setMetaTag('og:description', desc, true);
+    setMetaTag('og:type', 'website', true);
+    setMetaTag('og:url', canonicalUrl, true);
+    setMetaTag('og:image', `${BASE_URL}/images/logo.PNG`, true);
+    setCanonical(canonicalUrl);
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Load discounts first, then products with discounts applied
@@ -135,22 +173,33 @@ function parseURLFilters() {
     const tag = getUrlParam('tag');
     const search = getUrlParam('search');
 
+    let seoTitle = '';
+    let seoDescription = '';
+
     if (category && category !== 'all') {
         filters.categories = [category];
-        document.getElementById('catalogTitle').textContent = getCategoryTitle(category);
-        document.getElementById('breadcrumbCurrent').textContent = getCategoryTitle(category);
+        const categoryTitle = getCategoryTitle(category);
+        document.getElementById('catalogTitle').textContent = categoryTitle;
+        document.getElementById('breadcrumbCurrent').textContent = categoryTitle;
+        seoTitle = categoryTitle;
+        seoDescription = `Каталог AURA: ${categoryTitle}.`;
     }
 
     if (tag) {
         filters.tags = [tag];
-        document.getElementById('catalogTitle').textContent = getTagTitle(tag);
-        document.getElementById('breadcrumbCurrent').textContent = getTagTitle(tag);
+        const tagTitle = getTagTitle(tag);
+        document.getElementById('catalogTitle').textContent = tagTitle;
+        document.getElementById('breadcrumbCurrent').textContent = tagTitle;
+        seoTitle = tagTitle;
+        seoDescription = `Каталог AURA: ${tagTitle}.`;
     }
 
     if (search) {
         filters.search = search.toLowerCase();
         document.getElementById('catalogTitle').textContent = `Поиск: "${search}"`;
         document.getElementById('breadcrumbCurrent').textContent = 'Результаты поиска';
+        seoTitle = `Поиск: ${search}`;
+        seoDescription = `Результаты поиска по запросу "${search}" в каталоге AURA.`;
 
         // Update search input if it exists
         const searchInput = document.getElementById('catalogSearch');
@@ -158,6 +207,8 @@ function parseURLFilters() {
             searchInput.value = search;
         }
     }
+
+    updateCatalogSeo(seoTitle, seoDescription);
 }
 
 function getCategoryTitle(category) {

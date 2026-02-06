@@ -5,6 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Коллекция · AURA</title>
+    <meta name="description" content="Коллекции AURA — подборки товаров по сезонам и стилям.">
+    <meta property="og:site_name" content="AURA">
+    <meta property="og:title" content="Коллекция · AURA">
+    <meta property="og:description" content="Коллекции AURA — подборки товаров по сезонам и стилям.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://higherwaist.uz/collection">
+    <meta property="og:image" content="https://higherwaist.uz/images/logo.PNG">
+    <link rel="canonical" href="https://higherwaist.uz/collection">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -189,6 +197,45 @@
         const loadingState = document.getElementById('loadingState');
         const errorState = document.getElementById('errorState');
         const emptyState = document.getElementById('emptyState');
+        const BASE_URL = 'https://higherwaist.uz';
+
+        function setMetaTag(name, content, isProperty = false) {
+            const selector = isProperty ? `meta[property="${name}"]` : `meta[name="${name}"]`;
+            let element = document.querySelector(selector);
+            if (!element) {
+                element = document.createElement('meta');
+                element.setAttribute(isProperty ? 'property' : 'name', name);
+                document.head.appendChild(element);
+            }
+            element.setAttribute('content', content);
+        }
+
+        function setCanonical(url) {
+            let link = document.querySelector('link[rel="canonical"]');
+            if (!link) {
+                link = document.createElement('link');
+                link.rel = 'canonical';
+                document.head.appendChild(link);
+            }
+            link.href = url;
+        }
+
+        function updateCollectionSeo(collection) {
+            const name = collection.name || collection.title || 'Коллекция';
+            const description = (collection.description || 'Коллекции AURA.').replace(/<[^>]*>/g, '').trim();
+            const shortDescription = description.length > 160 ? `${description.slice(0, 157)}...` : description;
+            const canonicalUrl = `${BASE_URL}/collection?slug=${encodeURIComponent(collection.slug || '')}`;
+
+            document.title = `${name} · AURA`;
+            setMetaTag('description', shortDescription);
+            setMetaTag('og:site_name', 'AURA', true);
+            setMetaTag('og:title', `${name} · AURA`, true);
+            setMetaTag('og:description', shortDescription, true);
+            setMetaTag('og:type', 'website', true);
+            setMetaTag('og:url', canonicalUrl, true);
+            setMetaTag('og:image', `${BASE_URL}/images/logo.PNG`, true);
+            setCanonical(canonicalUrl);
+        }
 
         async function loadNavbarCategories() {
             const navList = document.querySelector('#mainNav .nav-list');
@@ -254,9 +301,10 @@
 
                 // Update page title and meta
                 const collectionName = currentCollection.name || currentCollection.title || 'Коллекция';
-                document.title = `${collectionName} · AURA`;
                 collectionTitle.textContent = collectionName;
                 breadcrumbCurrent.textContent = collectionName;
+
+                updateCollectionSeo(currentCollection);
 
                 // Show description if available
                 if (currentCollection.description) {

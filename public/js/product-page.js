@@ -6,6 +6,78 @@ let selectedSize = null;
 let quantity = 1;
 let currentLightboxIndex = 0;
 let productImages = [];
+const BASE_URL = 'https://higherwaist.uz';
+
+function setMetaTag(name, content, isProperty = false) {
+    const selector = isProperty ? `meta[property="${name}"]` : `meta[name="${name}"]`;
+    let element = document.querySelector(selector);
+    if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute(isProperty ? 'property' : 'name', name);
+        document.head.appendChild(element);
+    }
+    element.setAttribute('content', content);
+}
+
+function setCanonical(url) {
+    let link = document.querySelector('link[rel="canonical"]');
+    if (!link) {
+        link = document.createElement('link');
+        link.rel = 'canonical';
+        document.head.appendChild(link);
+    }
+    link.href = url;
+}
+
+function toAbsoluteUrl(url) {
+    if (!url) return `${BASE_URL}/images/logo.PNG`;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    if (url.startsWith('/')) return `${BASE_URL}${url}`;
+    return `${BASE_URL}/${url}`;
+}
+
+function updateProductSeo(product, finalPrice, inStock) {
+    const description = (product.description || 'Товар AURA.').replace(/<[^>]*>/g, '').trim();
+    const shortDescription = description.length > 160 ? `${description.slice(0, 157)}...` : description;
+    const rawImageUrl = Array.isArray(product.images) ? product.images[0] : (product.images || product.image || `${BASE_URL}/images/logo.PNG`);
+    const imageUrl = toAbsoluteUrl(rawImageUrl);
+    const canonicalUrl = `${BASE_URL}/product?id=${product.id}`;
+
+    document.title = `${product.title} · AURA`;
+    setMetaTag('description', shortDescription);
+    setMetaTag('og:site_name', 'AURA', true);
+    setMetaTag('og:title', `${product.title} · AURA`, true);
+    setMetaTag('og:description', shortDescription, true);
+    setMetaTag('og:type', 'product', true);
+    setMetaTag('og:url', canonicalUrl, true);
+    setMetaTag('og:image', imageUrl, true);
+    setCanonical(canonicalUrl);
+
+    const schema = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: product.title,
+        image: imageUrl ? [imageUrl] : [],
+        description: shortDescription,
+        sku: product.sku || `SKU-${product.id}`,
+        offers: {
+            "@type": "Offer",
+            priceCurrency: "UZS",
+            price: String(finalPrice),
+            availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            url: canonicalUrl
+        }
+    };
+
+    let schemaEl = document.getElementById('product-schema');
+    if (!schemaEl) {
+        schemaEl = document.createElement('script');
+        schemaEl.type = 'application/ld+json';
+        schemaEl.id = 'product-schema';
+        document.head.appendChild(schemaEl);
+    }
+    schemaEl.textContent = JSON.stringify(schema);
+}
 
 function getVariants(product) {
     return Array.isArray(product?.variants) ? product.variants : [];
@@ -64,9 +136,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 function renderProduct() {
     const product = currentProduct;
 
-    // Update page title
-    document.title = `${product.title} · AURA`;
-
     // Update breadcrumbs
     document.getElementById('productCategoryLink').href = `catalog.html?category=${product.category}`;
     document.getElementById('productCategoryLink').textContent = getCategoryTitle(product.category);
@@ -94,6 +163,8 @@ function renderProduct() {
         ? variants.reduce((sum, v) => sum + (v.stock || 0), 0)
         : (product.stock || 0);
     const isOutOfStock = stockCount === 0;
+
+    updateProductSeo(product, finalPrice, !isOutOfStock);
 
     let tagsHtml = '';
     if (isOutOfStock) {

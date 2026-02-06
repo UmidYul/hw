@@ -99,6 +99,38 @@ async function applyDiscountsToCartItems(items) {
     });
 }
 
+async function calculateCartTotals(items) {
+    const itemsWithDiscounts = await applyDiscountsToCartItems(items);
+    const subtotalBeforeDiscounts = itemsWithDiscounts.reduce((sum, item) => {
+        return sum + ((item.originalPrice ?? item.price) * item.quantity);
+    }, 0);
+    const subtotalAfterProductDiscounts = itemsWithDiscounts.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const productDiscountSavings = Math.max(0, subtotalBeforeDiscounts - subtotalAfterProductDiscounts);
+
+    const promoItems = itemsWithDiscounts.map(item => ({
+        ...item,
+        oldPrice: item.originalPrice ?? item.oldPrice ?? item.old_price
+    }));
+    const promoDiscount = promo.calculate(subtotalAfterProductDiscounts, promoItems);
+
+    const subtotalAfterPromo = subtotalAfterProductDiscounts - promoDiscount;
+    const shipping = subtotalAfterProductDiscounts >= cartSettings.freeShippingThreshold ? 0 : cartSettings.shippingCost;
+    const vat = cartSettings.vatRate > 0 ? Math.round(subtotalAfterPromo * cartSettings.vatRate / 100) : 0;
+    const total = subtotalAfterPromo + shipping + vat;
+
+    return {
+        itemsWithDiscounts,
+        subtotalBeforeDiscounts,
+        subtotalAfterProductDiscounts,
+        productDiscountSavings,
+        promoDiscount,
+        subtotalAfterPromo,
+        shipping,
+        vat,
+        total
+    };
+}
+
 function renderCartItem(item) {
     const hasDiscount = item.appliedDiscount && item.originalPrice && item.originalPrice > item.price;
     const variants = getProductVariants(item.id);
@@ -367,53 +399,30 @@ function attachCartItemListeners() {
 async function updateCartSummary() {
     const items = cart.getItems();
 
-    // Apply discounts to get actual prices
-    const itemsWithDiscounts = await applyDiscountsToCartItems(items);
-
-    // Calculate subtotal WITHOUT discounts (original prices)
-    const subtotalWithoutDiscounts = itemsWithDiscounts.reduce((sum, item) => {
-        return sum + ((item.originalPrice || item.price) * item.quantity);
-    }, 0);
-
-    // Calculate subtotal WITH discounts applied
-    const subtotalWithDiscounts = itemsWithDiscounts.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-    // Calculate total discount savings (from discount system)
-    const totalDiscountSavings = itemsWithDiscounts.reduce((sum, item) => {
-        if (item.appliedDiscount && item.originalPrice) {
-            return sum + ((item.originalPrice - item.price) * item.quantity);
-        }
-        return sum;
-    }, 0);
-
-    const appliedPromo = promo.getApplied();
-    // Calculate promo discount based on subtotal AFTER product discounts
-    const promoDiscount = promo.calculate(subtotalWithDiscounts, items);
-
-    // Calculate delivery using settings
-    const delivery = subtotalWithDiscounts >= cartSettings.freeShippingThreshold ? 0 : cartSettings.shippingCost;
-
-    // Calculate VAT if enabled
-    const subtotalAfterPromo = subtotalWithDiscounts - promoDiscount;
-    const vat = cartSettings.vatRate > 0 ? Math.round(subtotalAfterPromo * cartSettings.vatRate / 100) : 0;
-
-    const total = subtotalAfterPromo + delivery + vat;
+    const {
+        subtotalBeforeDiscounts,
+        productDiscountSavings,
+        promoDiscount,
+        shipping,
+        vat,
+        total
+    } = await calculateCartTotals(items);
 
     // Update UI
     document.getElementById('summaryItemCount').textContent = cart.getCount();
-    document.getElementById('summarySubtotal').textContent = formatPrice(subtotalWithoutDiscounts);
+    document.getElementById('summarySubtotal').textContent = formatPrice(subtotalBeforeDiscounts);
 
     // Show discount savings if any
     const discountRow = document.getElementById('discountRow');
-    const totalDiscount = totalDiscountSavings + promoDiscount;
+    const totalDiscount = productDiscountSavings + promoDiscount;
 
     if (totalDiscount > 0) {
         discountRow.style.display = 'flex';
         let discountText = '';
-        if (totalDiscountSavings > 0 && promoDiscount > 0) {
-            discountText = `-${formatPrice(totalDiscountSavings)} (скидки) + -${formatPrice(promoDiscount)} (промокод)`;
-        } else if (totalDiscountSavings > 0) {
-            discountText = `-${formatPrice(totalDiscountSavings)}`;
+        if (productDiscountSavings > 0 && promoDiscount > 0) {
+            discountText = `-${formatPrice(productDiscountSavings)} (скидки) + -${formatPrice(promoDiscount)} (промокод)`;
+        } else if (productDiscountSavings > 0) {
+            discountText = `-${formatPrice(productDiscountSavings)}`;
         } else if (promoDiscount > 0) {
             discountText = `-${formatPrice(promoDiscount)}`;
         }
@@ -423,7 +432,7 @@ async function updateCartSummary() {
     }
 
     // Delivery
-    const deliveryText = delivery === 0 ? 'Бесплатно' : formatPrice(delivery);
+    const deliveryText = shipping === 0 ? 'Бесплатно' : formatPrice(shipping);
     document.getElementById('summaryDelivery').textContent = deliveryText;
 
     // VAT
@@ -521,21 +530,14 @@ function initializeCartPage() {
         checkoutBtn.addEventListener('click', async () => {
             const items = cart.getItems();
 
-            // Apply discounts to get actual prices
-            const itemsWithDiscounts = await applyDiscountsToCartItems(items);
-
-            // Calculate subtotal with discounts
-            const subtotal = itemsWithDiscounts.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-            const appliedPromo = promo.getApplied();
-            const discount = promo.calculate(subtotal, items);
-            const shipping = subtotal >= cartSettings.freeShippingThreshold ? 0 : cartSettings.shippingCost;
-
-            // Calculate VAT if enabled
-            const subtotalAfterDiscount = subtotal - discount;
-            const vat = cartSettings.vatRate > 0 ? Math.round(subtotalAfterDiscount * cartSettings.vatRate / 100) : 0;
-
-            const total = subtotalAfterDiscount + shipping + vat;
+            const {
+                subtotalBeforeDiscounts,
+                productDiscountSavings,
+                promoDiscount,
+                shipping,
+                vat,
+                total
+            } = await calculateCartTotals(items);
 
             // Update summary in modal - use querySelectorAll to update modal elements specifically
             const modalSummaryItemCount = checkoutModal.querySelector('#summaryItemCount');
@@ -548,12 +550,13 @@ function initializeCartPage() {
             const modalSummaryVat = checkoutModal.querySelector('#summaryVat');
 
             if (modalSummaryItemCount) modalSummaryItemCount.textContent = items.length;
-            if (modalSummarySubtotal) modalSummarySubtotal.textContent = formatPrice(subtotal);
+            if (modalSummarySubtotal) modalSummarySubtotal.textContent = formatPrice(subtotalBeforeDiscounts);
 
             // Show discount if applied
-            if (discount > 0 && discountRow) {
+            const totalDiscount = productDiscountSavings + promoDiscount;
+            if (totalDiscount > 0 && discountRow) {
                 discountRow.style.display = 'flex';
-                if (modalSummaryDiscountAmount) modalSummaryDiscountAmount.textContent = '-' + formatPrice(discount);
+                if (modalSummaryDiscountAmount) modalSummaryDiscountAmount.textContent = '-' + formatPrice(totalDiscount);
             } else if (discountRow) {
                 discountRow.style.display = 'none';
             }
@@ -617,21 +620,17 @@ function initializeCartPage() {
 
         const items = cart.getItems();
 
-        // Apply discounts to get actual prices
-        const itemsWithDiscounts = await applyDiscountsToCartItems(items);
-
-        // Calculate subtotal with discounts
-        const subtotal = itemsWithDiscounts.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const {
+            itemsWithDiscounts,
+            subtotalBeforeDiscounts,
+            productDiscountSavings,
+            promoDiscount,
+            shipping,
+            total
+        } = await calculateCartTotals(items);
 
         const appliedPromo = promo.getApplied();
-        const discount = promo.calculate(subtotal, items);
-        const shipping = subtotal >= cartSettings.freeShippingThreshold ? 0 : cartSettings.shippingCost;
-
-        // Calculate VAT if enabled
-        const subtotalAfterDiscount = subtotal - discount;
-        const vat = cartSettings.vatRate > 0 ? Math.round(subtotalAfterDiscount * cartSettings.vatRate / 100) : 0;
-
-        const total = subtotalAfterDiscount + shipping + vat;
+        const discount = productDiscountSavings + promoDiscount;
 
         // Create order via API
         try {
@@ -650,7 +649,7 @@ function initializeCartPage() {
                     size: item.size,
                     color: item.color
                 })),
-                subtotal,
+                subtotal: subtotalBeforeDiscounts,
                 shipping,
                 discount,
                 total,
