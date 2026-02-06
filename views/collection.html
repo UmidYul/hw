@@ -254,13 +254,14 @@
                 }
 
                 const data = await response.json();
-                currentCollection = data.collection;
+                currentCollection = data;
                 products = data.products || [];
 
                 // Update page title and meta
-                document.title = `${currentCollection.name} · AURA`;
-                collectionTitle.textContent = currentCollection.name;
-                breadcrumbCurrent.textContent = currentCollection.name;
+                const collectionName = currentCollection?.name || currentCollection?.title || 'Коллекция';
+                document.title = `${collectionName} · AURA`;
+                collectionTitle.textContent = collectionName;
+                breadcrumbCurrent.textContent = collectionName;
 
                 // Show description if available
                 if (currentCollection.description) {
