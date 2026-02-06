@@ -23,7 +23,7 @@ const initSettingsTable = async () => {
             vat_rate REAL DEFAULT 0,
             shipping_cost REAL DEFAULT 0,
             free_shipping_threshold REAL DEFAULT 0,
-            enable_taxes BOOLEAN DEFAULT false,
+            enable_taxes INTEGER DEFAULT 0,
             return_policy TEXT,
             privacy_policy TEXT,
             updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
@@ -35,7 +35,7 @@ const initSettingsTable = async () => {
     if (!existing) {
         await dbRun(`
             INSERT INTO settings (id, site_name, logo_text, currency, currency_symbol, vat_rate, shipping_cost, free_shipping_threshold, enable_taxes)
-            VALUES (1, 'AURA', 'AURA', 'UZS', 'Сумм', 0, 0, 0, false)
+            VALUES (1, 'AURA', 'AURA', 'UZS', 'Сумм', 0, 0, 0, 0)
         `);
     } else {
         // Add missing columns if they don't exist (for existing databases)
@@ -47,26 +47,9 @@ const initSettingsTable = async () => {
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS social_facebook TEXT');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS social_telegram TEXT');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS color_palette JSONB');
-        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS enable_taxes BOOLEAN DEFAULT false');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS enable_taxes INTEGER DEFAULT 0');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS return_policy TEXT');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS privacy_policy TEXT');
-    }
-
-    const enableTaxesColumn = await dbGet(`
-        SELECT data_type
-        FROM information_schema.columns
-        WHERE table_schema = 'public'
-          AND table_name = 'settings'
-          AND column_name = 'enable_taxes'
-    `);
-
-    if (enableTaxesColumn && enableTaxesColumn.data_type !== 'boolean') {
-        await dbRun(`
-            ALTER TABLE settings
-            ALTER COLUMN enable_taxes TYPE BOOLEAN
-            USING (CASE WHEN enable_taxes IS NULL THEN false ELSE enable_taxes <> 0 END)
-        `);
-        await dbRun('ALTER TABLE settings ALTER COLUMN enable_taxes SET DEFAULT false');
     }
 };
 
@@ -118,17 +101,7 @@ router.put('/', requireAdmin, async (req, res) => {
             || enableTaxes === 1
             || enableTaxes === '1';
 
-        const enableTaxesColumn = await dbGet(`
-            SELECT data_type
-            FROM information_schema.columns
-            WHERE table_schema = 'public'
-              AND table_name = 'settings'
-              AND column_name = 'enable_taxes'
-        `);
-
-        const enableTaxesDbValue = enableTaxesColumn?.data_type === 'boolean'
-            ? enableTaxesValue
-            : (enableTaxesValue ? 1 : 0);
+        const enableTaxesDbValue = enableTaxesValue ? 1 : 0;
 
         await dbRun(`
             UPDATE settings SET
