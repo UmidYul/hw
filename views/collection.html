@@ -115,7 +115,7 @@
                 </div>
 
                 <!-- Products Grid -->
-                <div class="products-grid" id="productsGrid"></div>
+                <div class="products-grid products-grid-3" id="productsGrid"></div>
             </div>
         </div>
     </div>
@@ -281,7 +281,7 @@
 
                 // Display products
                 productsTotal.textContent = products.length;
-                renderProducts();
+                renderProducts(products, 'productsGrid');
 
             } catch (error) {
                 console.error('Error loading collection:', error);
@@ -290,75 +290,6 @@
             }
         }
 
-        // Render products
-        function renderProducts() {
-            productsGrid.innerHTML = products.map(product => {
-                const oldPrice = product.old_price || product.oldPrice;
-                const hasDiscount = oldPrice && oldPrice > product.price;
-                const discountPercent = hasDiscount ? Math.round((1 - product.price / oldPrice) * 100) : 0;
-                const productName = product.title || product.name || '';
-                const productImage = product.image || (Array.isArray(product.images) ? product.images[0] : product.images) || '/images/logo.PNG';
-
-                return `
-                    <div class="product-card">
-                        ${hasDiscount ? `<span class="product-badge product-badge-sale">-${discountPercent}%</span>` : ''}
-                        ${product.tags && product.tags.includes('New') ? '<span class="product-badge product-badge-new">New</span>' : ''}
-                        <a href="/product?id=${product.id}" class="product-image-link">
-                            <img src="${productImage}" alt="${productName}" class="product-image">
-                        </a>
-                        <div class="product-info">
-                            <h3 class="product-title">
-                                <a href="/product?id=${product.id}">${productName}</a>
-                            </h3>
-                            <div class="product-price">
-                                <span class="price-current">${formatPrice(product.price)}</span>
-                                ${hasDiscount ? `<span class="price-old">${formatPrice(oldPrice)}</span>` : ''}
-                            </div>
-                            <div class="product-rating">
-                                ${renderStars(product.rating || 0)}
-                                <span class="rating-count">(${product.reviews_count || 0})</span>
-                            </div>
-                        </div>
-                        <div class="product-actions">
-                            <button class="btn btn-primary btn-block add-to-cart-btn" data-id="${product.id}">
-                                <i class="fas fa-shopping-bag"></i>
-                                В корзину
-                            </button>
-                            <button class="btn-icon wishlist-icon-btn" data-id="${product.id}" aria-label="В избранное">
-                                <i class="far fa-heart"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            // Attach event listeners
-            attachProductEventListeners();
-        }
-
-        // Format price
-        function formatPrice(price) {
-            return new Intl.NumberFormat('ru-RU').format(price) + ' Сумм';
-        }
-
-        // Render star rating
-        function renderStars(rating) {
-            const fullStars = Math.floor(rating);
-            const hasHalfStar = rating % 1 >= 0.5;
-            let stars = '';
-
-            for (let i = 0; i < 5; i++) {
-                if (i < fullStars) {
-                    stars += '<i class="fas fa-star"></i>';
-                } else if (i === fullStars && hasHalfStar) {
-                    stars += '<i class="fas fa-star-half-alt"></i>';
-                } else {
-                    stars += '<i class="far fa-star"></i>';
-                }
-            }
-
-            return `<div class="stars">${stars}</div>`;
-        }
 
         // Show error state
         function showError() {
@@ -377,118 +308,6 @@
             productsGrid.innerHTML = '';
         }
 
-        // Attach event listeners to product cards
-        function attachProductEventListeners() {
-            // Add to cart buttons
-            document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
-                btn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const productId = this.dataset.id;
-                    const product = products.find(p => p.id === productId);
-                    if (product) {
-                        addToCart(product);
-                    }
-                });
-            });
-
-            // Wishlist buttons
-            document.querySelectorAll('.wishlist-icon-btn').forEach(btn => {
-                btn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const productId = this.dataset.id;
-                    const product = products.find(p => p.id === productId);
-                    if (product) {
-                        toggleWishlist(product, this);
-                    }
-                });
-            });
-        }
-
-        // Add to cart
-        function addToCart(product) {
-            let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-            const existingItem = cart.find(item => item.id === product.id);
-
-            if (existingItem) {
-                existingItem.quantity += 1;
-            } else {
-                cart.push({
-                    id: product.id,
-                    name: product.name,
-                    price: product.price,
-                    image: product.image,
-                    quantity: 1
-                });
-            }
-
-            localStorage.setItem('cart', JSON.stringify(cart));
-            updateCartBadge();
-            showNotification('Товар добавлен в корзину');
-        }
-
-        // Toggle wishlist
-        function toggleWishlist(product, button) {
-            let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-            const index = wishlist.findIndex(item => item.id === product.id);
-
-            if (index > -1) {
-                wishlist.splice(index, 1);
-                button.querySelector('i').classList.remove('fas');
-                button.querySelector('i').classList.add('far');
-                showNotification('Товар удален из избранного');
-            } else {
-                wishlist.push({
-                    id: product.id,
-                    name: product.name,
-                    price: product.price,
-                    image: product.image
-                });
-                button.querySelector('i').classList.remove('far');
-                button.querySelector('i').classList.add('fas');
-                showNotification('Товар добавлен в избранное');
-            }
-
-            localStorage.setItem('wishlist', JSON.stringify(wishlist));
-            updateWishlistBadge();
-        }
-
-        // Update cart badge
-        function updateCartBadge() {
-            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-            document.getElementById('cartBadge').textContent = totalItems;
-        }
-
-        // Update wishlist badge
-        function updateWishlistBadge() {
-            const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-            document.getElementById('wishlistBadge').textContent = wishlist.length;
-        }
-
-        // Show notification
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.textContent = message;
-            notification.style.cssText = `
-                position: fixed;
-                bottom: 24px;
-                right: 24px;
-                background: #000;
-                color: #fff;
-                padding: 16px 24px;
-                border-radius: 8px;
-                font-size: 14px;
-                z-index: 10000;
-                animation: slideIn 0.3s ease;
-            `;
-            document.body.appendChild(notification);
-
-            setTimeout(() => {
-                notification.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
-        }
 
         async function applyStoreSettings() {
             try {
