@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Header interactions
     initializeHeader();
     loadNavbarCategories();
+    updateStoreTexts();
 
     // Drawers
     initializeCartDrawer();
@@ -21,6 +22,22 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCartDrawer();
     updateWishlistDrawer();
 });
+
+async function updateStoreTexts() {
+    if (typeof loadSiteSettings === 'function') {
+        await loadSiteSettings();
+    }
+
+    const freeShippingText = document.getElementById('freeShippingText');
+    if (freeShippingText) {
+        const threshold = Number(siteSettings?.freeShippingThreshold) || 0;
+        if (threshold > 0) {
+            freeShippingText.textContent = `При заказе от ${formatPrice(threshold)}`;
+        } else {
+            freeShippingText.textContent = 'Бесплатная доставка';
+        }
+    }
+}
 
 // Header functionality
 function initializeHeader() {

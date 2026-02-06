@@ -3,7 +3,9 @@
 // Settings cache
 let siteSettings = {
     currencySymbol: 'Сумм',
-    currency: 'UZS'
+    currency: 'UZS',
+    freeShippingThreshold: 0,
+    shippingCost: 0
 };
 
 // Load settings from API
@@ -13,6 +15,8 @@ async function loadSiteSettings() {
             const settings = await API.settings.get();
             siteSettings.currencySymbol = settings.currency_symbol || 'Сумм';
             siteSettings.currency = settings.currency || 'UZS';
+            siteSettings.freeShippingThreshold = Number(settings.free_shipping_threshold) || 0;
+            siteSettings.shippingCost = Number(settings.shipping_cost) || 0;
         }
     } catch (error) {
         console.log('Using default settings');
