@@ -8,12 +8,22 @@ let siteSettings = {
     shippingCost: 0
 };
 
+const normalizeCurrencySymbol = (symbol) => {
+    if (!symbol) return 'Сумм';
+    const value = String(symbol).trim();
+    const lower = value.toLowerCase();
+    if (lower.includes('руб') || lower.includes('rub') || value.includes('₽') || value === 'RUB') {
+        return 'Сумм';
+    }
+    return value;
+};
+
 // Load settings from API
 async function loadSiteSettings() {
     try {
         if (typeof API !== 'undefined' && API.settings) {
             const settings = await API.settings.get();
-            siteSettings.currencySymbol = settings.currency_symbol || 'Сумм';
+            siteSettings.currencySymbol = normalizeCurrencySymbol(settings.currency_symbol || 'Сумм');
             siteSettings.currency = settings.currency || 'UZS';
             siteSettings.freeShippingThreshold = Number(settings.free_shipping_threshold) || 0;
             siteSettings.shippingCost = Number(settings.shipping_cost) || 0;
@@ -32,7 +42,8 @@ if (document.readyState === 'loading') {
 
 // Format price with currency
 function formatPrice(price) {
-    return price.toLocaleString('ru-RU') + ' ' + siteSettings.currencySymbol;
+    const symbol = normalizeCurrencySymbol(siteSettings.currencySymbol);
+    return price.toLocaleString('ru-RU') + ' ' + symbol;
 }
 
 // LocalStorage helpers
@@ -337,7 +348,7 @@ function renderProductCard(product) {
 
     return `
         <div class="product-card" data-product-id="${product.id}">
-            <div class="product-card-image" style="background-image: url('${imageUrl}'); background-size: cover; background-position: center;">
+            <div class="product-card-image" data-link="/product?id=${product.id}" role="link" style="background-image: url('${imageUrl}'); background-size: cover; background-position: center;">
                 <div class="product-card-actions">
                     <button class="product-card-btn wishlist-toggle" data-id="${product.id}" aria-label="В избранное">
                         <i class="fa${isInWishlist ? 's' : 'r'} fa-heart"></i>
@@ -425,6 +436,16 @@ function renderProducts(products, containerId) {
 
 // Attach event listeners to product cards
 function attachProductCardListeners(container) {
+    // Image click -> product page
+    container.querySelectorAll('.product-card-image').forEach(image => {
+        image.addEventListener('click', () => {
+            const link = image.getAttribute('data-link');
+            if (link) {
+                window.location.href = link;
+            }
+        });
+    });
+
     // Wishlist toggles
     container.querySelectorAll('.wishlist-toggle').forEach(btn => {
         btn.addEventListener('click', (e) => {

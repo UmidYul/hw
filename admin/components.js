@@ -3,6 +3,16 @@
 // Reusable UI Components
 // ========================================
 
+const normalizeCurrencySymbol = (symbol) => {
+    if (!symbol) return 'Сумм';
+    const value = String(symbol).trim();
+    const lower = value.toLowerCase();
+    if (lower.includes('руб') || lower.includes('rub') || value.includes('₽') || value === 'RUB') {
+        return 'Сумм';
+    }
+    return value;
+};
+
 const Components = {
     // Toast notifications
     showToast(title, message, type = 'info') {
@@ -66,9 +76,10 @@ const Components = {
 
     // Format price
     formatPrice(price) {
-        const currencySymbol = (typeof REPO !== 'undefined' && REPO.getSettings)
+        const rawSymbol = (typeof REPO !== 'undefined' && REPO.getSettings)
             ? REPO.getSettings().currencySymbol
             : 'Сумм';
+        const currencySymbol = normalizeCurrencySymbol(rawSymbol);
         return price.toLocaleString('ru-RU') + ' ' + currencySymbol;
     },
 
