@@ -324,7 +324,7 @@ function seedData() {
     // Homepage Sections
     const sections = [
         { id: 'hero', name: 'Hero Banner', enabled: true, order: 1, config: { bannerId: REPO.getBanners()[0].id } },
-        { id: 'promo', name: 'Promo Strip', enabled: true, order: 2, config: { text: 'Бесплатная доставка от 5000₽' } },
+        { id: 'promo', name: 'Promo Strip', enabled: true, order: 2, config: { text: 'Бесплатная доставка от 5000 Сумм' } },
         { id: 'new', name: 'New Arrivals', enabled: true, order: 3, config: { source: 'tag', value: 'New', limit: 8 } },
         { id: 'sale', name: 'Sale', enabled: true, order: 4, config: { source: 'tag', value: 'Sale', limit: 4 } },
         { id: 'essentials', name: 'Essentials', enabled: true, order: 5, config: { source: 'manual', productIds: products.slice(0, 4).map(p => p.id) } },
@@ -340,8 +340,8 @@ function seedData() {
         logoText: 'AURA',
         contactEmail: 'info@aura-store.com',
         contactPhone: '+7 999 999 9999',
-        currency: 'RUB',
-        currencySymbol: '₽',
+        currency: 'UZS',
+        currencySymbol: 'Сумм',
         freeShippingThreshold: 5000,
         flatShippingRate: 500,
         enableTaxes: false,

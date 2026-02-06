@@ -52,7 +52,7 @@ router.post('/validate', async (req, res) => {
         if (promo.min_amount && amount < promo.min_amount) {
             return res.json({
                 valid: false,
-                message: `Минимальная сумма заказа ${promo.min_amount}₽`
+                message: `Минимальная сумма заказа ${promo.min_amount} Сумм`
             });
         }
 

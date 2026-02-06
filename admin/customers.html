@@ -130,7 +130,7 @@
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Средний чек</div>
-                        <div class="stat-value" id="avgOrderValue">0 ₽</div>
+                        <div class="stat-value" id="avgOrderValue">0 Сумм</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Повторные покупки</div>
@@ -322,7 +322,7 @@
 
             document.getElementById('totalCustomers').textContent = totalCustomers;
             document.getElementById('activeCustomers').textContent = customersWithOrders;
-            document.getElementById('avgOrderValue').textContent = avgOrderValue.toLocaleString('ru-RU') + ' ₽';
+            document.getElementById('avgOrderValue').textContent = avgOrderValue.toLocaleString('ru-RU') + ' Сумм';
             document.getElementById('repeatCustomers').textContent = repeatCustomers;
         }
 

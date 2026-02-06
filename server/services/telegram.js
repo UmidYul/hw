@@ -1,9 +1,9 @@
 import fetch from 'node-fetch';
 
 // Telegram bot configuration
-const TELEGRAM_BOT_TOKEN = '8572262947:AAH9sR2gmixfO_oezxsPqMJSp7uvDdao-to';
-const TELEGRAM_CHAT_ID = '8176192068';
-const SERVER_URL = process.env.SERVER_URL || 'https://zedly.uz';
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+const SERVER_URL = process.env.SERVER_URL || 'https://higherwaist.uz';
 
 /**
  * Send message to Telegram

@@ -13,7 +13,7 @@ const initSettingsTable = async () => {
             store_description TEXT,
             contact_email TEXT,
             contact_phone TEXT,
-            currency TEXT DEFAULT 'RUB',
+            currency TEXT DEFAULT 'UZS',
             currency_symbol TEXT DEFAULT 'Сумм',
             vat_rate REAL DEFAULT 0,
             shipping_cost REAL DEFAULT 0,
@@ -66,7 +66,7 @@ router.get('/', async (req, res) => {
         const settings = await dbGet('SELECT * FROM settings WHERE id = 1');
         res.json(settings || {
             site_name: 'AURA',
-            currency: 'RUB',
+            currency: 'UZS',
             currency_symbol: 'Сумм',
             vat_rate: 0,
             shipping_cost: 0,
@@ -120,7 +120,7 @@ router.put('/', async (req, res) => {
             storeDescription || null,
             contactEmail || null,
             contactPhone || null,
-            currency || 'RUB',
+            currency || 'UZS',
             currencySymbol || 'Сумм',
             flatShippingRate || 0,
             freeShippingThreshold || 0,

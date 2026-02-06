@@ -315,7 +315,7 @@
 
                     const discountType = discount.discount_type || discount.type;
                     const discountValue = discount.discount_value ?? discount.value;
-                    const typeLabel = discountType === 'percent' ? '%' : '₽';
+                    const typeLabel = discountType === 'percent' ? '%' : ' Сумм';
                     const valueDisplay = `${discountValue}${typeLabel}`;
 
                     const targetLabels = {
