@@ -115,31 +115,37 @@ function initializeHeader() {
 
 async function loadNavbarCategories() {
     const navList = document.querySelector('#mainNav .nav-list');
-    if (!navList || typeof API === 'undefined' || !API.categories) return;
+    if (!navList || typeof API === 'undefined' || !API.categories || !API.collections) return;
 
     try {
-        const categories = API.categories.getVisible
-            ? await API.categories.getVisible()
-            : await API.categories.getAll();
-
-        if (!Array.isArray(categories) || categories.length === 0) return;
+        const [categories, collections] = await Promise.all([
+            API.categories.getVisible ? API.categories.getVisible() : API.categories.getAll(),
+            API.collections.getAll({ visible: true })
+        ]);
 
         const visibleCategories = categories
             .filter(cat => cat && cat.is_visible !== false && cat.slug)
             .sort((a, b) => (a.order_index || 0) - (b.order_index || 0));
+        const visibleCollections = Array.isArray(collections)
+            ? collections.filter(col => col && col.is_visible !== false && col.slug)
+            : [];
 
-        if (visibleCategories.length === 0) return;
+        const collectionLinks = visibleCollections.slice(0, 6).map(col => {
+            const slug = encodeURIComponent(col.slug);
+            return `<li><a href="/collection?slug=${slug}" class="nav-link">${col.name}</a></li>`;
+        }).join('');
 
         const categoryLinks = visibleCategories.map(cat => {
             const slug = encodeURIComponent(cat.slug);
             return `<li><a href="/catalog?category=${slug}" class="nav-link">${cat.name}</a></li>`;
         }).join('');
 
-        navList.innerHTML = `
-            <li><a href="/catalog?category=all" class="nav-link">Все товары</a></li>
-            ${categoryLinks}
-            <li><a href="/catalog?tag=Sale" class="nav-link nav-link-sale">Sale</a></li>
-        `;
+        navList.innerHTML = [
+            '<li><a href="/catalog?category=all" class="nav-link">Все товары</a></li>',
+            collectionLinks,
+            categoryLinks,
+            '<li><a href="/catalog?tag=Sale" class="nav-link nav-link-sale">Sale</a></li>'
+        ].filter(Boolean).join('');
     } catch (error) {
         console.error('Failed to load navbar categories:', error);
     }
