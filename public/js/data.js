@@ -436,6 +436,14 @@ if (typeof window.products === 'undefined') {
         }
     ];
 
+    window.products = window.products.map(product => {
+        if (!product || !product.deliveryInfo) return product;
+        return {
+            ...product,
+            deliveryInfo: product.deliveryInfo.replace('₽', ' Сумм')
+        };
+    });
+
     // Promo codes
     const promoCodes = {
         'MINIMAL10': {

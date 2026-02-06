@@ -432,7 +432,7 @@
                                 ${stats.ordersCount}
                             </span>
                         </td>
-                        <td>${stats.totalSpent.toLocaleString('ru-RU')} ₽</td>
+                        <td>${stats.totalSpent.toLocaleString('ru-RU')} Сумм</td>
                         <td>${lastOrderDate}</td>
                         <td>
                             <div class="action-buttons">
@@ -489,7 +489,7 @@
                                 </div>
                                 <div class="order-history-details">
                                     <div>Дата: ${new Date(createdAt).toLocaleDateString('ru-RU')}</div>
-                                    <div>Сумма: ${(order.total || 0).toLocaleString('ru-RU')} ₽</div>
+                                    <div>Сумма: ${(order.total || 0).toLocaleString('ru-RU')} Сумм</div>
                                 </div>
                                 <a href="order-view?id=${order.id}" class="order-link">Подробнее →</a>
                             </div>
