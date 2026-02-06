@@ -26,7 +26,7 @@ const initSettingsTable = async () => {
             enable_taxes INTEGER DEFAULT 0,
             return_policy TEXT,
             privacy_policy TEXT,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
         )
     `);
 
