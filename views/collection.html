@@ -249,13 +249,14 @@
                 }
 
                 const data = await response.json();
-                currentCollection = data.collection;
+                currentCollection = data;
                 products = data.products || [];
 
                 // Update page title and meta
-                document.title = `${currentCollection.name} · AURA`;
-                collectionTitle.textContent = currentCollection.name;
-                breadcrumbCurrent.textContent = currentCollection.name;
+                const collectionName = currentCollection.name || currentCollection.title || 'Коллекция';
+                document.title = `${collectionName} · AURA`;
+                collectionTitle.textContent = collectionName;
+                breadcrumbCurrent.textContent = collectionName;
 
                 // Show description if available
                 if (currentCollection.description) {
@@ -291,16 +292,19 @@
                 const hasDiscount = oldPrice && oldPrice > product.price;
                 const discountPercent = hasDiscount ? Math.round((1 - product.price / oldPrice) * 100) : 0;
 
+                const productName = product.title || product.name || '';
+                const productImage = product.image || (Array.isArray(product.images) ? product.images[0] : product.images) || '';
+
                 return `
                     <div class="product-card">
                         ${hasDiscount ? `<span class="product-badge product-badge-sale">-${discountPercent}%</span>` : ''}
                         ${product.tags && product.tags.includes('New') ? '<span class="product-badge product-badge-new">New</span>' : ''}
                         <a href="/product?id=${product.id}" class="product-image-link">
-                            <img src="${product.image}" alt="${product.name}" class="product-image">
+                            <img src="${productImage}" alt="${productName}" class="product-image">
                         </a>
                         <div class="product-info">
                             <h3 class="product-title">
-                                <a href="/product?id=${product.id}">${product.name}</a>
+                                <a href="/product?id=${product.id}">${productName}</a>
                             </h3>
                             <div class="product-price">
                                 <span class="price-current">${formatPrice(product.price)}</span>
