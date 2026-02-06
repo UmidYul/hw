@@ -1,0 +1,50 @@
+<header class="header">
+    <div class="container header-container">
+        <div class="header-left">
+            <button class="menu-btn" id="mobileMenuBtn" aria-label="Меню">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <a href="/" class="logo">
+            <span class="logo-text">AURA</span>
+            <span class="logo-dot">·</span>
+        </a>
+
+        <div class="header-right">
+            <button class="icon-btn search-btn" id="searchBtn" aria-label="Поиск">
+                <i class="fas fa-search"></i>
+            </button>
+            <button class="icon-btn wishlist-btn" id="wishlistBtn" aria-label="Избранное">
+                <i class="far fa-heart"></i>
+                <span class="badge" id="wishlistBadge">0</span>
+            </button>
+            <button class="icon-btn cart-btn" id="cartBtn" aria-label="Корзина">
+                <i class="fas fa-shopping-bag"></i>
+                <span class="badge" id="cartBadge">0</span>
+            </button>
+        </div>
+    </div>
+
+    <nav class="nav" id="mainNav">
+        <div class="container">
+            <ul class="nav-list">
+                <li><a href="/catalog?category=all" class="nav-link">Все товары</a></li>
+                <li><a href="/catalog?tag=Sale" class="nav-link nav-link-sale">Sale</a></li>
+            </ul>
+        </div>
+    </nav>
+</header>
+
+<div class="modal" id="searchModal">
+    <div class="modal-overlay" id="searchModalOverlay"></div>
+    <div class="modal-content search-modal-content">
+        <button class="modal-close" id="searchModalClose" aria-label="Закрыть">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="search-modal-body">
+            <input type="text" class="search-input-large" id="searchInput" placeholder="Поиск товаров...">
+            <div class="search-results" id="searchResults"></div>
+        </div>
+    </div>
+</div>

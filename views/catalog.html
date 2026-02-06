@@ -23,362 +23,239 @@
 </head>
 
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="container header-container">
-            <div class="header-left">
-                <button class="menu-btn" id="mobileMenuBtn" aria-label="Меню">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
+    <div id="siteHeader"></div>
 
-            <a href="/" class="logo">
-                <span class="logo-text">AURA</span>
-                <span class="logo-dot">·</span>
-            </a>
-
-            <div class="header-right">
-                <button class="icon-btn search-btn" id="searchBtn" aria-label="Поиск">
-                    <i class="fas fa-search"></i>
-                </button>
-                <button class="icon-btn wishlist-btn" id="wishlistBtn" aria-label="Избранное">
-                    <i class="far fa-heart"></i>
-                    <span class="badge" id="wishlistBadge">0</span>
-                </button>
-                <button class="icon-btn cart-btn" id="cartBtn" aria-label="Корзина">
-                    <i class="fas fa-shopping-bag"></i>
-                    <span class="badge" id="cartBadge">0</span>
-                </button>
-            </div>
-        </div>
-
-        <nav class="nav" id="mainNav">
-            <div class="container">
-                <ul class="nav-list">
-                    <li><a href="/catalog?category=all" class="nav-link">Все товары</a></li>
-                    <li><a href="/catalog?tag=Sale" class="nav-link nav-link-sale">Sale</a></li>
-                </ul>
-            </div>
-        </nav>
-    </header>
-
-    <!-- Search Modal -->
-    <div class="modal" id="searchModal">
-        <div class="modal-overlay" id="searchModalOverlay"></div>
-        <div class="modal-content search-modal-content">
-            <button class="modal-close" id="searchModalClose" aria-label="Закрыть">
-                <i class="fas fa-times"></i>
-            </button>
-            <div class="search-modal-body">
-                <input type="text" class="search-input-large" id="searchInput" placeholder="Поиск товаров...">
-                <div class="search-results" id="searchResults"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Catalog Page -->
     <div class="catalog-page">
         <div class="container">
-            <!-- Breadcrumbs -->
-            <nav class="breadcrumbs" aria-label="breadcrumb">
-                <a href="/">Главная</a>
-                <span>/</span>
-                <span id="breadcrumbCurrent">Каталог</span>
-            </nav>
-
-            <!-- Catalog Header -->
-            <div class="catalog-header">
-                <h1 class="page-title" id="catalogTitle">Все товары</h1>
-                <div class="catalog-controls">
-                    <button class="filter-toggle-btn" id="filterToggleBtn">
-                        <i class="fas fa-sliders-h"></i>
-                        <span>Фильтры</span>
+            <button class="filter-toggle-btn" id="filterToggleBtn">
+                <i class="fas fa-sliders-h"></i>
+                <span>Фильтры</span>
+            </button>
+            <div class="catalog-actions">
+                <div class="sort-select-wrapper">
+                    <select class="sort-select" id="sortSelect">
+                        <option value="default">По умолчанию</option>
+                        <option value="price-asc">Цена: по возрастанию</option>
+                        <option value="price-desc">Цена: по убыванию</option>
+                        <option value="rating">Рейтинг</option>
+                        <option value="new">Новинки</option>
+                    </select>
+                </div>
+                <div class="grid-toggle">
+                    <button class="grid-btn" data-cols="2" aria-label="2 колонки">
+                        <i class="fas fa-th-large"></i>
                     </button>
-                    <div class="catalog-actions">
-                        <div class="sort-select-wrapper">
-                            <select class="sort-select" id="sortSelect">
-                                <option value="default">По умолчанию</option>
-                                <option value="price-asc">Цена: по возрастанию</option>
-                                <option value="price-desc">Цена: по убыванию</option>
-                                <option value="rating">Рейтинг</option>
-                                <option value="new">Новинки</option>
-                            </select>
-                        </div>
-                        <div class="grid-toggle">
-                            <button class="grid-btn" data-cols="2" aria-label="2 колонки">
-                                <i class="fas fa-th-large"></i>
-                            </button>
-                            <button class="grid-btn active" data-cols="3" aria-label="3 колонки">
-                                <i class="fas fa-th"></i>
-                            </button>
-                        </div>
-                    </div>
+                    <button class="grid-btn active" data-cols="3" aria-label="3 колонки">
+                        <i class="fas fa-th"></i>
+                    </button>
                 </div>
             </div>
+        </div>
 
-            <div class="catalog-content">
-                <!-- Filters Sidebar -->
-                <aside class="filters-sidebar" id="filtersSidebar">
-                    <div class="filters-header">
-                        <h3 class="filters-title">Фильтры</h3>
-                        <button class="filters-reset" id="resetFilters">Сбросить</button>
+        <div class="catalog-content">
+            <!-- Filters Sidebar -->
+            <aside class="filters-sidebar" id="filtersSidebar">
+                <div class="filters-header">
+                    <h3 class="filters-title">Фильтры</h3>
+                    <button class="filters-reset" id="resetFilters">Сбросить</button>
+                </div>
+
+                <!-- Search Filter -->
+                <div class="filter-group">
+                    <input type="text" class="filter-search" id="catalogSearch" placeholder="Поиск...">
+                </div>
+
+                <!-- Category Filter -->
+                <div class="filter-group">
+                    <h4 class="filter-heading">Категория</h4>
+                    <div class="filter-options" id="categoryFilter">
+                        <!-- Categories will be loaded dynamically -->
                     </div>
+                </div>
 
-                    <!-- Search Filter -->
-                    <div class="filter-group">
-                        <input type="text" class="filter-search" id="catalogSearch" placeholder="Поиск...">
+                <!-- Price Range -->
+                <div class="filter-group">
+                    <h4 class="filter-heading">Цена</h4>
+                    <div class="price-inputs">
+                        <input type="number" class="price-input" id="priceMin" placeholder="От" min="0">
+                        <input type="number" class="price-input" id="priceMax" placeholder="До" min="0">
                     </div>
+                </div>
 
-                    <!-- Category Filter -->
-                    <div class="filter-group">
-                        <h4 class="filter-heading">Категория</h4>
-                        <div class="filter-options" id="categoryFilter">
-                            <!-- Categories will be loaded dynamically -->
-                        </div>
+                <!-- Size Filter -->
+                <div class="filter-group">
+                    <h4 class="filter-heading">Размер</h4>
+                    <div class="filter-chips" id="sizeFilter">
+                        <button class="filter-chip" data-value="XS">XS</button>
+                        <button class="filter-chip" data-value="S">S</button>
+                        <button class="filter-chip" data-value="M">M</button>
+                        <button class="filter-chip" data-value="L">L</button>
+                        <button class="filter-chip" data-value="XL">XL</button>
                     </div>
+                </div>
 
-                    <!-- Price Range -->
-                    <div class="filter-group">
-                        <h4 class="filter-heading">Цена</h4>
-                        <div class="price-inputs">
-                            <input type="number" class="price-input" id="priceMin" placeholder="От" min="0">
-                            <input type="number" class="price-input" id="priceMax" placeholder="До" min="0">
-                        </div>
-                    </div>
+                <!-- Color Filter -->
+                <div class="filter-group">
+                    <h4 class="filter-heading">Цвет</h4>
+                    <div class="color-swatches" id="colorFilter"></div>
+                </div>
 
-                    <!-- Size Filter -->
-                    <div class="filter-group">
-                        <h4 class="filter-heading">Размер</h4>
-                        <div class="filter-chips" id="sizeFilter">
-                            <button class="filter-chip" data-value="XS">XS</button>
-                            <button class="filter-chip" data-value="S">S</button>
-                            <button class="filter-chip" data-value="M">M</button>
-                            <button class="filter-chip" data-value="L">L</button>
-                            <button class="filter-chip" data-value="XL">XL</button>
-                        </div>
-                    </div>
-
-                    <!-- Color Filter -->
-                    <div class="filter-group">
-                        <h4 class="filter-heading">Цвет</h4>
-                        <div class="color-swatches" id="colorFilter"></div>
-                    </div>
-
-                    <!-- Tags Filter -->
-                    <div class="filter-group">
-                        <h4 class="filter-heading">Теги</h4>
-                        <div class="filter-options" id="tagFilter">
-                            <label class="filter-checkbox">
-                                <input type="checkbox" value="New">
-                                <span>Новинки</span>
-                            </label>
-                            <label class="filter-checkbox">
-                                <input type="checkbox" value="Sale">
-                                <span>Скидки</span>
-                            </label>
-                            <label class="filter-checkbox">
-                                <input type="checkbox" value="Limited">
-                                <span>Лимитированные</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Rating Filter -->
-                    <div class="filter-group">
-                        <h4 class="filter-heading">Рейтинг</h4>
-                        <div class="rating-filter" id="ratingFilterGroup">
-                            <button class="rating-option" data-rating="5">
-                                <span class="rating-stars">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                </span>
-                                <span class="rating-text">5 звезд</span>
-                            </button>
-                            <button class="rating-option" data-rating="4">
-                                <span class="rating-stars">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="far fa-star"></i>
-                                </span>
-                                <span class="rating-text">4+ звезды</span>
-                            </button>
-                            <button class="rating-option" data-rating="3">
-                                <span class="rating-stars">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="far fa-star"></i>
-                                    <i class="far fa-star"></i>
-                                </span>
-                                <span class="rating-text">3+ звезды</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Discount Filter -->
-                    <div class="filter-group">
+                <!-- Tags Filter -->
+                <div class="filter-group">
+                    <h4 class="filter-heading">Теги</h4>
+                    <div class="filter-options" id="tagFilter">
                         <label class="filter-checkbox">
-                            <input type="checkbox" id="discountFilter">
-                            <span>Только со скидкой</span>
+                            <input type="checkbox" value="New">
+                            <span>Новинки</span>
+                        </label>
+                        <label class="filter-checkbox">
+                            <input type="checkbox" value="Sale">
+                            <span>Скидки</span>
+                        </label>
+                        <label class="filter-checkbox">
+                            <input type="checkbox" value="Limited">
+                            <span>Лимитированные</span>
                         </label>
                     </div>
-                </aside>
+                </div>
 
-                <!-- Products Grid -->
-                <div class="catalog-main">
-                    <!-- Loading Skeleton -->
-                    <div class="products-grid products-grid-3" id="productsLoading">
-                        <div class="product-card-skeleton"></div>
-                        <div class="product-card-skeleton"></div>
-                        <div class="product-card-skeleton"></div>
-                        <div class="product-card-skeleton"></div>
+                <!-- Rating Filter -->
+                <div class="filter-group">
+                    <h4 class="filter-heading">Рейтинг</h4>
+                    <div class="rating-filter" id="ratingFilterGroup">
+                        <button class="rating-option" data-rating="5">
+                            <span class="rating-stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </span>
+                            <span class="rating-text">5 звезд</span>
+                        </button>
+                        <button class="rating-option" data-rating="4">
+                            <span class="rating-stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </span>
+                            <span class="rating-text">4+ звезды</span>
+                        </button>
+                        <button class="rating-option" data-rating="3">
+                            <span class="rating-stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </span>
+                            <span class="rating-text">3+ звезды</span>
+                        </button>
                     </div>
+                </div>
 
-                    <!-- Products -->
-                    <div class="products-grid products-grid-3" id="catalogProducts" style="display: none;">
-                        <!-- Products will be inserted here -->
-                    </div>
+                <!-- Discount Filter -->
+                <div class="filter-group">
+                    <label class="filter-checkbox">
+                        <input type="checkbox" id="discountFilter">
+                        <span>Только со скидкой</span>
+                    </label>
+                </div>
+            </aside>
 
-                    <!-- Empty State -->
-                    <div class="empty-state-large" id="emptyState" style="display: none;">
-                        <i class="fas fa-search empty-icon-large"></i>
-                        <h3>Ничего не найдено</h3>
-                        <p>Попробуйте изменить параметры фильтров</p>
-                        <button class="btn btn-primary" id="resetFiltersBtn">Сбросить фильтры</button>
-                    </div>
+            <!-- Products Grid -->
+            <div class="catalog-main">
+                <!-- Loading Skeleton -->
+                <div class="products-grid products-grid-3" id="productsLoading">
+                    <div class="product-card-skeleton"></div>
+                    <div class="product-card-skeleton"></div>
+                    <div class="product-card-skeleton"></div>
+                    <div class="product-card-skeleton"></div>
+                </div>
 
-                    <!-- Pagination -->
-                    <div class="pagination" id="pagination" style="display: none;">
-                        <button class="btn btn-outline" id="loadMoreBtn">Загрузить еще</button>
-                    </div>
+                <!-- Products -->
+                <div class="products-grid products-grid-3" id="catalogProducts" style="display: none;">
+                    <!-- Products will be inserted here -->
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state-large" id="emptyState" style="display: none;">
+                    <i class="fas fa-search empty-icon-large"></i>
+                    <h3>Ничего не найдено</h3>
+                    <p>Попробуйте изменить параметры фильтров</p>
+                    <button class="btn btn-primary" id="resetFiltersBtn">Сбросить фильтры</button>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination" id="pagination" style="display: none;">
+                    <button class="btn btn-outline" id="loadMoreBtn">Загрузить еще</button>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Quick View Modal -->
-    <div class="modal" id="quickViewModal">
-        <div class="modal-overlay" id="quickViewOverlay"></div>
-        <div class="modal-content quick-view-content">
-            <button class="modal-close" id="quickViewClose" aria-label="Закрыть">
-                <i class="fas fa-times"></i>
-            </button>
-            <div class="quick-view-body" id="quickViewBody">
-                <!-- Product details will be inserted here -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <div class="logo footer-logo">
-                        <span class="logo-text">AURA</span>
-                        <span class="logo-dot">·</span>
-                    </div>
-                    <p class="footer-text">Минималистичная мода для современной жизни</p>
-                    <div class="social-links">
-                        <a href="#" class="social-link" data-social="instagram" aria-label="Instagram"><i
-                                class="fab fa-instagram"></i></a>
-                        <a href="#" class="social-link" data-social="facebook" aria-label="Facebook"><i
-                                class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="social-link" data-social="telegram" aria-label="Telegram"><i
-                                class="fab fa-telegram"></i></a>
-                    </div>
-                </div>
-                <div class="footer-col">
-                    <h4 class="footer-heading">Покупателям</h4>
-                    <ul class="footer-links">
-                        <li><a href="#">Доставка и оплата</a></li>
-                        <li><a href="#">Возврат и обмен</a></li>
-                        <li><a href="#">Таблица размеров</a></li>
-                        <li><a href="#">FAQ</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4 class="footer-heading">О компании</h4>
-                    <ul class="footer-links">
-                        <li><a href="#">О нас</a></li>
-                        <li><a href="#">Контакты</a></li>
-                        <li><a href="#">Вакансии</a></li>
-                        <li><a href="#">Sustainability</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4 class="footer-heading">Контакты</h4>
-                    <ul class="footer-contacts">
-                        <li><i class="fas fa-phone"></i> <a id="contactPhone" href="tel:">—</a></li>
-                        <li><i class="fas fa-envelope"></i> <a id="contactEmail" href="mailto:">—</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4 class="footer-heading">Помощь</h4>
-                    <ul class="footer-links">
-                        <li><a href="#">Связаться с нами</a></li>
-                        <li><a href="#">Политика конфиденциальности</a></li>
-                        <li><a href="#">Условия использования</a></li>
-                        <li><a href="#">Программа лояльности</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 AURA. Все права защищены.</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Cart Drawer -->
-    <div class="drawer" id="cartDrawer">
-        <div class="drawer-overlay" id="cartDrawerOverlay"></div>
-        <div class="drawer-content">
-            <div class="drawer-header">
-                <h3 class="drawer-title">Корзина (<span id="drawerCartCount">0</span>)</h3>
-                <button class="drawer-close" id="cartDrawerClose" aria-label="Закрыть">
+        <!-- Quick View Modal -->
+        <div class="modal" id="quickViewModal">
+            <div class="modal-overlay" id="quickViewOverlay"></div>
+            <div class="modal-content quick-view-content">
+                <button class="modal-close" id="quickViewClose" aria-label="Закрыть">
                     <i class="fas fa-times"></i>
                 </button>
-            </div>
-            <div class="drawer-body" id="drawerCartItems"></div>
-            <div class="drawer-footer" id="drawerFooter" style="display: none;">
-                <div class="drawer-total">
-                    <span>Итого:</span>
-                    <span id="drawerTotal">0 Сумм</span>
+                <div class="quick-view-body" id="quickViewBody">
+                    <!-- Product details will be inserted here -->
                 </div>
-                <a href="/cart" class="btn btn-dark btn-block">Оформить заказ</a>
             </div>
         </div>
-    </div>
 
-    <!-- Wishlist Drawer -->
-    <div class="drawer" id="wishlistDrawer">
-        <div class="drawer-overlay" id="wishlistDrawerOverlay"></div>
-        <div class="drawer-content">
-            <div class="drawer-header">
-                <h3 class="drawer-title">Избранное (<span id="drawerWishlistCount">0</span>)</h3>
-                <button class="drawer-close" id="wishlistDrawerClose" aria-label="Закрыть">
-                    <i class="fas fa-times"></i>
-                </button>
+        <div id="siteFooter"></div>
+
+        <!-- Cart Drawer -->
+        <div class="drawer" id="cartDrawer">
+            <div class="drawer-overlay" id="cartDrawerOverlay"></div>
+            <div class="drawer-content">
+                <div class="drawer-header">
+                    <h3 class="drawer-title">Корзина (<span id="drawerCartCount">0</span>)</h3>
+                    <button class="drawer-close" id="cartDrawerClose" aria-label="Закрыть">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="drawer-body" id="drawerCartItems"></div>
+                <div class="drawer-footer" id="drawerFooter" style="display: none;">
+                    <div class="drawer-total">
+                        <span>Итого:</span>
+                        <span id="drawerTotal">0 Сумм</span>
+                    </div>
+                    <a href="/cart" class="btn btn-dark btn-block">Оформить заказ</a>
+                </div>
             </div>
-            <div class="drawer-body" id="drawerWishlistItems"></div>
         </div>
-    </div>
 
-    <!-- Toast Container -->
-    <div class="toast-container" id="toastContainer"></div>
+        <!-- Wishlist Drawer -->
+        <div class="drawer" id="wishlistDrawer">
+            <div class="drawer-overlay" id="wishlistDrawerOverlay"></div>
+            <div class="drawer-content">
+                <div class="drawer-header">
+                    <h3 class="drawer-title">Избранное (<span id="drawerWishlistCount">0</span>)</h3>
+                    <button class="drawer-close" id="wishlistDrawerClose" aria-label="Закрыть">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="drawer-body" id="drawerWishlistItems"></div>
+            </div>
+        </div>
 
-    <script src="/js/api.js"></script>
-    <script src="/js/discounts-loader.js"></script>
-    <script src="/js/products-loader.js"></script>
-    <script src="/js/data.js"></script>
-    <script src="/js/utils.js"></script>
-    <script src="/js/app.js"></script>
-    <script src="/js/catalog-page.js"></script>
+        <!-- Toast Container -->
+        <div class="toast-container" id="toastContainer"></div>
+
+        <script src="/js/api.js"></script>
+        <script src="/js/discounts-loader.js"></script>
+        <script src="/js/products-loader.js"></script>
+        <script src="/js/data.js"></script>
+        <script src="/js/utils.js"></script>
+        <script src="/js/layout.js"></script>
+        <script src="/js/app.js"></script>
+        <script src="/js/catalog-page.js"></script>
 </body>
 
 </html>

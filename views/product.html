@@ -23,181 +23,119 @@
 </head>
 
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="container header-container">
-            <div class="header-left">
-                <button class="menu-btn" id="mobileMenuBtn" aria-label="Меню">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
+    <div id="siteHeader"></div>
 
-            <a href="/" class="logo">
-                <span class="logo-text">AURA</span>
-                <span class="logo-dot">·</span>
-            </a>
-
-            <div class="header-right">
-                <button class="icon-btn search-btn" id="searchBtn" aria-label="Поиск">
-                    <i class="fas fa-search"></i>
-                </button>
-                <button class="icon-btn wishlist-btn" id="wishlistBtn" aria-label="Избранное">
-                    <i class="far fa-heart"></i>
-                    <span class="badge" id="wishlistBadge">0</span>
-                </button>
-                <button class="icon-btn cart-btn" id="cartBtn" aria-label="Корзина">
-                    <i class="fas fa-shopping-bag"></i>
-                    <span class="badge" id="cartBadge">0</span>
-                </button>
-            </div>
-        </div>
-
-        <nav class="nav" id="mainNav">
-            <div class="container">
-                <ul class="nav-list">
-                    <li><a href="/catalog?category=all" class="nav-link">Все товары</a></li>
-                    <li><a href="/catalog?tag=Sale" class="nav-link nav-link-sale">Sale</a></li>
-                </ul>
-            </div>
-        </nav>
-    </header>
-
-    <!-- Search Modal -->
-    <div class="modal" id="searchModal">
-        <div class="modal-overlay" id="searchModalOverlay"></div>
-        <div class="modal-content search-modal-content">
-            <button class="modal-close" id="searchModalClose" aria-label="Закрыть">
-                <i class="fas fa-times"></i>
-            </button>
-            <div class="search-modal-body">
-                <input type="text" class="search-input-large" id="searchInput" placeholder="Поиск товаров...">
-                <div class="search-results" id="searchResults"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Product Page -->
     <div class="product-page">
         <div class="container">
-            <!-- Breadcrumbs -->
-            <nav class="breadcrumbs" aria-label="breadcrumb">
-                <a href="/">Главная</a>
-                <span>/</span>
-                <a href="/catalog" id="productCategoryLink">Каталог</a>
-                <span>/</span>
-                <span id="productBreadcrumb">Товар</span>
-            </nav>
-
-            <div class="product-container">
-                <!-- Gallery -->
-                <div class="product-gallery">
-                    <div class="gallery-main" id="galleryMain">
-                        <!-- Main image will be inserted here -->
-                    </div>
-                    <div class="gallery-thumbs" id="galleryThumbs">
-                        <!-- Thumbnail images will be inserted here -->
-                    </div>
+            <div class="product-gallery">
+                <div class="gallery-main" id="galleryMain">
+                    <!-- Main image will be inserted here -->
                 </div>
-
-                <!-- Product Info -->
-                <div class="product-info">
-                    <div class="product-tags" id="productTags"></div>
-                    <h1 class="product-title" id="productTitle"></h1>
-
-                    <div class="product-rating">
-                        <div class="rating-stars" id="productRating"></div>
-                        <span class="rating-text" id="productRatingText"></span>
-                    </div>
-
-                    <div class="product-price">
-                        <span class="price-current" id="productPrice"></span>
-                        <span class="price-old" id="productOldPrice"></span>
-                    </div>
-
-                    <div class="product-form">
-                        <!-- Color Selection -->
-                        <div class="product-option">
-                            <div class="option-header">
-                                <label class="option-label">Цвет: <span id="selectedColorName"></span></label>
-                            </div>
-                            <div class="color-swatches-large" id="productColors"></div>
-                        </div>
-
-                        <!-- Size Selection -->
-                        <div class="product-option">
-                            <div class="option-header">
-                                <label class="option-label">Размер: <span id="selectedSizeName"></span></label>
-                                <button class="size-guide-btn">Таблица размеров</button>
-                            </div>
-                            <div class="size-chips" id="productSizes"></div>
-                        </div>
-
-                        <!-- Quantity -->
-                        <div class="product-option">
-                            <label class="option-label">Количество</label>
-                            <div class="quantity-selector">
-                                <button class="qty-btn" id="qtyMinus" aria-label="Уменьшить">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                                <input type="number" class="qty-input" id="qtyInput" value="1" min="1" max="10">
-                                <button class="qty-btn" id="qtyPlus" aria-label="Увеличить">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="product-actions">
-                            <button class="btn btn-dark btn-large btn-block" id="addToCartBtn">
-                                Добавить в корзину
-                            </button>
-                            <button class="btn btn-outline btn-large btn-block" id="buyNowBtn">
-                                Купить сейчас
-                            </button>
-                            <button class="btn-icon-large" id="addToWishlistBtn" aria-label="В избранное">
-                                <i class="far fa-heart"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Accordions -->
-                    <div class="product-accordions">
-                        <div class="accordion-item">
-                            <button class="accordion-header" data-accordion="description">
-                                <span>Описание</span>
-                                <i class="fas fa-chevron-down"></i>
-                            </button>
-                            <div class="accordion-content" id="accordionDescription"></div>
-                        </div>
-
-                        <div class="accordion-item">
-                            <button class="accordion-header" data-accordion="materials">
-                                <span>Состав и уход</span>
-                                <i class="fas fa-chevron-down"></i>
-                            </button>
-                            <div class="accordion-content" id="accordionMaterials"></div>
-                        </div>
-
-                        <div class="accordion-item">
-                            <button class="accordion-header" data-accordion="delivery">
-                                <span>Доставка и возврат</span>
-                                <i class="fas fa-chevron-down"></i>
-                            </button>
-                            <div class="accordion-content" id="accordionDelivery"></div>
-                        </div>
-                    </div>
+                <div class="gallery-thumbs" id="galleryThumbs">
+                    <!-- Thumbnail images will be inserted here -->
                 </div>
             </div>
 
-            <!-- Related Products -->
-            <section class="section">
-                <div class="section-header">
-                    <h2 class="section-title">Вам может понравиться</h2>
+            <!-- Product Info -->
+            <div class="product-info">
+                <div class="product-tags" id="productTags"></div>
+                <h1 class="product-title" id="productTitle"></h1>
+
+                <div class="product-rating">
+                    <div class="rating-stars" id="productRating"></div>
+                    <span class="rating-text" id="productRatingText"></span>
                 </div>
-                <div class="products-grid products-grid-4" id="relatedProducts"></div>
-            </section>
+
+                <div class="product-price">
+                    <span class="price-current" id="productPrice"></span>
+                    <span class="price-old" id="productOldPrice"></span>
+                </div>
+
+                <div class="product-form">
+                    <!-- Color Selection -->
+                    <div class="product-option">
+                        <div class="option-header">
+                            <label class="option-label">Цвет: <span id="selectedColorName"></span></label>
+                        </div>
+                        <div class="color-swatches-large" id="productColors"></div>
+                    </div>
+
+                    <!-- Size Selection -->
+                    <div class="product-option">
+                        <div class="option-header">
+                            <label class="option-label">Размер: <span id="selectedSizeName"></span></label>
+                            <button class="size-guide-btn">Таблица размеров</button>
+                        </div>
+                        <div class="size-chips" id="productSizes"></div>
+                    </div>
+
+                    <!-- Quantity -->
+                    <div class="product-option">
+                        <label class="option-label">Количество</label>
+                        <div class="quantity-selector">
+                            <button class="qty-btn" id="qtyMinus" aria-label="Уменьшить">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" class="qty-input" id="qtyInput" value="1" min="1" max="10">
+                            <button class="qty-btn" id="qtyPlus" aria-label="Увеличить">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="product-actions">
+                        <button class="btn btn-dark btn-large btn-block" id="addToCartBtn">
+                            Добавить в корзину
+                        </button>
+                        <button class="btn btn-outline btn-large btn-block" id="buyNowBtn">
+                            Купить сейчас
+                        </button>
+                        <button class="btn-icon-large" id="addToWishlistBtn" aria-label="В избранное">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Accordions -->
+                <div class="product-accordions">
+                    <div class="accordion-item">
+                        <button class="accordion-header" data-accordion="description">
+                            <span>Описание</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="accordion-content" id="accordionDescription"></div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <button class="accordion-header" data-accordion="materials">
+                            <span>Состав и уход</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="accordion-content" id="accordionMaterials"></div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <button class="accordion-header" data-accordion="delivery">
+                            <span>Доставка и возврат</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="accordion-content" id="accordionDelivery"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Related Products -->
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Вам может понравиться</h2>
+            </div>
+            <div class="products-grid products-grid-4" id="relatedProducts"></div>
+        </div>
+    </section>
 
     <!-- Image Lightbox Modal -->
     <div class="lightbox-modal" id="lightboxModal">
@@ -219,65 +157,7 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <div class="logo footer-logo">
-                        <span class="logo-text">AURA</span>
-                        <span class="logo-dot">·</span>
-                    </div>
-                    <p class="footer-text">Минималистичная мода для современной жизни</p>
-                    <div class="social-links">
-                        <a href="#" class="social-link" data-social="instagram" aria-label="Instagram"><i
-                                class="fab fa-instagram"></i></a>
-                        <a href="#" class="social-link" data-social="facebook" aria-label="Facebook"><i
-                                class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="social-link" data-social="telegram" aria-label="Telegram"><i
-                                class="fab fa-telegram"></i></a>
-                    </div>
-                </div>
-                <div class="footer-col">
-                    <h4 class="footer-heading">Покупателям</h4>
-                    <ul class="footer-links">
-                        <li><a href="#">Доставка и оплата</a></li>
-                        <li><a href="#">Возврат и обмен</a></li>
-                        <li><a href="#">Таблица размеров</a></li>
-                        <li><a href="#">FAQ</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4 class="footer-heading">О компании</h4>
-                    <ul class="footer-links">
-                        <li><a href="#">О нас</a></li>
-                        <li><a href="#">Контакты</a></li>
-                        <li><a href="#">Вакансии</a></li>
-                        <li><a href="#">Sustainability</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4 class="footer-heading">Контакты</h4>
-                    <ul class="footer-contacts">
-                        <li><i class="fas fa-phone"></i> <a id="contactPhone" href="tel:">—</a></li>
-                        <li><i class="fas fa-envelope"></i> <a id="contactEmail" href="mailto:">—</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4 class="footer-heading">Помощь</h4>
-                    <ul class="footer-links">
-                        <li><a href="#">Связаться с нами</a></li>
-                        <li><a href="#">Политика конфиденциальности</a></li>
-                        <li><a href="#">Условия использования</a></li>
-                        <li><a href="#">Программа лояльности</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 AURA. Все права защищены.</p>
-            </div>
-        </div>
-    </footer>
+    <div id="siteFooter"></div>
 
     <!-- Cart Drawer -->
     <div class="drawer" id="cartDrawer">
@@ -322,6 +202,7 @@
     <script src="/js/products-loader.js"></script>
     <script src="/js/data.js"></script>
     <script src="/js/utils.js"></script>
+    <script src="/js/layout.js"></script>
     <script src="/js/app.js"></script>
     <script src="/js/product-page.js"></script>
 </body>

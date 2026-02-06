@@ -23,58 +23,7 @@
 </head>
 
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="container header-container">
-            <div class="header-left">
-                <button class="menu-btn" id="mobileMenuBtn" aria-label="Меню">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
-
-            <a href="/" class="logo">
-                <span class="logo-text">AURA</span>
-                <span class="logo-dot">·</span>
-            </a>
-
-            <div class="header-right">
-                <button class="icon-btn search-btn" id="searchBtn" aria-label="Поиск">
-                    <i class="fas fa-search"></i>
-                </button>
-                <button class="icon-btn wishlist-btn" id="wishlistBtn" aria-label="Избранное">
-                    <i class="far fa-heart"></i>
-                    <span class="badge" id="wishlistBadge">0</span>
-                </button>
-                <button class="icon-btn cart-btn" id="cartBtn" aria-label="Корзина">
-                    <i class="fas fa-shopping-bag"></i>
-                    <span class="badge" id="cartBadge">0</span>
-                </button>
-            </div>
-        </div>
-
-        <nav class="nav" id="mainNav">
-            <div class="container">
-                <ul class="nav-list">
-                    <li><a href="/catalog?category=all" class="nav-link">Все товары</a></li>
-                    <li><a href="/catalog?tag=Sale" class="nav-link nav-link-sale">Sale</a></li>
-                </ul>
-            </div>
-        </nav>
-    </header>
-
-    <!-- Search Modal -->
-    <div class="modal" id="searchModal">
-        <div class="modal-overlay" id="searchModalOverlay"></div>
-        <div class="modal-content search-modal-content">
-            <button class="modal-close" id="searchModalClose" aria-label="Закрыть">
-                <i class="fas fa-times"></i>
-            </button>
-            <div class="search-modal-body">
-                <input type="text" class="search-input-large" id="searchInput" placeholder="Поиск товаров...">
-                <div class="search-results" id="searchResults"></div>
-            </div>
-        </div>
-    </div>
+    <div id="siteHeader"></div>
 
     <!-- Collection Page -->
     <div class="catalog-page">
@@ -128,85 +77,39 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <h3 class="footer-title">О нас</h3>
-                    <p class="footer-text">AURA — это современный интернет-магазин модной одежды и аксессуаров с
-                        тщательно отобранными коллекциями.</p>
-                </div>
-                <div class="footer-col">
-                    <h3 class="footer-title">Информация</h3>
-                    <ul class="footer-links">
-                        <li><a href="#">О компании</a></li>
-                        <li><a href="#">Доставка и оплата</a></li>
-                        <li><a href="#">Возврат товара</a></li>
-                        <li><a href="#">Контакты</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h3 class="footer-title">Категории</h3>
-                    <ul class="footer-links">
-                        <li><a href="/catalog?category=Outerwear">Верхняя одежда</a></li>
-                        <li><a href="/catalog?category=Tops">Топы</a></li>
-                        <li><a href="/catalog?category=Bottoms">Низ</a></li>
-                        <li><a href="/catalog?category=Shoes">Обувь</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h3 class="footer-title">Контакты</h3>
-                    <ul class="footer-contacts">
-                        <li><i class="fas fa-phone"></i> <a id="contactPhone" href="tel:">—</a></li>
-                        <li><i class="fas fa-envelope"></i> <a id="contactEmail" href="mailto:">—</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p class="footer-copyright">© 2024 AURA. Все права защищены.</p>
-                <div class="footer-social">
-                    <a href="#" class="social-link" data-social="instagram" aria-label="Instagram"><i
-                            class="fab fa-instagram"></i></a>
-                    <a href="#" class="social-link" data-social="facebook" aria-label="Facebook"><i
-                            class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="social-link" data-social="telegram" aria-label="Telegram"><i
-                            class="fab fa-telegram"></i></a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <div id="siteFooter"></div>
 
-    <script src="/js/api.js"></script>
-    <script src="/js/header.js"></script>
-    <script src="/js/search.js"></script>
+    <script src="/js/data.js"></script>
+    <script src="/js/utils.js"></script>
+    <script src="/js/layout.js"></script>
+    <script src="/js/app.js"></script>
     <script>
-        // Get collection slug from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const collectionSlug = urlParams.get('slug');
+        const BASE_URL = 'https://higherwaist.uz';
+        const params = new URLSearchParams(window.location.search);
+        const collectionSlug = params.get('slug');
 
-        let currentCollection = null;
-        let products = [];
-
-        // DOM Elements
         const collectionTitle = document.getElementById('collectionTitle');
         const collectionDescription = document.getElementById('collectionDescription');
         const breadcrumbCurrent = document.getElementById('breadcrumbCurrent');
-        const productsGrid = document.getElementById('productsGrid');
         const productsTotal = document.getElementById('productsTotal');
         const loadingState = document.getElementById('loadingState');
         const errorState = document.getElementById('errorState');
         const emptyState = document.getElementById('emptyState');
-        const BASE_URL = 'https://higherwaist.uz';
 
         function setMetaTag(name, content, isProperty = false) {
             const selector = isProperty ? `meta[property="${name}"]` : `meta[name="${name}"]`;
             let element = document.querySelector(selector);
+
             if (!element) {
                 element = document.createElement('meta');
-                element.setAttribute(isProperty ? 'property' : 'name', name);
+                if (isProperty) {
+                    element.setAttribute('property', name);
+                } else {
+                    element.setAttribute('name', name);
+                }
                 document.head.appendChild(element);
             }
+
             element.setAttribute('content', content);
         }
 
@@ -222,8 +125,12 @@
 
         function updateCollectionSeo(collection) {
             const name = collection.name || collection.title || 'Коллекция';
-            const description = (collection.description || 'Коллекции AURA.').replace(/<[^>]*>/g, '').trim();
-            const shortDescription = description.length > 160 ? `${description.slice(0, 157)}...` : description;
+            const description = (collection.description || 'Коллекции AURA.')
+                .replace(/<[^>]*>/g, '')
+                .trim();
+            const shortDescription = description.length > 160
+                ? `${description.slice(0, 157)}...`
+                : description;
             const canonicalUrl = `${BASE_URL}/collection?slug=${encodeURIComponent(collection.slug || '')}`;
 
             document.title = `${name} · AURA`;
@@ -237,45 +144,21 @@
             setCanonical(canonicalUrl);
         }
 
-        async function loadNavbarCategories() {
-            const navList = document.querySelector('#mainNav .nav-list');
-            if (!navList || typeof API === 'undefined' || !API.categories || !API.collections) return;
-
-            try {
-                const [categories, collections] = await Promise.all([
-                    API.categories.getVisible ? API.categories.getVisible() : API.categories.getAll(),
-                    API.collections.getAll({ visible: true })
-                ]);
-
-                const visibleCategories = categories
-                    .filter(cat => cat && cat.is_visible !== false && cat.slug)
-                    .sort((a, b) => (a.order_index || 0) - (b.order_index || 0));
-                const visibleCollections = Array.isArray(collections)
-                    ? collections.filter(col => col && col.is_visible !== false && col.slug)
-                    : [];
-
-                const collectionLinks = visibleCollections.slice(0, 6).map(col => {
-                    const slug = encodeURIComponent(col.slug);
-                    return `<li><a href="/collection?slug=${slug}" class="nav-link">${col.name}</a></li>`;
-                }).join('');
-
-                const categoryLinks = visibleCategories.map(cat => {
-                    const slug = encodeURIComponent(cat.slug);
-                    return `<li><a href="/catalog?category=${slug}" class="nav-link">${cat.name}</a></li>`;
-                }).join('');
-
-                navList.innerHTML = [
-                    '<li><a href="/catalog?category=all" class="nav-link">Все товары</a></li>',
-                    collectionLinks,
-                    categoryLinks,
-                    '<li><a href="/catalog?tag=Sale" class="nav-link nav-link-sale">Sale</a></li>'
-                ].filter(Boolean).join('');
-            } catch (error) {
-                console.error('Failed to load navbar categories:', error);
-            }
+        function showError() {
+            loadingState.style.display = 'none';
+            errorState.style.display = 'block';
+            emptyState.style.display = 'none';
+            document.getElementById('productsGrid').innerHTML = '';
+            collectionTitle.textContent = 'Коллекция не найдена';
         }
 
-        // Load collection
+        function showEmpty() {
+            loadingState.style.display = 'none';
+            errorState.style.display = 'none';
+            emptyState.style.display = 'block';
+            document.getElementById('productsGrid').innerHTML = '';
+        }
+
         async function loadCollection() {
             if (!collectionSlug) {
                 showError();
@@ -286,29 +169,24 @@
                 loadingState.style.display = 'block';
                 errorState.style.display = 'none';
                 emptyState.style.display = 'none';
-                productsGrid.innerHTML = '';
+                document.getElementById('productsGrid').innerHTML = '';
 
-                // Fetch collection with products
-                const response = await fetch(`/api/collections/slug/${collectionSlug}`);
+                const response = await fetch(`/api/collections/slug/${encodeURIComponent(collectionSlug)}`);
 
                 if (!response.ok) {
                     throw new Error('Collection not found');
                 }
 
                 const data = await response.json();
-                currentCollection = data;
-                products = data.products || [];
+                const products = Array.isArray(data.products) ? data.products : [];
+                const collectionName = data.name || data.title || 'Коллекция';
 
-                // Update page title and meta
-                const collectionName = currentCollection.name || currentCollection.title || 'Коллекция';
                 collectionTitle.textContent = collectionName;
                 breadcrumbCurrent.textContent = collectionName;
+                updateCollectionSeo(data);
 
-                updateCollectionSeo(currentCollection);
-
-                // Show description if available
-                if (currentCollection.description) {
-                    collectionDescription.textContent = currentCollection.description;
+                if (data.description) {
+                    collectionDescription.textContent = data.description;
                     collectionDescription.style.display = 'block';
                 } else {
                     collectionDescription.style.display = 'none';
@@ -316,16 +194,13 @@
 
                 loadingState.style.display = 'none';
 
-                // Check if collection has products
                 if (products.length === 0) {
                     showEmpty();
                     return;
                 }
 
-                // Display products
                 productsTotal.textContent = products.length;
-                renderProducts();
-
+                renderProducts(products, 'productsGrid');
             } catch (error) {
                 console.error('Error loading collection:', error);
                 loadingState.style.display = 'none';
@@ -333,304 +208,9 @@
             }
         }
 
-        // Render products
-        function renderProducts() {
-            const wishlistRaw = JSON.parse(localStorage.getItem('wishlist') || '[]');
-            const wishlistIds = new Set(wishlistRaw.map(item => (item && typeof item === 'object') ? item.id : item));
-
-            productsGrid.innerHTML = products.map(product => {
-                const oldPrice = product.old_price || product.oldPrice;
-                const hasDiscount = oldPrice && oldPrice > product.price;
-                const discountPercent = hasDiscount ? Math.round((1 - product.price / oldPrice) * 100) : 0;
-
-                const productName = product.title || product.name || '';
-                const productImage = product.image || (Array.isArray(product.images) ? product.images[0] : product.images) || '';
-                const productTags = Array.isArray(product.tags) ? product.tags : [];
-                const isInWishlist = wishlistIds.has(product.id);
-
-                return `
-                    <div class="product-card" data-product-id="${product.id}">
-                        <div class="product-card-image" data-link="/product?id=${product.id}" role="link" style="background-image: url('${productImage}'); background-size: cover; background-position: center;">
-                            <div class="product-card-actions">
-                                <button class="product-card-btn wishlist-toggle" data-id="${product.id}" aria-label="В избранное">
-                                    <i class="fa${isInWishlist ? 's' : 'r'} fa-heart"></i>
-                                </button>
-                            </div>
-                            ${(productTags.length > 0) || hasDiscount ? `
-                                <div class="product-card-badges">
-                                    ${hasDiscount ? `<span class="badge-sale">-${discountPercent}%</span>` : ''}
-                                    ${productTags.map(tag => {
-                    if (tag === 'New') return '<span class="badge-new">New</span>';
-                    if (tag === 'Limited') return '<span class="badge-limited">Limited</span>';
-                    return '';
-                }).join('')}
-                                </div>
-                            ` : ''}
-                        </div>
-                        <div class="product-card-body">
-                            <a href="/product?id=${product.id}" class="product-card-title">${productName}</a>
-                            <div class="product-card-rating">
-                                <div class="rating-stars">
-                                    ${renderStars(product.rating || 0)}
-                                </div>
-                                <span class="rating-count">(${product.reviews_count || 0})</span>
-                            </div>
-                            <div class="product-card-price">
-                                <span class="price-current">${formatPrice(product.price)}</span>
-                                ${hasDiscount ? `<span class="price-old">${formatPrice(oldPrice)}</span>` : ''}
-                            </div>
-                            <button class="btn btn-outline btn-sm btn-block add-to-cart-quick" data-id="${product.id}">
-                                В корзину
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            attachProductEventListeners();
-        }
-
-        // Format price
-        function formatPrice(price) {
-            return new Intl.NumberFormat('ru-RU').format(price) + ' Сумм';
-        }
-
-        // Render star rating
-        function renderStars(rating) {
-            const fullStars = Math.floor(rating);
-            const hasHalfStar = rating % 1 >= 0.5;
-            let stars = '';
-
-            for (let i = 0; i < 5; i++) {
-                if (i < fullStars) {
-                    stars += '<i class="fas fa-star"></i>';
-                } else if (i === fullStars && hasHalfStar) {
-                    stars += '<i class="fas fa-star-half-alt"></i>';
-                } else {
-                    stars += '<i class="far fa-star"></i>';
-                }
-            }
-
-            return stars;
-        }
-
-        // Show error state
-        function showError() {
-            loadingState.style.display = 'none';
-            errorState.style.display = 'block';
-            emptyState.style.display = 'none';
-            productsGrid.innerHTML = '';
-            collectionTitle.textContent = 'Коллекция не найдена';
-        }
-
-        // Show empty state
-        function showEmpty() {
-            loadingState.style.display = 'none';
-            errorState.style.display = 'none';
-            emptyState.style.display = 'block';
-            productsGrid.innerHTML = '';
-        }
-
-        // Attach event listeners to product cards
-        function attachProductEventListeners() {
-            document.querySelectorAll('.product-card-image').forEach(card => {
-                card.addEventListener('click', () => {
-                    const link = card.getAttribute('data-link');
-                    if (link) window.location.href = link;
-                });
-            });
-
-            document.querySelectorAll('.add-to-cart-quick').forEach(btn => {
-                btn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const productId = this.dataset.id;
-                    const product = products.find(p => String(p.id) === String(productId));
-                    if (product) {
-                        addToCart(product);
-                    }
-                });
-            });
-
-            document.querySelectorAll('.wishlist-toggle').forEach(btn => {
-                btn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const productId = this.dataset.id;
-                    const product = products.find(p => String(p.id) === String(productId));
-                    if (product) {
-                        toggleWishlist(product, this);
-                    }
-                });
-            });
-        }
-
-        // Add to cart
-        function addToCart(product) {
-            let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-            const existingItem = cart.find(item => String(item.id) === String(product.id));
-            const productName = product.title || product.name || '';
-            const productImage = product.image || (Array.isArray(product.images) ? product.images[0] : product.images) || '';
-
-            if (existingItem) {
-                existingItem.quantity += 1;
-            } else {
-                cart.push({
-                    id: product.id,
-                    name: productName,
-                    price: product.price,
-                    image: productImage,
-                    quantity: 1
-                });
-            }
-
-            localStorage.setItem('cart', JSON.stringify(cart));
-            updateCartBadge();
-            showNotification('Товар добавлен в корзину');
-        }
-
-        // Toggle wishlist
-        function toggleWishlist(product, button) {
-            let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-            const index = wishlist.findIndex(item => String(item.id || item) === String(product.id));
-
-            if (index > -1) {
-                wishlist.splice(index, 1);
-                button.querySelector('i').classList.remove('fas');
-                button.querySelector('i').classList.add('far');
-                showNotification('Товар удален из избранного');
-            } else {
-                wishlist.push({
-                    id: product.id,
-                    name: product.title || product.name,
-                    price: product.price,
-                    image: product.image || (Array.isArray(product.images) ? product.images[0] : product.images)
-                });
-                button.querySelector('i').classList.remove('far');
-                button.querySelector('i').classList.add('fas');
-                showNotification('Товар добавлен в избранное');
-            }
-
-            localStorage.setItem('wishlist', JSON.stringify(wishlist));
-            updateWishlistBadge();
-        }
-
-        // Update cart badge
-        function updateCartBadge() {
-            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-            document.getElementById('cartBadge').textContent = totalItems;
-        }
-
-        // Update wishlist badge
-        function updateWishlistBadge() {
-            const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-            document.getElementById('wishlistBadge').textContent = wishlist.length;
-        }
-
-        // Show notification
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.textContent = message;
-            notification.style.cssText = `
-                position: fixed;
-                bottom: 24px;
-                right: 24px;
-                background: #000;
-                color: #fff;
-                padding: 16px 24px;
-                border-radius: 8px;
-                font-size: 14px;
-                z-index: 10000;
-                animation: slideIn 0.3s ease;
-            `;
-            document.body.appendChild(notification);
-
-            setTimeout(() => {
-                notification.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
-        }
-
-        async function applyStoreSettings() {
-            try {
-                const response = await fetch('/api/settings');
-                if (!response.ok) return;
-                const settings = await response.json();
-
-                const logoText = settings.logo_text || settings.site_name || 'AURA';
-                document.querySelectorAll('.logo-text').forEach((el) => {
-                    el.textContent = logoText;
-                });
-
-                const contactPhone = document.getElementById('contactPhone');
-                if (contactPhone) {
-                    const phone = settings.contact_phone || '';
-                    contactPhone.textContent = phone || '—';
-                    if (phone) {
-                        contactPhone.href = `tel:${phone.replace(/\s+/g, '')}`;
-                    } else {
-                        contactPhone.removeAttribute('href');
-                    }
-                }
-
-                const contactEmail = document.getElementById('contactEmail');
-                if (contactEmail) {
-                    const email = settings.contact_email || '';
-                    contactEmail.textContent = email || '—';
-                    if (email) {
-                        contactEmail.href = `mailto:${email}`;
-                    } else {
-                        contactEmail.removeAttribute('href');
-                    }
-                }
-
-                const socials = {
-                    instagram: settings.social_instagram || '',
-                    facebook: settings.social_facebook || '',
-                    telegram: settings.social_telegram || ''
-                };
-
-                document.querySelectorAll('[data-social]').forEach((link) => {
-                    const key = link.dataset.social;
-                    const url = socials[key] || '';
-
-                    if (url) {
-                        link.href = url;
-                        link.style.display = '';
-                        link.setAttribute('target', '_blank');
-                        link.setAttribute('rel', 'noopener');
-                    } else {
-                        link.removeAttribute('href');
-                        link.style.display = 'none';
-                    }
-                });
-
-                document.querySelectorAll('.footer-social, .social-links').forEach((container) => {
-                    const links = Array.from(container.querySelectorAll('[data-social]'));
-                    if (links.length === 0) return;
-                    const hasVisible = links.some(link => link.style.display !== 'none');
-                    container.style.display = hasVisible ? '' : 'none';
-                });
-
-                const footerName = settings.site_name || settings.logo_text || 'AURA';
-                const year = new Date().getFullYear();
-                document.querySelectorAll('.footer-bottom p, .footer-copyright').forEach((el) => {
-                    if (el.textContent) {
-                        el.textContent = `© ${year} ${footerName}. Все права защищены.`;
-                    }
-                });
-            } catch (error) {
-                console.error('Failed to load store settings:', error);
-            }
-        }
-
-        // Initialize
-        applyStoreSettings();
-        loadNavbarCategories();
-        loadCollection();
-        updateCartBadge();
-        updateWishlistBadge();
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCollection();
+        });
     </script>
 </body>
 
