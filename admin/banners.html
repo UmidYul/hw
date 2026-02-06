@@ -95,8 +95,7 @@
                 <div class="topbar-left">
                     <button class="topbar-btn" id="sidebar-toggle">Меню</button>
                     <div class="topbar-search">
-                        <input type="text" class="topbar-search-input"
-                            id="global-search">
+                        <input type="text" class="topbar-search-input" id="global-search">
                         <span class="topbar-search-icon">Поиск</span>
                     </div>
                 </div>
@@ -592,7 +591,8 @@
             });
 
             document.addEventListener('keydown', (e) => {
-                if (e.key === '/' && document.activeElement !== input) {
+                const isTyping = ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) || e.target.isContentEditable;
+                if (e.key === '/' && !isTyping && document.activeElement !== input) {
                     e.preventDefault();
                     input?.focus();
                 }
@@ -653,7 +653,3 @@
 </body>
 
 </html>
-
-
-
-

@@ -339,7 +339,8 @@
 
         // Global search
         document.addEventListener('keydown', (e) => {
-            if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+            const isTyping = ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) || e.target.isContentEditable;
+            if (e.key === '/' && !isTyping) {
                 e.preventDefault();
                 document.getElementById('global-search').focus();
             }
