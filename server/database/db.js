@@ -1,11 +1,18 @@
+import dotenv from 'dotenv';
 import pg from 'pg';
 
+dotenv.config();
+
 const { Pool } = pg;
+const hasPgConfig = !!(process.env.DATABASE_URL || process.env.PGHOST || process.env.PGDATABASE);
+if (!hasPgConfig) {
+    console.warn('⚠️ PostgreSQL env is missing. Check .env for PGHOST/PGDATABASE/PGUSER/PGPASSWORD.');
+}
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     host: process.env.PGHOST,
-    port: process.env.PGPORT ? parseInt(process.env.PGPORT, 10) : undefined,
+    port: process.env.PGPORT ? parseInt(process.env.PGPORT, 10) : 5432,
     database: process.env.PGDATABASE,
     user: process.env.PGUSER,
     password: process.env.PGPASSWORD,
@@ -15,6 +22,15 @@ const pool = new Pool({
 pool.on('connect', () => {
     console.log('✅ Connected to PostgreSQL database');
 });
+
+(async () => {
+    try {
+        await pool.query('SELECT 1');
+        console.log('✅ PostgreSQL connection check passed');
+    } catch (error) {
+        console.error('❌ PostgreSQL connection check failed:', error.message);
+    }
+})();
 
 const normalizeSql = (sql) => {
     let index = 0;
