@@ -118,6 +118,18 @@ router.put('/', requireAdmin, async (req, res) => {
             || enableTaxes === 1
             || enableTaxes === '1';
 
+        const enableTaxesColumn = await dbGet(`
+            SELECT data_type
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+              AND table_name = 'settings'
+              AND column_name = 'enable_taxes'
+        `);
+
+        const enableTaxesDbValue = enableTaxesColumn?.data_type === 'boolean'
+            ? enableTaxesValue
+            : (enableTaxesValue ? 1 : 0);
+
         await dbRun(`
             UPDATE settings SET
                 site_name = ?,
@@ -153,7 +165,7 @@ router.put('/', requireAdmin, async (req, res) => {
             currencySymbol || 'Сумм',
             flatShippingRate || 0,
             freeShippingThreshold || 0,
-            enableTaxesValue,
+            enableTaxesDbValue,
             taxPercent || 0,
             returnPolicy || null,
             privacyPolicy || null
