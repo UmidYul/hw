@@ -287,6 +287,9 @@
 
         // Render products
         function renderProducts() {
+            const wishlistRaw = JSON.parse(localStorage.getItem('wishlist') || '[]');
+            const wishlistIds = new Set(wishlistRaw.map(item => (item && typeof item === 'object') ? item.id : item));
+
             productsGrid.innerHTML = products.map(product => {
                 const oldPrice = product.old_price || product.oldPrice;
                 const hasDiscount = oldPrice && oldPrice > product.price;
@@ -294,41 +297,48 @@
 
                 const productName = product.title || product.name || '';
                 const productImage = product.image || (Array.isArray(product.images) ? product.images[0] : product.images) || '';
+                const productTags = Array.isArray(product.tags) ? product.tags : [];
+                const isInWishlist = wishlistIds.has(product.id);
 
                 return `
-                    <div class="product-card">
-                        ${hasDiscount ? `<span class="product-badge product-badge-sale">-${discountPercent}%</span>` : ''}
-                        ${product.tags && product.tags.includes('New') ? '<span class="product-badge product-badge-new">New</span>' : ''}
-                        <a href="/product?id=${product.id}" class="product-image-link">
-                            <img src="${productImage}" alt="${productName}" class="product-image">
-                        </a>
-                        <div class="product-info">
-                            <h3 class="product-title">
-                                <a href="/product?id=${product.id}">${productName}</a>
-                            </h3>
-                            <div class="product-price">
+                    <div class="product-card" data-product-id="${product.id}">
+                        <div class="product-card-image" data-link="/product?id=${product.id}" role="link" style="background-image: url('${productImage}'); background-size: cover; background-position: center;">
+                            <div class="product-card-actions">
+                                <button class="product-card-btn wishlist-toggle" data-id="${product.id}" aria-label="В избранное">
+                                    <i class="fa${isInWishlist ? 's' : 'r'} fa-heart"></i>
+                                </button>
+                            </div>
+                            ${(productTags.length > 0) || hasDiscount ? `
+                                <div class="product-card-badges">
+                                    ${hasDiscount ? `<span class="badge-sale">-${discountPercent}%</span>` : ''}
+                                    ${productTags.map(tag => {
+                    if (tag === 'New') return '<span class="badge-new">New</span>';
+                    if (tag === 'Limited') return '<span class="badge-limited">Limited</span>';
+                    return '';
+                }).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="product-card-body">
+                            <a href="/product?id=${product.id}" class="product-card-title">${productName}</a>
+                            <div class="product-card-rating">
+                                <div class="rating-stars">
+                                    ${renderStars(product.rating || 0)}
+                                </div>
+                                <span class="rating-count">(${product.reviews_count || 0})</span>
+                            </div>
+                            <div class="product-card-price">
                                 <span class="price-current">${formatPrice(product.price)}</span>
                                 ${hasDiscount ? `<span class="price-old">${formatPrice(oldPrice)}</span>` : ''}
                             </div>
-                            <div class="product-rating">
-                                ${renderStars(product.rating || 0)}
-                                <span class="rating-count">(${product.reviews_count || 0})</span>
-                            </div>
-                        </div>
-                        <div class="product-actions">
-                            <button class="btn btn-primary btn-block add-to-cart-btn" data-id="${product.id}">
-                                <i class="fas fa-shopping-bag"></i>
+                            <button class="btn btn-outline btn-sm btn-block add-to-cart-quick" data-id="${product.id}">
                                 В корзину
-                            </button>
-                            <button class="btn-icon wishlist-icon-btn" data-id="${product.id}" aria-label="В избранное">
-                                <i class="far fa-heart"></i>
                             </button>
                         </div>
                     </div>
                 `;
             }).join('');
 
-            // Attach event listeners
             attachProductEventListeners();
         }
 
@@ -353,7 +363,7 @@
                 }
             }
 
-            return `<div class="stars">${stars}</div>`;
+            return stars;
         }
 
         // Show error state
@@ -375,24 +385,30 @@
 
         // Attach event listeners to product cards
         function attachProductEventListeners() {
-            // Add to cart buttons
-            document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+            document.querySelectorAll('.product-card-image').forEach(card => {
+                card.addEventListener('click', () => {
+                    const link = card.getAttribute('data-link');
+                    if (link) window.location.href = link;
+                });
+            });
+
+            document.querySelectorAll('.add-to-cart-quick').forEach(btn => {
                 btn.addEventListener('click', function (e) {
                     e.preventDefault();
                     const productId = this.dataset.id;
-                    const product = products.find(p => p.id === productId);
+                    const product = products.find(p => String(p.id) === String(productId));
                     if (product) {
                         addToCart(product);
                     }
                 });
             });
 
-            // Wishlist buttons
-            document.querySelectorAll('.wishlist-icon-btn').forEach(btn => {
+            document.querySelectorAll('.wishlist-toggle').forEach(btn => {
                 btn.addEventListener('click', function (e) {
                     e.preventDefault();
+                    e.stopPropagation();
                     const productId = this.dataset.id;
-                    const product = products.find(p => p.id === productId);
+                    const product = products.find(p => String(p.id) === String(productId));
                     if (product) {
                         toggleWishlist(product, this);
                     }
@@ -403,16 +419,18 @@
         // Add to cart
         function addToCart(product) {
             let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-            const existingItem = cart.find(item => item.id === product.id);
+            const existingItem = cart.find(item => String(item.id) === String(product.id));
+            const productName = product.title || product.name || '';
+            const productImage = product.image || (Array.isArray(product.images) ? product.images[0] : product.images) || '';
 
             if (existingItem) {
                 existingItem.quantity += 1;
             } else {
                 cart.push({
                     id: product.id,
-                    name: product.name,
+                    name: productName,
                     price: product.price,
-                    image: product.image,
+                    image: productImage,
                     quantity: 1
                 });
             }
@@ -425,7 +443,7 @@
         // Toggle wishlist
         function toggleWishlist(product, button) {
             let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-            const index = wishlist.findIndex(item => item.id === product.id);
+            const index = wishlist.findIndex(item => String(item.id || item) === String(product.id));
 
             if (index > -1) {
                 wishlist.splice(index, 1);
@@ -435,9 +453,9 @@
             } else {
                 wishlist.push({
                     id: product.id,
-                    name: product.name,
+                    name: product.title || product.name,
                     price: product.price,
-                    image: product.image
+                    image: product.image || (Array.isArray(product.images) ? product.images[0] : product.images)
                 });
                 button.querySelector('i').classList.remove('far');
                 button.querySelector('i').classList.add('fas');

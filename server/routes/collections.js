@@ -77,9 +77,16 @@ router.get('/slug/:slug', async (req, res) => {
                 params.push(parsedCollection.conditions.category);
             }
 
-            if (parsedCollection.conditions.tag) {
-                sql += ' AND tags @> ?::jsonb';
-                params.push(JSON.stringify([parsedCollection.conditions.tag]));
+            const conditionTags = Array.isArray(parsedCollection.conditions.tags)
+                ? parsedCollection.conditions.tags
+                : (parsedCollection.conditions.tag ? [parsedCollection.conditions.tag] : []);
+
+            if (conditionTags.length > 0) {
+                const tagFilters = conditionTags.map(() => 'tags @> ?::jsonb').join(' OR ');
+                sql += ` AND (${tagFilters})`;
+                conditionTags.forEach(tag => {
+                    params.push(JSON.stringify([tag]));
+                });
             }
 
             products = await dbAll(sql, params);
