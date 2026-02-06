@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -16,6 +17,9 @@ import promocodesRouter from './routes/promocodes.js';
 import discountsRouter from './routes/discounts.js';
 import settingsRouter from './routes/settings.js';
 import statsRouter from './routes/stats.js';
+import authRouter from './routes/auth.js';
+import uploadsRouter from './routes/uploads.js';
+import { initAuthTables, requireAdmin } from './services/auth.js';
 
 dotenv.config();
 
@@ -29,14 +33,16 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Static files (serve frontend)
-app.use(express.static(path.join(__dirname, '..')));
 app.use('/css', express.static(path.join(__dirname, '../public/css')));
 app.use('/js', express.static(path.join(__dirname, '../public/js')));
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
 
 // API Routes
+app.use('/api/auth', authRouter);
+app.use('/api/uploads', uploadsRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/customers', customersRouter);
@@ -48,6 +54,7 @@ app.use('/api/discounts', discountsRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/stats', statsRouter);
 
+// Admin auth (UI gate)
 // Page routes (without .html extension)
 // Frontend pages
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../views/index.html')));
@@ -58,18 +65,29 @@ app.get('/collection', (req, res) => res.sendFile(path.join(__dirname, '../views
 app.get('/wishlist', (req, res) => res.sendFile(path.join(__dirname, '../views/wishlist.html')));
 
 // Admin pages
-app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, '../admin/index.html')));
-app.get('/admin/products', (req, res) => res.sendFile(path.join(__dirname, '../admin/products.html')));
-app.get('/admin/product-edit', (req, res) => res.sendFile(path.join(__dirname, '../admin/product-edit.html')));
-app.get('/admin/orders', (req, res) => res.sendFile(path.join(__dirname, '../admin/orders.html')));
-app.get('/admin/order-view', (req, res) => res.sendFile(path.join(__dirname, '../admin/order-view.html')));
-app.get('/admin/customers', (req, res) => res.sendFile(path.join(__dirname, '../admin/customers.html')));
-app.get('/admin/banners', (req, res) => res.sendFile(path.join(__dirname, '../admin/banners.html')));
-app.get('/admin/collections', (req, res) => res.sendFile(path.join(__dirname, '../admin/collections.html')));
-app.get('/admin/categories', (req, res) => res.sendFile(path.join(__dirname, '../admin/categories.html')));
-app.get('/admin/promocodes', (req, res) => res.sendFile(path.join(__dirname, '../admin/promocodes.html')));
-app.get('/admin/discounts', (req, res) => res.sendFile(path.join(__dirname, '../admin/discounts.html')));
-app.get('/admin/settings', (req, res) => res.sendFile(path.join(__dirname, '../admin/settings.html')));
+app.get('/admin/login', (req, res) => res.sendFile(path.join(__dirname, '../admin/login.html')));
+app.get('/admin', requireAdmin, (req, res) => res.sendFile(path.join(__dirname, '../admin/index.html')));
+app.get('/admin/products', requireAdmin, (req, res) => res.sendFile(path.join(__dirname, '../admin/products.html')));
+app.get('/admin/product-edit', requireAdmin, (req, res) => res.sendFile(path.join(__dirname, '../admin/product-edit.html')));
+app.get('/admin/orders', requireAdmin, (req, res) => res.sendFile(path.join(__dirname, '../admin/orders.html')));
+app.get('/admin/order-view', requireAdmin, (req, res) => res.sendFile(path.join(__dirname, '../admin/order-view.html')));
+app.get('/admin/customer-view', requireAdmin, (req, res) => res.sendFile(path.join(__dirname, '../admin/customer-view.html')));
+app.get('/admin/customers', requireAdmin, (req, res) => res.sendFile(path.join(__dirname, '../admin/customers.html')));
+app.get('/admin/banners', requireAdmin, (req, res) => res.sendFile(path.join(__dirname, '../admin/banners.html')));
+app.get('/admin/collections', requireAdmin, (req, res) => res.sendFile(path.join(__dirname, '../admin/collections.html')));
+app.get('/admin/categories', requireAdmin, (req, res) => res.sendFile(path.join(__dirname, '../admin/categories.html')));
+app.get('/admin/promocodes', requireAdmin, (req, res) => res.sendFile(path.join(__dirname, '../admin/promocodes.html')));
+app.get('/admin/discounts', requireAdmin, (req, res) => res.sendFile(path.join(__dirname, '../admin/discounts.html')));
+app.get('/admin/settings', requireAdmin, (req, res) => res.sendFile(path.join(__dirname, '../admin/settings.html')));
+
+// Admin assets (protect everything except login and its CSS)
+app.use('/admin', (req, res, next) => {
+    const openPaths = new Set(['/login', '/login.html', '/styles.css']);
+    if (openPaths.has(req.path)) {
+        return next();
+    }
+    return requireAdmin(req, res, next);
+}, express.static(path.join(__dirname, '../admin')));
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -86,8 +104,18 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-    console.log(`🚀 AURA Server running on http://localhost:${PORT}`);
-    console.log(`📊 API: http://localhost:${PORT}/api`);
-    console.log(`🌐 Frontend: http://localhost:${PORT}/views/index.html`);
-});
+const startServer = async () => {
+    try {
+        await initAuthTables();
+        app.listen(PORT, () => {
+            console.log(`🚀 AURA Server running on http://localhost:${PORT}`);
+            console.log(`📊 API: http://localhost:${PORT}/api`);
+            console.log(`🌐 Frontend: http://localhost:${PORT}/views/index.html`);
+        });
+    } catch (error) {
+        console.error('Failed to initialize auth tables:', error);
+        process.exit(1);
+    }
+};
+
+startServer();

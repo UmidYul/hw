@@ -348,6 +348,45 @@ a:hover {
     margin-bottom: var(--spacing-xl);
 }
 
+.color-palette-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.color-palette-row {
+    display: grid;
+    grid-template-columns: 1fr 80px auto;
+    gap: var(--spacing-sm);
+    align-items: center;
+}
+
+.color-palette-row .color-input {
+    padding: 0;
+    height: 38px;
+}
+
+.color-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+}
+
+.color-option span {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.color-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    display: inline-block;
+}
+
 .page-title {
     font-size: 28px;
     margin-bottom: 4px;
@@ -736,6 +775,16 @@ a:hover {
     background: var(--color-surface);
     border-radius: var(--border-radius);
     max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-xl);
+}
+
+.modal-content {
+    position: relative;
+    background: var(--color-surface);
+    border-radius: var(--border-radius);
     width: 100%;
     max-height: 90vh;
     overflow-y: auto;

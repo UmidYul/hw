@@ -23,6 +23,7 @@ function renderHeroBanner() {
 
     if (heroBanners.length === 0) {
         // Keep default static hero
+        heroSection.classList.remove('banner-active');
         return;
     }
 
@@ -31,7 +32,8 @@ function renderHeroBanner() {
 
     // Update hero content
     heroSection.style.backgroundColor = banner.background_color || '#F5F5F5';
-    heroSection.style.color = banner.text_color || '#2D2D2D';
+    heroSection.style.color = '#ffffff';
+    heroSection.classList.add('banner-active');
 
     if (banner.image) {
         heroSection.style.backgroundImage = `url(${banner.image})`;

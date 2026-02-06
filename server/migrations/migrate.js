@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import db from '../database/db.js';
+import { dbRun, dbGet } from '../database/db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,16 +21,12 @@ async function runMigrations() {
             .filter(s => s.length > 0);
 
         for (const statement of statements) {
-            await new Promise((resolve, reject) => {
-                db.run(statement, (err) => {
-                    if (err) {
-                        console.error('❌ Migration error:', err.message);
-                        reject(err);
-                    } else {
-                        resolve();
-                    }
-                });
-            });
+            try {
+                await dbRun(statement);
+            } catch (error) {
+                console.error('❌ Migration error:', error.message);
+                throw error;
+            }
         }
 
         console.log('✅ Migrations completed successfully');
@@ -49,12 +45,8 @@ async function seedInitialData() {
     console.log('🌱 Seeding initial data...');
 
     // Check if we already have data
-    const productCount = await new Promise((resolve, reject) => {
-        db.get('SELECT COUNT(*) as count FROM products', (err, row) => {
-            if (err) reject(err);
-            else resolve(row.count);
-        });
-    });
+    const countRow = await dbGet('SELECT COUNT(*) as count FROM products');
+    const productCount = Number(countRow?.count || 0);
 
     if (productCount > 0) {
         console.log('ℹ️ Data already exists, skipping seed');
@@ -85,30 +77,29 @@ async function seedInitialData() {
           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
-                await new Promise((resolve, reject) => {
-                    db.run(sql, [
-                        product.id,
-                        product.title,
-                        product.category,
-                        product.price,
-                        product.oldPrice || null,
-                        JSON.stringify(product.tags || []),
-                        JSON.stringify(product.colors || []),
-                        JSON.stringify(product.sizes || []),
-                        product.rating || 0,
-                        product.reviewsCount || 0,
-                        JSON.stringify(product.images || []),
-                        product.description || '',
-                        product.material || '',
-                        product.care || '',
-                        product.fit || '',
-                        product.deliveryInfo || ''
-                    ], (err) => {
-                        if (err) reject(err);
-                        else resolve();
-                    });
-                });
+                await dbRun(sql, [
+                    product.id,
+                    product.title,
+                    product.category,
+                    product.price,
+                    product.oldPrice || null,
+                    JSON.stringify(product.tags || []),
+                    JSON.stringify(product.colors || []),
+                    JSON.stringify(product.sizes || []),
+                    product.rating || 0,
+                    product.reviewsCount || 0,
+                    JSON.stringify(product.images || []),
+                    product.description || '',
+                    product.material || '',
+                    product.care || '',
+                    product.fit || '',
+                    product.deliveryInfo || ''
+                ]);
             }
+
+            await dbRun(
+                "SELECT setval(pg_get_serial_sequence('products', 'id'), (SELECT COALESCE(MAX(id), 1) FROM products))"
+            );
 
             console.log('✅ Products imported successfully');
         }

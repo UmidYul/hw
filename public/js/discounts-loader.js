@@ -75,10 +75,12 @@ class DiscountSystem {
 
         if (target === 'category') {
             const categoryId = discount.category_id;
-            // Product category can be stored as slug or id
-            return product.category === categoryId ||
-                product.category_id === categoryId ||
-                product.category === String(categoryId);
+            if (categoryId === null || categoryId === undefined) return false;
+            const normalizedCategoryId = String(categoryId);
+            const productCategory = product.category !== undefined ? String(product.category) : null;
+            const productCategoryId = product.category_id !== undefined ? String(product.category_id) : null;
+
+            return productCategory === normalizedCategoryId || productCategoryId === normalizedCategoryId;
         }
 
         if (target === 'collection') {
@@ -96,7 +98,9 @@ class DiscountSystem {
                     productIds = [];
                 }
             }
-            return Array.isArray(productIds) && productIds.includes(product.id);
+            if (!Array.isArray(productIds)) return false;
+            const normalizedIds = productIds.map(id => String(id));
+            return normalizedIds.includes(String(product.id));
         }
 
         return false;

@@ -150,18 +150,20 @@
                 <div class="footer-col">
                     <h3 class="footer-title">Контакты</h3>
                     <ul class="footer-contacts">
-                        <li><i class="fas fa-phone"></i> +7 (999) 123-45-67</li>
-                        <li><i class="fas fa-envelope"></i> info@aura-shop.ru</li>
-                        <li><i class="fas fa-map-marker-alt"></i> Москва, ул. Примерная, д. 1</li>
+                        <li><i class="fas fa-phone"></i> <a id="contactPhone" href="tel:">—</a></li>
+                        <li><i class="fas fa-envelope"></i> <a id="contactEmail" href="mailto:">—</a></li>
                     </ul>
                 </div>
             </div>
             <div class="footer-bottom">
                 <p class="footer-copyright">© 2024 AURA. Все права защищены.</p>
                 <div class="footer-social">
-                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
-                    <a href="#" class="social-link"><i class="fab fa-telegram"></i></a>
+                    <a href="#" class="social-link" data-social="instagram" aria-label="Instagram"><i
+                            class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-link" data-social="facebook" aria-label="Facebook"><i
+                            class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-link" data-social="telegram" aria-label="Telegram"><i
+                            class="fab fa-telegram"></i></a>
                 </div>
             </div>
         </div>
@@ -474,7 +476,81 @@
             }, 3000);
         }
 
+        async function applyStoreSettings() {
+            try {
+                const response = await fetch('/api/settings');
+                if (!response.ok) return;
+                const settings = await response.json();
+
+                const logoText = settings.logo_text || settings.site_name || 'AURA';
+                document.querySelectorAll('.logo-text').forEach((el) => {
+                    el.textContent = logoText;
+                });
+
+                const contactPhone = document.getElementById('contactPhone');
+                if (contactPhone) {
+                    const phone = settings.contact_phone || '';
+                    contactPhone.textContent = phone || '—';
+                    if (phone) {
+                        contactPhone.href = `tel:${phone.replace(/\s+/g, '')}`;
+                    } else {
+                        contactPhone.removeAttribute('href');
+                    }
+                }
+
+                const contactEmail = document.getElementById('contactEmail');
+                if (contactEmail) {
+                    const email = settings.contact_email || '';
+                    contactEmail.textContent = email || '—';
+                    if (email) {
+                        contactEmail.href = `mailto:${email}`;
+                    } else {
+                        contactEmail.removeAttribute('href');
+                    }
+                }
+
+                const socials = {
+                    instagram: settings.social_instagram || '',
+                    facebook: settings.social_facebook || '',
+                    telegram: settings.social_telegram || ''
+                };
+
+                document.querySelectorAll('[data-social]').forEach((link) => {
+                    const key = link.dataset.social;
+                    const url = socials[key] || '';
+
+                    if (url) {
+                        link.href = url;
+                        link.style.display = '';
+                        link.setAttribute('target', '_blank');
+                        link.setAttribute('rel', 'noopener');
+                    } else {
+                        link.removeAttribute('href');
+                        link.style.display = 'none';
+                    }
+                });
+
+                document.querySelectorAll('.footer-social, .social-links').forEach((container) => {
+                    const links = Array.from(container.querySelectorAll('[data-social]'));
+                    if (links.length === 0) return;
+                    const hasVisible = links.some(link => link.style.display !== 'none');
+                    container.style.display = hasVisible ? '' : 'none';
+                });
+
+                const footerName = settings.site_name || settings.logo_text || 'AURA';
+                const year = new Date().getFullYear();
+                document.querySelectorAll('.footer-bottom p, .footer-copyright').forEach((el) => {
+                    if (el.textContent) {
+                        el.textContent = `© ${year} ${footerName}. Все права защищены.`;
+                    }
+                });
+            } catch (error) {
+                console.error('Failed to load store settings:', error);
+            }
+        }
+
         // Initialize
+        applyStoreSettings();
         loadNavbarCategories();
         loadCollection();
         updateCartBadge();

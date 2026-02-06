@@ -1,53 +1,65 @@
-import sqlite3 from 'sqlite3';
-import { fileURLToPath } from 'url';
-import path from 'path';
-import fs from 'fs';
+import pg from 'pg';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const { Pool } = pg;
 
-const dbPath = path.join(__dirname, 'aura.db');
-
-// Create database directory if it doesn't exist
-if (!fs.existsSync(__dirname)) {
-    fs.mkdirSync(__dirname, { recursive: true });
-}
-
-// Create database connection
-const db = new sqlite3.Database(dbPath, (err) => {
-    if (err) {
-        console.error('Error opening database:', err.message);
-    } else {
-        console.log('✅ Connected to SQLite database');
-    }
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    host: process.env.PGHOST,
+    port: process.env.PGPORT ? parseInt(process.env.PGPORT, 10) : undefined,
+    database: process.env.PGDATABASE,
+    user: process.env.PGUSER,
+    password: process.env.PGPASSWORD,
+    ssl: process.env.PGSSL === 'true' ? { rejectUnauthorized: false } : undefined
 });
 
-// Promisify database methods
-export const dbRun = (sql, params = []) => {
-    return new Promise((resolve, reject) => {
-        db.run(sql, params, function (err) {
-            if (err) reject(err);
-            else resolve({ id: this.lastID, changes: this.changes });
-        });
-    });
+pool.on('connect', () => {
+    console.log('✅ Connected to PostgreSQL database');
+});
+
+const normalizeSql = (sql) => {
+    let index = 0;
+    let inSingleQuote = false;
+    let output = '';
+
+    for (let i = 0; i < sql.length; i += 1) {
+        const char = sql[i];
+        if (char === "'") {
+            inSingleQuote = !inSingleQuote;
+            output += char;
+            continue;
+        }
+
+        if (char === '?' && !inSingleQuote) {
+            index += 1;
+            output += `$${index}`;
+            continue;
+        }
+
+        output += char;
+    }
+
+    return output;
 };
 
-export const dbGet = (sql, params = []) => {
-    return new Promise((resolve, reject) => {
-        db.get(sql, params, (err, row) => {
-            if (err) reject(err);
-            else resolve(row);
-        });
-    });
+export const dbRun = async (sql, params = []) => {
+    const normalized = normalizeSql(sql);
+    const result = await pool.query(normalized, params);
+    return {
+        id: result.rows?.[0]?.id,
+        changes: result.rowCount
+    };
 };
 
-export const dbAll = (sql, params = []) => {
-    return new Promise((resolve, reject) => {
-        db.all(sql, params, (err, rows) => {
-            if (err) reject(err);
-            else resolve(rows);
-        });
-    });
+export const dbGet = async (sql, params = []) => {
+    const normalized = normalizeSql(sql);
+    const result = await pool.query(normalized, params);
+    return result.rows?.[0];
 };
 
-export default db;
+export const dbAll = async (sql, params = []) => {
+    const normalized = normalizeSql(sql);
+    const result = await pool.query(normalized, params);
+    return result.rows;
+};
+
+export default pool;

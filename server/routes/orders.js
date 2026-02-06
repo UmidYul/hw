@@ -1,11 +1,23 @@
 import express from 'express';
 import { dbAll, dbGet, dbRun } from '../database/db.js';
 import { notifyNewOrder, notifyStatusChange } from '../services/telegram.js';
+import { requireAdmin } from '../services/auth.js';
 
 const router = express.Router();
 
+const parseJsonField = (value, fallback) => {
+    if (value === null || value === undefined) return fallback;
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'object') return value;
+    try {
+        return JSON.parse(value);
+    } catch (error) {
+        return fallback;
+    }
+};
+
 // Get all orders
-router.get('/', async (req, res) => {
+router.get('/', requireAdmin, async (req, res) => {
     try {
         const { status, limit, offset } = req.query;
 
@@ -34,7 +46,7 @@ router.get('/', async (req, res) => {
         // Parse JSON fields
         const parsedOrders = orders.map(o => ({
             ...o,
-            items: JSON.parse(o.items || '[]')
+            items: parseJsonField(o.items, [])
         }));
 
         res.json(parsedOrders);
@@ -44,7 +56,7 @@ router.get('/', async (req, res) => {
 });
 
 // Get order by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', requireAdmin, async (req, res) => {
     try {
         const order = await dbGet('SELECT * FROM orders WHERE id = ?', [req.params.id]);
 
@@ -54,7 +66,7 @@ router.get('/:id', async (req, res) => {
 
         const parsedOrder = {
             ...order,
-            items: JSON.parse(order.items || '[]')
+            items: parseJsonField(order.items, [])
         };
 
         res.json(parsedOrder);
@@ -80,7 +92,7 @@ router.post('/', async (req, res) => {
         if (!customer) {
             // Create new customer
             const customerResult = await dbRun(
-                'INSERT INTO customers (name, phone, email, total_orders, total_spent) VALUES (?, ?, ?, 1, ?)',
+                'INSERT INTO customers (name, phone, email, total_orders, total_spent) VALUES (?, ?, ?, 1, ?) RETURNING id',
                 [customerName, customerPhone, customerEmail || null, total]
             );
             customer = { id: customerResult.id };
@@ -126,12 +138,13 @@ router.post('/', async (req, res) => {
 
         // Create order
         const sql = `
-      INSERT INTO orders (
-        order_number, customer_id, customer_name, customer_phone, customer_email,
-        shipping_address, items, subtotal, discount, shipping, total,
-        status, payment_method, notes, promo_code
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
+            INSERT INTO orders (
+                order_number, customer_id, customer_name, customer_phone, customer_email,
+                shipping_address, items, subtotal, discount, shipping, total,
+                status, payment_method, notes, promo_code
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            RETURNING id
+        `;
 
         const result = await dbRun(sql, [
             orderNumber, customer.id, customerName, customerPhone, customerEmail || null,
@@ -173,7 +186,7 @@ router.post('/', async (req, res) => {
 });
 
 // Update order status
-router.patch('/:id/status', async (req, res) => {
+router.patch('/:id/status', requireAdmin, async (req, res) => {
     try {
         const { status } = req.body;
 
@@ -220,7 +233,7 @@ router.patch('/:id/status', async (req, res) => {
 });
 
 // Delete order
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAdmin, async (req, res) => {
     try {
         await dbRun('DELETE FROM orders WHERE id = ?', [req.params.id]);
         res.json({ message: 'Order deleted successfully' });

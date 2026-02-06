@@ -224,10 +224,34 @@ textarea {
     background: linear-gradient(135deg, #F5F5F5 0%, #E8E8E8 100%);
     text-align: center;
     padding: var(--spacing-2xl) var(--spacing-md);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero.banner-active::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: inherit;
+    background-position: center;
+    background-size: cover;
+    filter: blur(14px);
+    transform: scale(1.08);
+    z-index: 0;
+}
+
+.hero.banner-active::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 1;
 }
 
 .hero-content {
     max-width: 600px;
+    position: relative;
+    z-index: 2;
 }
 
 .hero-subtitle {
@@ -237,6 +261,15 @@ textarea {
     color: var(--color-secondary);
     margin-bottom: var(--spacing-md);
     display: block;
+}
+
+.hero.banner-active .hero-subtitle,
+.hero.banner-active .hero-text {
+    color: rgba(255, 255, 255, 0.86);
+}
+
+.hero.banner-active .hero-title {
+    color: #fff;
 }
 
 .hero-title {
@@ -796,6 +829,16 @@ textarea {
     font-size: 14px;
     color: var(--color-secondary);
     transition: color var(--transition);
+}
+
+
+.footer-contacts {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0;
+    margin: 0;
 }
 
 .footer-links a:hover {

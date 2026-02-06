@@ -202,13 +202,23 @@ function renderColors() {
     const colorsContainer = document.getElementById('productColors');
     const variants = getVariants(product);
 
-    const colorMap = {
-        'Black': '#2D2D2D',
-        'White': '#FFFFFF',
-        'Beige': '#D4C4B0',
-        'Navy': '#1A2B4A',
-        'Grey': '#8B8B8B',
-        'Brown': '#6B4423'
+    const fallbackPalette = [
+        { name: 'Black', hex: '#2D2D2D' },
+        { name: 'White', hex: '#FFFFFF' },
+        { name: 'Beige', hex: '#D4C4B0' },
+        { name: 'Navy', hex: '#1A2B4A' },
+        { name: 'Grey', hex: '#8B8B8B' },
+        { name: 'Brown', hex: '#6B4423' }
+    ];
+
+    const palette = typeof getColorPalette === 'function' ? getColorPalette() : fallbackPalette;
+    const findColorHex = (colorName) => {
+        if (typeof getColorHex === 'function') {
+            const hex = getColorHex(colorName);
+            if (hex) return hex;
+        }
+        const match = palette.find(item => item.name === colorName);
+        return match ? match.hex : '#CCCCCC';
     };
 
     const isColorAvailable = (color) => {
@@ -229,6 +239,8 @@ function renderColors() {
     document.getElementById('selectedColorName').textContent = selectedColor || '';
     colorsContainer.innerHTML = colors.map((color) => {
         const available = isColorAvailable(color);
+        const hex = findColorHex(color);
+        const isWhite = hex.toLowerCase() === '#ffffff';
         const classes = [
             'color-swatch-large',
             color === selectedColor ? 'active' : '',
@@ -239,7 +251,7 @@ function renderColors() {
             <button class="${classes}" 
                     data-color="${color}" 
                     ${available ? '' : 'disabled'}
-                    style="background: ${colorMap[color] || '#CCCCCC'}${color === 'White' ? '; border: 1px solid #E8E8E8' : ''}" 
+                    style="background: ${hex}${isWhite ? '; border: 1px solid #E8E8E8' : ''}" 
                     aria-label="${color}">
             </button>
         `;

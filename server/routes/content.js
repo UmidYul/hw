@@ -3,6 +3,16 @@ import { dbAll, dbGet, dbRun } from '../database/db.js';
 
 const router = express.Router();
 
+const parseJsonField = (value, fallback) => {
+    if (value === null || value === undefined) return fallback;
+    if (typeof value === 'object') return value;
+    try {
+        return JSON.parse(value);
+    } catch (error) {
+        return fallback;
+    }
+};
+
 // Get content setting by key
 router.get('/:key', async (req, res) => {
     try {
@@ -14,7 +24,7 @@ router.get('/:key', async (req, res) => {
 
         res.json({
             key: setting.key,
-            value: setting.value ? JSON.parse(setting.value) : null,
+            value: parseJsonField(setting.value, null),
             updatedAt: setting.updated_at
         });
     } catch (error) {
@@ -29,7 +39,7 @@ router.get('/', async (req, res) => {
 
         const parsed = {};
         settings.forEach(s => {
-            parsed[s.key] = s.value ? JSON.parse(s.value) : null;
+            parsed[s.key] = parseJsonField(s.value, null);
         });
 
         res.json(parsed);
@@ -48,7 +58,7 @@ router.get('/featured/collections', async (req, res) => {
             return res.json([]);
         }
 
-        const featuredIds = JSON.parse(setting.value);
+        const featuredIds = parseJsonField(setting.value, []);
 
         if (!Array.isArray(featuredIds) || featuredIds.length === 0) {
             return res.json([]);
@@ -57,14 +67,14 @@ router.get('/featured/collections', async (req, res) => {
         // Get full collection details for featured collections
         const placeholders = featuredIds.map(() => '?').join(',');
         const collections = await dbAll(
-            `SELECT * FROM collections WHERE id IN (${placeholders}) AND is_active = 1 ORDER BY name`,
+            `SELECT * FROM collections WHERE id IN (${placeholders}) AND is_visible = true ORDER BY name`,
             featuredIds
         );
 
         // For each collection, get product count
         const collectionsWithCount = await Promise.all(
             collections.map(async (collection) => {
-                const productIds = collection.product_ids ? JSON.parse(collection.product_ids) : [];
+                const productIds = parseJsonField(collection.product_ids, []);
                 return {
                     ...collection,
                     product_ids: productIds,

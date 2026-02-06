@@ -1,10 +1,11 @@
 import express from 'express';
 import { dbAll, dbGet, dbRun } from '../database/db.js';
+import { requireAdmin } from '../services/auth.js';
 
 const router = express.Router();
 
 // Get all discounts
-router.get('/', async (req, res) => {
+router.get('/', requireAdmin, async (req, res) => {
     try {
         const discounts = await dbAll('SELECT * FROM discounts ORDER BY created_at DESC');
         res.json(discounts);
@@ -17,10 +18,10 @@ router.get('/', async (req, res) => {
 router.get('/active', async (req, res) => {
     try {
         const sql = `
-      SELECT * FROM discounts 
-      WHERE is_active = 1 
-      AND (start_date IS NULL OR start_date <= CURRENT_TIMESTAMP)
-      AND (end_date IS NULL OR end_date >= CURRENT_TIMESTAMP)
+      SELECT * FROM discounts
+    WHERE is_active = true
+            AND (start_date IS NULL OR start_date <= NOW())
+            AND (end_date IS NULL OR end_date >= NOW())
     `;
 
         const discounts = await dbAll(sql);
@@ -31,7 +32,7 @@ router.get('/active', async (req, res) => {
 });
 
 // Get discount by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', requireAdmin, async (req, res) => {
     try {
         const discount = await dbGet('SELECT * FROM discounts WHERE id = ?', [req.params.id]);
         if (!discount) {
@@ -44,7 +45,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create discount
-router.post('/', async (req, res) => {
+router.post('/', requireAdmin, async (req, res) => {
     try {
         const {
             name,
@@ -64,13 +65,14 @@ router.post('/', async (req, res) => {
         } = req.body;
 
         const sql = `
-      INSERT INTO discounts (
-        name, description, discount_type, discount_value, target,
-        category_id, collection_id, product_ids, min_amount, priority,
-        is_active, combine_with_other, start_date, end_date
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
+            INSERT INTO discounts (
+                name, description, discount_type, discount_value, target,
+                category_id, collection_id, product_ids, min_amount, priority,
+                is_active, combine_with_other, start_date, end_date
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            RETURNING id
+        `;
 
         const productIdsJson = product_ids ?
             (typeof product_ids === 'string' ? product_ids : JSON.stringify(product_ids)) :
@@ -87,8 +89,8 @@ router.post('/', async (req, res) => {
             productIdsJson,
             min_amount || 0,
             priority || 0,
-            is_active !== undefined ? is_active : 1,
-            combine_with_other || 0,
+            is_active !== undefined ? !!is_active : true,
+            !!combine_with_other,
             start_date || null,
             end_date || null
         ]);
@@ -101,7 +103,7 @@ router.post('/', async (req, res) => {
 });
 
 // Update discount
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireAdmin, async (req, res) => {
     try {
         const {
             name,
@@ -144,8 +146,8 @@ router.put('/:id', async (req, res) => {
             productIdsJson,
             min_amount || 0,
             priority || 0,
-            is_active !== undefined ? is_active : 1,
-            combine_with_other || 0,
+            is_active !== undefined ? !!is_active : true,
+            !!combine_with_other,
             start_date || null,
             end_date || null,
             req.params.id
@@ -159,7 +161,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete discount
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAdmin, async (req, res) => {
     try {
         await dbRun('DELETE FROM discounts WHERE id = ?', [req.params.id]);
         res.json({ message: 'Discount deleted successfully' });

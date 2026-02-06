@@ -37,6 +37,67 @@ async function updateStoreTexts() {
             freeShippingText.textContent = 'Бесплатная доставка';
         }
     }
+
+    const logoTextValue = siteSettings?.logoText || siteSettings?.storeName || 'AURA';
+    document.querySelectorAll('.logo-text').forEach((el) => {
+        el.textContent = logoTextValue;
+    });
+
+    const footerName = siteSettings?.storeName || siteSettings?.logoText || 'AURA';
+    const year = new Date().getFullYear();
+    document.querySelectorAll('.footer-bottom p, .footer-copyright').forEach((el) => {
+        if (el.textContent) {
+            el.textContent = `© ${year} ${footerName}. Все права защищены.`;
+        }
+    });
+
+    const contactPhone = document.getElementById('contactPhone');
+    if (contactPhone) {
+        contactPhone.textContent = siteSettings?.contactPhone || '—';
+        if (siteSettings?.contactPhone) {
+            contactPhone.href = `tel:${siteSettings.contactPhone.replace(/\s+/g, '')}`;
+        } else {
+            contactPhone.removeAttribute('href');
+        }
+    }
+
+    const contactEmail = document.getElementById('contactEmail');
+    if (contactEmail) {
+        contactEmail.textContent = siteSettings?.contactEmail || '—';
+        if (siteSettings?.contactEmail) {
+            contactEmail.href = `mailto:${siteSettings.contactEmail}`;
+        } else {
+            contactEmail.removeAttribute('href');
+        }
+    }
+
+    const socials = {
+        instagram: siteSettings?.socialInstagram || '',
+        facebook: siteSettings?.socialFacebook || '',
+        telegram: siteSettings?.socialTelegram || ''
+    };
+
+    document.querySelectorAll('[data-social]').forEach((link) => {
+        const key = link.dataset.social;
+        const url = socials[key] || '';
+
+        if (url) {
+            link.href = url;
+            link.style.display = '';
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noopener');
+        } else {
+            link.removeAttribute('href');
+            link.style.display = 'none';
+        }
+    });
+
+    document.querySelectorAll('.social-links, .footer-social').forEach((container) => {
+        const links = Array.from(container.querySelectorAll('[data-social]'));
+        if (links.length === 0) return;
+        const hasVisible = links.some(link => link.style.display !== 'none');
+        container.style.display = hasVisible ? '' : 'none';
+    });
 }
 
 // Header functionality

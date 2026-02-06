@@ -152,6 +152,47 @@
 
                     <div class="card mt-lg">
                         <div class="card-header">
+                            <h3 class="card-title">Соцсети</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="grid grid-cols-2">
+                                <div class="form-group">
+                                    <label class="form-label">Instagram</label>
+                                    <input type="url" class="form-input" name="socialInstagram"
+                                        placeholder="https://instagram.com/...">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Facebook</label>
+                                    <input type="url" class="form-input" name="socialFacebook"
+                                        placeholder="https://facebook.com/...">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2">
+                                <div class="form-group">
+                                    <label class="form-label">Telegram</label>
+                                    <input type="url" class="form-input" name="socialTelegram"
+                                        placeholder="https://t.me/...">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">Цветовая палитра</h3>
+                        </div>
+                        <div class="card-body">
+                            <input type="hidden" name="colorPalette" id="colorPaletteValue">
+                            <div class="color-palette-list" id="colorPaletteList"></div>
+                            <button type="button" class="btn btn-secondary" id="addColorBtn">Добавить цвет</button>
+                            <div class="form-hint">Используется в фильтрах и карточках товаров.</div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-lg">
+                        <div class="card-header">
                             <h3 class="card-title">Доставка</h3>
                         </div>
                         <div class="card-body">
@@ -232,6 +273,10 @@
                     'store_description': 'storeDescription',
                     'contact_email': 'contactEmail',
                     'contact_phone': 'contactPhone',
+                    'social_instagram': 'socialInstagram',
+                    'social_facebook': 'socialFacebook',
+                    'social_telegram': 'socialTelegram',
+                    'color_palette': 'colorPalette',
                     'free_shipping_threshold': 'freeShippingThreshold',
                     'shipping_cost': 'flatShippingRate',
                     'enable_taxes': 'enableTaxes',
@@ -251,11 +296,98 @@
                         input.value = settings[dbKey] || '';
                     }
                 });
+
+                loadColorPalette(settings.color_palette);
             } catch (error) {
                 console.error('Failed to load settings:', error);
                 Components.showToast('Ошибка', 'Не удалось загрузить настройки', 'error');
+                loadColorPalette(null);
             }
         }
+
+        const defaultPalette = [
+            { name: 'Black', hex: '#2D2D2D' },
+            { name: 'White', hex: '#FFFFFF' },
+            { name: 'Beige', hex: '#D4C4B0' },
+            { name: 'Navy', hex: '#1A2B4A' },
+            { name: 'Grey', hex: '#8B8B8B' },
+            { name: 'Brown', hex: '#6B4423' }
+        ];
+
+        let paletteState = [...defaultPalette];
+
+        function normalizePalette(value) {
+            if (!value) return [...defaultPalette];
+            try {
+                const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+                if (!Array.isArray(parsed)) return [...defaultPalette];
+                const cleaned = parsed
+                    .filter(item => item && item.name)
+                    .map(item => ({
+                        name: String(item.name).trim(),
+                        hex: String(item.hex || '').trim() || '#CCCCCC'
+                    }))
+                    .filter(item => item.name.length > 0);
+                return cleaned.length > 0 ? cleaned : [...defaultPalette];
+            } catch (error) {
+                return [...defaultPalette];
+            }
+        }
+
+        function updatePaletteValue() {
+            const input = document.getElementById('colorPaletteValue');
+            if (input) {
+                input.value = JSON.stringify(paletteState);
+            }
+        }
+
+        function renderPaletteList() {
+            const container = document.getElementById('colorPaletteList');
+            if (!container) return;
+
+            container.innerHTML = paletteState.map((item, index) => `
+                <div class="color-palette-row" data-index="${index}">
+                    <input type="text" class="form-input" data-field="name" value="${item.name}" placeholder="Название">
+                    <input type="color" class="form-input color-input" data-field="hex" value="${item.hex}">
+                    <button type="button" class="btn btn-ghost btn-sm" data-action="remove">Удалить</button>
+                </div>
+            `).join('');
+
+            container.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', (event) => {
+                    const row = event.target.closest('.color-palette-row');
+                    const index = parseInt(row.dataset.index, 10);
+                    const field = event.target.dataset.field;
+                    paletteState[index][field] = event.target.value.trim();
+                    updatePaletteValue();
+                });
+            });
+
+            container.querySelectorAll('[data-action="remove"]').forEach(btn => {
+                btn.addEventListener('click', (event) => {
+                    const row = event.target.closest('.color-palette-row');
+                    const index = parseInt(row.dataset.index, 10);
+                    paletteState.splice(index, 1);
+                    if (paletteState.length === 0) {
+                        paletteState = [...defaultPalette];
+                    }
+                    renderPaletteList();
+                    updatePaletteValue();
+                });
+            });
+
+            updatePaletteValue();
+        }
+
+        function loadColorPalette(value) {
+            paletteState = normalizePalette(value);
+            renderPaletteList();
+        }
+
+        document.getElementById('addColorBtn')?.addEventListener('click', () => {
+            paletteState.push({ name: '', hex: '#CCCCCC' });
+            renderPaletteList();
+        });
 
         async function saveSettings() {
             try {
@@ -273,6 +405,9 @@
                         settings[key] = value;
                     }
                 }
+
+                updatePaletteValue();
+                settings.colorPalette = document.getElementById('colorPaletteValue')?.value || '';
 
                 await API.settings.update(settings);
                 Components.showToast('Успешно', 'Настройки сохранены', 'success');

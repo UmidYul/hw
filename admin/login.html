@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход — AURA Admin</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/admin/styles.css">
+</head>
+
+<body>
+    <div class="admin-layout" style="justify-content: center; align-items: center;">
+        <div class="card" style="max-width: 420px; width: 100%;">
+            <div class="card-header">
+                <h3 class="card-title">Вход в админку</h3>
+                <div class="text-muted" style="margin-top: 6px;">
+                    Доступ только для администраторов
+                </div>
+            </div>
+            <div class="card-body">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label" for="username">Логин</label>
+                        <input class="form-input" type="text" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="password">Пароль</label>
+                        <input class="form-input" type="password" id="password" name="password" required>
+                    </div>
+                    <div class="form-group" id="loginError" style="display: none; color: var(--color-error);">
+                        Неверный логин или пароль.
+                    </div>
+                    <button class="btn btn-primary" type="submit" style="width: 100%;">Войти</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const error = document.getElementById('loginError');
+
+            error.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ username, password })
+                });
+
+                const payload = await response.json().catch(() => ({}));
+
+                if (!response.ok || payload.success === false) {
+                    error.textContent = payload.message || 'Неверный логин или пароль.';
+                    error.style.display = 'block';
+                    return;
+                }
+
+                window.location.href = '/admin';
+            } catch (err) {
+                error.textContent = 'Не удалось войти. Проверьте подключение и попробуйте снова.';
+                error.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+
+</html>

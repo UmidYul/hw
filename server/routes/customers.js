@@ -1,7 +1,21 @@
 import express from 'express';
 import { dbAll, dbGet, dbRun } from '../database/db.js';
+import { requireAdmin } from '../services/auth.js';
 
 const router = express.Router();
+
+const parseJsonField = (value, fallback) => {
+    if (value === null || value === undefined) return fallback;
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'object') return value;
+    try {
+        return JSON.parse(value);
+    } catch (error) {
+        return fallback;
+    }
+};
+
+router.use(requireAdmin);
 
 // Get all customers
 router.get('/', async (req, res) => {
@@ -27,7 +41,7 @@ router.get('/:id', async (req, res) => {
 
         res.json({
             ...customer,
-            orders: orders.map(o => ({ ...o, items: JSON.parse(o.items || '[]') }))
+            orders: orders.map(o => ({ ...o, items: parseJsonField(o.items, []) }))
         });
     } catch (error) {
         res.status(500).json({ error: error.message });

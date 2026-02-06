@@ -1,10 +1,11 @@
 import express from 'express';
 import { dbAll, dbGet, dbRun } from '../database/db.js';
+import { requireAdmin } from '../services/auth.js';
 
 const router = express.Router();
 
 // Get dashboard statistics
-router.get('/dashboard', async (req, res) => {
+router.get('/dashboard', requireAdmin, async (req, res) => {
     try {
         const { period = '30' } = req.query; // days
         const daysAgo = parseInt(period);
@@ -16,16 +17,16 @@ router.get('/dashboard', async (req, res) => {
             SELECT COALESCE(SUM(total), 0) as total_revenue,
                    COUNT(*) as total_orders
             FROM orders
-            WHERE created_at >= datetime('now', '-${daysAgo} days')
+            WHERE created_at >= NOW() - INTERVAL '${daysAgo} days'
         `);
 
         // Previous period revenue for comparison
         const prevRevenueResult = await dbGet(`
-            SELECT COALESCE(SUM(total), 0) as total_revenue
-            FROM orders
-            WHERE created_at >= datetime('now', '-${daysAgo * 2} days')
-              AND created_at < datetime('now', '-${daysAgo} days')
-        `);
+                        SELECT COALESCE(SUM(total), 0) as total_revenue
+                        FROM orders
+                        WHERE created_at >= NOW() - INTERVAL '${daysAgo * 2} days'
+                            AND created_at < NOW() - INTERVAL '${daysAgo} days'
+                `);
 
         // Average order value
         const avgOrder = revenueResult.total_orders > 0
@@ -51,12 +52,12 @@ router.get('/dashboard', async (req, res) => {
                 p.title,
                 p.sku,
                 p.price,
-                SUM(json_extract(item.value, '$.quantity')) as total_sold,
-                SUM(json_extract(item.value, '$.quantity') * json_extract(item.value, '$.price')) as revenue
-            FROM orders o,
-                 json_each(o.items) as item
-            JOIN products p ON p.id = CAST(json_extract(item.value, '$.productId') AS INTEGER)
-            WHERE o.created_at >= datetime('now', '-${daysAgo} days')
+                SUM((item.value->>'quantity')::int) as total_sold,
+                SUM((item.value->>'quantity')::int * (item.value->>'price')::numeric) as revenue
+            FROM orders o
+            CROSS JOIN LATERAL jsonb_array_elements(o.items) AS item(value)
+            JOIN products p ON p.id = (item.value->>'productId')::int
+            WHERE o.created_at >= NOW() - INTERVAL '${daysAgo} days'
             GROUP BY p.id
             ORDER BY revenue DESC
             LIMIT 5
@@ -84,7 +85,7 @@ router.get('/dashboard', async (req, res) => {
                 COUNT(*) as count,
                 SUM(total) as revenue
             FROM orders
-            WHERE created_at >= datetime('now', '-${daysAgo} days')
+            WHERE created_at >= NOW() - INTERVAL '${daysAgo} days'
             GROUP BY status
         `);
 
@@ -95,7 +96,7 @@ router.get('/dashboard', async (req, res) => {
                 COUNT(*) as orders,
                 SUM(total) as revenue
             FROM orders
-            WHERE created_at >= datetime('now', '-7 days')
+            WHERE created_at >= NOW() - INTERVAL '7 days'
             GROUP BY DATE(created_at)
             ORDER BY date ASC
         `);

@@ -1,7 +1,19 @@
 import express from 'express';
 import { dbAll, dbGet, dbRun } from '../database/db.js';
+import { requireAdmin } from '../services/auth.js';
 
 const router = express.Router();
+
+const parseJsonField = (value, fallback) => {
+    if (value === null || value === undefined) return fallback;
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'object') return value;
+    try {
+        return JSON.parse(value);
+    } catch (error) {
+        return fallback;
+    }
+};
 
 // Get all collections
 router.get('/', async (req, res) => {
@@ -13,7 +25,7 @@ router.get('/', async (req, res) => {
 
         if (visible !== undefined) {
             sql += ' WHERE is_visible = ?';
-            params.push(visible === 'true' ? 1 : 0);
+            params.push(visible === 'true');
         }
 
         sql += ' ORDER BY order_index ASC, created_at DESC';
@@ -23,8 +35,8 @@ router.get('/', async (req, res) => {
         // Parse JSON fields
         const parsedCollections = collections.map(c => ({
             ...c,
-            conditions: c.conditions ? JSON.parse(c.conditions) : null,
-            productIds: c.product_ids ? JSON.parse(c.product_ids) : []
+            conditions: parseJsonField(c.conditions, null),
+            productIds: parseJsonField(c.product_ids, [])
         }));
 
         res.json(parsedCollections);
@@ -44,8 +56,8 @@ router.get('/slug/:slug', async (req, res) => {
 
         const parsedCollection = {
             ...collection,
-            conditions: collection.conditions ? JSON.parse(collection.conditions) : null,
-            productIds: collection.product_ids ? JSON.parse(collection.product_ids) : []
+            conditions: parseJsonField(collection.conditions, null),
+            productIds: parseJsonField(collection.product_ids, [])
         };
 
         // Get products for this collection
@@ -53,11 +65,11 @@ router.get('/slug/:slug', async (req, res) => {
 
         if (collection.type === 'manual' && parsedCollection.productIds.length > 0) {
             const placeholders = parsedCollection.productIds.map(() => '?').join(',');
-            const sql = `SELECT * FROM products WHERE id IN (${placeholders}) AND is_active = 1`;
+            const sql = `SELECT * FROM products WHERE id IN (${placeholders}) AND is_active = true`;
             products = await dbAll(sql, parsedCollection.productIds);
         } else if (collection.type === 'auto' && parsedCollection.conditions) {
             // Auto collection based on conditions
-            let sql = 'SELECT * FROM products WHERE is_active = 1';
+            let sql = 'SELECT * FROM products WHERE is_active = true';
             const params = [];
 
             if (parsedCollection.conditions.category) {
@@ -66,8 +78,8 @@ router.get('/slug/:slug', async (req, res) => {
             }
 
             if (parsedCollection.conditions.tag) {
-                sql += ' AND tags LIKE ?';
-                params.push(`%"${parsedCollection.conditions.tag}"%`);
+                sql += ' AND tags @> ?::jsonb';
+                params.push(JSON.stringify([parsedCollection.conditions.tag]));
             }
 
             products = await dbAll(sql, params);
@@ -76,10 +88,10 @@ router.get('/slug/:slug', async (req, res) => {
         // Parse product JSON fields
         const parsedProducts = products.map(p => ({
             ...p,
-            tags: JSON.parse(p.tags || '[]'),
-            colors: JSON.parse(p.colors || '[]'),
-            sizes: JSON.parse(p.sizes || '[]'),
-            images: JSON.parse(p.images || '[]')
+            tags: parseJsonField(p.tags, []),
+            colors: parseJsonField(p.colors, []),
+            sizes: parseJsonField(p.sizes, []),
+            images: parseJsonField(p.images, [])
         }));
 
         res.json({
@@ -102,8 +114,8 @@ router.get('/:id', async (req, res) => {
 
         const parsedCollection = {
             ...collection,
-            conditions: collection.conditions ? JSON.parse(collection.conditions) : null,
-            productIds: collection.product_ids ? JSON.parse(collection.product_ids) : []
+            conditions: parseJsonField(collection.conditions, null),
+            productIds: parseJsonField(collection.product_ids, [])
         };
 
         res.json(parsedCollection);
@@ -113,22 +125,23 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create collection
-router.post('/', async (req, res) => {
+router.post('/', requireAdmin, async (req, res) => {
     try {
         const { name, slug, description, type, conditions, productIds, isVisible, orderIndex } = req.body;
 
         const sql = `
-      INSERT INTO collections (
-        name, slug, description, type, conditions, product_ids, is_visible, order_index
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `;
+            INSERT INTO collections (
+                name, slug, description, type, conditions, product_ids, is_visible, order_index
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            RETURNING id
+        `;
 
         const result = await dbRun(sql, [
             name, slug, description || null,
             type || 'manual',
             conditions ? JSON.stringify(conditions) : null,
             productIds ? JSON.stringify(productIds) : JSON.stringify([]),
-            isVisible !== undefined ? isVisible : 1,
+            isVisible !== undefined ? !!isVisible : true,
             orderIndex || 0
         ]);
 
@@ -139,7 +152,7 @@ router.post('/', async (req, res) => {
 });
 
 // Update collection
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireAdmin, async (req, res) => {
     try {
         const { name, slug, description, type, conditions, productIds, isVisible, orderIndex } = req.body;
 
@@ -155,7 +168,7 @@ router.put('/:id', async (req, res) => {
             name, slug, description || null, type || 'manual',
             conditions ? JSON.stringify(conditions) : null,
             productIds ? JSON.stringify(productIds) : JSON.stringify([]),
-            isVisible !== undefined ? isVisible : 1,
+            isVisible !== undefined ? !!isVisible : true,
             orderIndex || 0,
             req.params.id
         ]);
@@ -167,7 +180,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete collection
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAdmin, async (req, res) => {
     try {
         await dbRun('DELETE FROM collections WHERE id = ?', [req.params.id]);
         res.json({ message: 'Collection deleted successfully' });

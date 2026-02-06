@@ -1,7 +1,19 @@
 import express from 'express';
 import { dbAll, dbGet, dbRun } from '../database/db.js';
+import { requireAdmin } from '../services/auth.js';
 
 const router = express.Router();
+
+const parseJsonField = (value, fallback) => {
+    if (value === null || value === undefined) return fallback;
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'object') return value;
+    try {
+        return JSON.parse(value);
+    } catch (error) {
+        return fallback;
+    }
+};
 
 function normalizeVariants(variants) {
     if (!Array.isArray(variants)) return [];
@@ -43,7 +55,7 @@ router.get('/', async (req, res) => {
     try {
         const { category, tag, search, limit, offset } = req.query;
 
-        let sql = 'SELECT * FROM products WHERE is_active = 1';
+        let sql = 'SELECT * FROM products WHERE is_active = true';
         const params = [];
 
         if (category) {
@@ -52,8 +64,8 @@ router.get('/', async (req, res) => {
         }
 
         if (tag) {
-            sql += ' AND tags LIKE ?';
-            params.push(`%"${tag}"%`);
+            sql += ' AND tags @> ?::jsonb';
+            params.push(JSON.stringify([tag]));
         }
 
         if (search) {
@@ -78,10 +90,10 @@ router.get('/', async (req, res) => {
         // Parse JSON fields
         const parsedProducts = products.map(p => ({
             ...p,
-            tags: JSON.parse(p.tags || '[]'),
-            colors: JSON.parse(p.colors || '[]'),
-            sizes: JSON.parse(p.sizes || '[]'),
-            images: JSON.parse(p.images || '[]')
+            tags: parseJsonField(p.tags, []),
+            colors: parseJsonField(p.colors, []),
+            sizes: parseJsonField(p.sizes, []),
+            images: parseJsonField(p.images, [])
         }));
 
         const variantsByProduct = await loadVariantsForProducts(parsedProducts.map(p => p.id));
@@ -108,10 +120,10 @@ router.get('/:id', async (req, res) => {
         // Parse JSON fields
         const parsedProduct = {
             ...product,
-            tags: JSON.parse(product.tags || '[]'),
-            colors: JSON.parse(product.colors || '[]'),
-            sizes: JSON.parse(product.sizes || '[]'),
-            images: JSON.parse(product.images || '[]')
+            tags: parseJsonField(product.tags, []),
+            colors: parseJsonField(product.colors, []),
+            sizes: parseJsonField(product.sizes, []),
+            images: parseJsonField(product.images, [])
         };
 
         const variants = await dbAll(
@@ -135,7 +147,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create product
-router.post('/', async (req, res) => {
+router.post('/', requireAdmin, async (req, res) => {
     try {
         const { title, category, price, oldPrice, stock, tags, colors, sizes, description, material, care, fit, deliveryInfo, images, variants } = req.body;
 
@@ -150,11 +162,12 @@ router.post('/', async (req, res) => {
         const sku = `PRD-${timestamp}-${randomPart}`;
 
         const sql = `
-      INSERT INTO products (
-        title, sku, category, price, old_price, stock, tags, colors, sizes,
-        description, material, care, fit, delivery_info, images
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
+            INSERT INTO products (
+                title, sku, category, price, old_price, stock, tags, colors, sizes,
+                description, material, care, fit, delivery_info, images
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            RETURNING id
+        `;
 
         const result = await dbRun(sql, [
             title, sku, category, price, oldPrice || null, totalStock,
@@ -182,7 +195,7 @@ router.post('/', async (req, res) => {
 });
 
 // Update product
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireAdmin, async (req, res) => {
     try {
         const { title, category, price, oldPrice, stock, tags, colors, sizes, description, material, care, fit, deliveryInfo, images, isActive, variants } = req.body;
 
@@ -209,7 +222,7 @@ router.put('/:id', async (req, res) => {
             description || '', material || '', care || '', fit || '',
             deliveryInfo || '',
             JSON.stringify(images || []),
-            isActive !== undefined ? isActive : 1,
+            isActive !== undefined ? !!isActive : true,
             req.params.id
         ]);
 
@@ -230,7 +243,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete product
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAdmin, async (req, res) => {
     try {
         await dbRun('DELETE FROM products WHERE id = ?', [req.params.id]);
         res.json({ message: 'Product deleted successfully' });

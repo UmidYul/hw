@@ -153,20 +153,7 @@
                     <!-- Color Filter -->
                     <div class="filter-group">
                         <h4 class="filter-heading">Цвет</h4>
-                        <div class="color-swatches" id="colorFilter">
-                            <button class="color-swatch" data-color="Black" style="background: #2D2D2D"
-                                aria-label="Черный"></button>
-                            <button class="color-swatch" data-color="White"
-                                style="background: #FFFFFF; border: 1px solid #E8E8E8" aria-label="Белый"></button>
-                            <button class="color-swatch" data-color="Beige" style="background: #D4C4B0"
-                                aria-label="Бежевый"></button>
-                            <button class="color-swatch" data-color="Navy" style="background: #1A2B4A"
-                                aria-label="Синий"></button>
-                            <button class="color-swatch" data-color="Grey" style="background: #8B8B8B"
-                                aria-label="Серый"></button>
-                            <button class="color-swatch" data-color="Brown" style="background: #6B4423"
-                                aria-label="Коричневый"></button>
-                        </div>
+                        <div class="color-swatches" id="colorFilter"></div>
                     </div>
 
                     <!-- Tags Filter -->
@@ -290,10 +277,12 @@
                     </div>
                     <p class="footer-text">Минималистичная мода для современной жизни</p>
                     <div class="social-links">
-                        <a href="#" class="social-link" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="social-link" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="social-link" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="social-link" aria-label="Pinterest"><i class="fab fa-pinterest-p"></i></a>
+                        <a href="#" class="social-link" data-social="instagram" aria-label="Instagram"><i
+                                class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link" data-social="facebook" aria-label="Facebook"><i
+                                class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link" data-social="telegram" aria-label="Telegram"><i
+                                class="fab fa-telegram"></i></a>
                     </div>
                 </div>
                 <div class="footer-col">
@@ -312,6 +301,13 @@
                         <li><a href="#">Контакты</a></li>
                         <li><a href="#">Вакансии</a></li>
                         <li><a href="#">Sustainability</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-heading">Контакты</h4>
+                    <ul class="footer-contacts">
+                        <li><i class="fas fa-phone"></i> <a id="contactPhone" href="tel:">—</a></li>
+                        <li><i class="fas fa-envelope"></i> <a id="contactEmail" href="mailto:">—</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">

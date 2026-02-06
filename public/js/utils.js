@@ -5,7 +5,42 @@ let siteSettings = {
     currencySymbol: 'Сумм',
     currency: 'UZS',
     freeShippingThreshold: 0,
-    shippingCost: 0
+    shippingCost: 0,
+    contactEmail: '',
+    contactPhone: '',
+    storeName: '',
+    logoText: '',
+    socialInstagram: '',
+    socialFacebook: '',
+    socialTelegram: '',
+    colorPalette: []
+};
+
+const defaultColorPalette = [
+    { name: 'Black', hex: '#2D2D2D' },
+    { name: 'White', hex: '#FFFFFF' },
+    { name: 'Beige', hex: '#D4C4B0' },
+    { name: 'Navy', hex: '#1A2B4A' },
+    { name: 'Grey', hex: '#8B8B8B' },
+    { name: 'Brown', hex: '#6B4423' }
+];
+
+const normalizeColorPalette = (value) => {
+    if (!value) return [...defaultColorPalette];
+    try {
+        const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+        if (!Array.isArray(parsed)) return [...defaultColorPalette];
+        const cleaned = parsed
+            .filter(item => item && item.name)
+            .map(item => ({
+                name: String(item.name).trim(),
+                hex: String(item.hex || '').trim() || '#CCCCCC'
+            }))
+            .filter(item => item.name.length > 0);
+        return cleaned.length > 0 ? cleaned : [...defaultColorPalette];
+    } catch (error) {
+        return [...defaultColorPalette];
+    }
 };
 
 const normalizeCurrencySymbol = (symbol) => {
@@ -27,10 +62,32 @@ async function loadSiteSettings() {
             siteSettings.currency = settings.currency || 'UZS';
             siteSettings.freeShippingThreshold = Number(settings.free_shipping_threshold) || 0;
             siteSettings.shippingCost = Number(settings.shipping_cost) || 0;
+            siteSettings.contactEmail = settings.contact_email || '';
+            siteSettings.contactPhone = settings.contact_phone || '';
+            siteSettings.storeName = settings.site_name || '';
+            siteSettings.logoText = settings.logo_text || '';
+            siteSettings.socialInstagram = settings.social_instagram || '';
+            siteSettings.socialFacebook = settings.social_facebook || '';
+            siteSettings.socialTelegram = settings.social_telegram || '';
+            siteSettings.colorPalette = normalizeColorPalette(settings.color_palette);
         }
     } catch (error) {
         console.log('Using default settings');
     }
+}
+
+function getColorPalette() {
+    if (siteSettings.colorPalette && siteSettings.colorPalette.length > 0) {
+        return siteSettings.colorPalette;
+    }
+    return [...defaultColorPalette];
+}
+
+function getColorHex(colorName) {
+    if (!colorName) return '';
+    const palette = getColorPalette();
+    const match = palette.find(item => item.name.toLowerCase() === String(colorName).toLowerCase());
+    return match ? match.hex : '';
 }
 
 // Initialize settings on page load
@@ -357,10 +414,9 @@ function renderProductCard(product) {
                         <i class="fas fa-eye"></i>
                     </button>
                 </div>
-                ${(product.tags && product.tags.length > 0) || hasDiscount || isOutOfStock ? `
+                ${(product.tags && product.tags.length > 0) || hasDiscount ? `
                     <div class="product-card-badges">
                         ${hasDiscount ? `<span class="badge-sale">-${discountPercent}%</span>` : ''}
-                        ${isOutOfStock ? `<span class="badge-limited">Распродано</span>` : ''}
                         ${product.tags ? product.tags.map(tag => {
         if (tag === 'New') {
             return `<span class="badge-new">New</span>`;

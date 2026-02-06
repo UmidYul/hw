@@ -344,7 +344,12 @@
                     API.products.getAll(),
                     API.categories.getAll()
                 ]);
-                allProducts = products.filter(p => p.status === 'active');
+                allProducts = products.filter(p =>
+                    p.status === 'active' ||
+                    p.status === undefined ||
+                    p.is_active === 1 ||
+                    p.is_active === true
+                );
                 allCategories = categories;
 
                 if (id) {
@@ -412,8 +417,9 @@
                 return;
             }
 
+            const selectedIdSet = new Set(selectedIds.map(id => String(id)));
             container.innerHTML = allProducts.map(product => {
-                const checked = selectedIds.includes(product.id) ? 'checked' : '';
+                const checked = selectedIdSet.has(String(product.id)) ? 'checked' : '';
                 const imageUrl = product.imageUrl || product.images?.[0] || '/images/placeholder.jpg';
                 const price = product.price || product.regular_price || 0;
                 return `
@@ -518,14 +524,22 @@
             `;
         }
 
+        function generateSlug(text) {
+            return text.toLowerCase()
+                .replace(/[а-яё]/g, (char) => {
+                    const map = { 'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e', 'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch', 'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya' };
+                    return map[char] || char;
+                })
+                .replace(/\s+/g, '-')
+                .replace(/[^a-z0-9-]/g, '')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '');
+        }
+
         // Generate slug
         document.getElementById('name')?.addEventListener('input', (e) => {
             if (!currentCollectionId) {
-                const slug = e.target.value
-                    .toLowerCase()
-                    .replace(/\s+/g, '-')
-                    .replace(/[^a-z0-9-]/g, '');
-                document.getElementById('slug').value = slug;
+                document.getElementById('slug').value = generateSlug(e.target.value);
             }
         });
 

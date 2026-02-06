@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Клиент — AURA Admin</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="/admin/styles.css">
+</head>
+
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">A</div>
+                    <div class="sidebar-logo-text">AURA Admin</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Основное</div>
+                    <a href="index.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Каталог</div>
+                    <a href="products.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Товары</span>
+                    </a>
+                    <a href="categories.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Категории</span>
+                    </a>
+                    <a href="collections.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Коллекции</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Маркетинг</div>
+                    <a href="discounts.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Скидки</span>
+                    </a>
+                    <a href="promocodes.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Промокоды</span>
+                    </a>
+                    <a href="banners.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Баннеры</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Продажи</div>
+                    <a href="orders.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Заказы</span>
+                    </a>
+                    <a href="customers.html" class="sidebar-nav-link active">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Клиенты</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Настройки</div>
+                    <a href="settings.html" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Настройки</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="topbar-btn" id="sidebar-toggle">Меню</button>
+                    <div class="topbar-search">
+                        <input type="text" class="topbar-search-input" placeholder="Поиск... (нажмите /)"
+                            id="global-search">
+                        <span class="topbar-search-icon">Поиск</span>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="topbar-profile">
+                        <div class="topbar-profile-avatar">A</div>
+                        <div class="topbar-profile-name">Администратор</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <div class="page-header">
+                    <div>
+                        <button class="btn btn-secondary btn-sm" onclick="history.back()" style="margin-bottom: 8px;">←
+                            Назад к клиентам</button>
+                        <h1 class="page-title" id="customerTitle">Клиент</h1>
+                        <p class="page-subtitle" id="customerSubtitle">...</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-3">
+                    <div class="card col-span-2">
+                        <div class="card-header">
+                            <h3>Информация о клиенте</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="order-info-grid">
+                                <div>
+                                    <div class="label">Имя</div>
+                                    <div class="value" id="customerName">—</div>
+                                </div>
+                                <div>
+                                    <div class="label">Телефон</div>
+                                    <div class="value" id="customerPhone">—</div>
+                                </div>
+                                <div>
+                                    <div class="label">Email</div>
+                                    <div class="value" id="customerEmail">—</div>
+                                </div>
+                                <div>
+                                    <div class="label">Создан</div>
+                                    <div class="value" id="customerCreated">—</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Примечания</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="customerNotes">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>История заказов</h3>
+                    </div>
+                    <div class="card-body" id="customerOrders">
+                        <div class="empty-state">
+                            <div class="empty-state-title">Заказов нет</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/js/api.js"></script>
+    <script src="/admin/components.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const customerId = urlParams.get('id');
+
+        function formatDate(value) {
+            if (!value) return '—';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return '—';
+            return date.toLocaleDateString('ru-RU');
+        }
+
+        async function loadCustomer() {
+            if (!customerId) {
+                Components.showToast('Ошибка', 'Не указан клиент', 'error');
+                return;
+            }
+
+            try {
+                const customer = await API.customers.getById(customerId);
+
+                document.getElementById('customerTitle').textContent = customer.name || 'Клиент';
+                document.getElementById('customerSubtitle').textContent = customer.phone || '—';
+
+                document.getElementById('customerName').textContent = customer.name || '—';
+                document.getElementById('customerPhone').textContent = customer.phone || '—';
+                document.getElementById('customerEmail').textContent = customer.email || '—';
+                document.getElementById('customerCreated').textContent = formatDate(customer.created_at || customer.createdAt);
+                document.getElementById('customerNotes').textContent = customer.notes || '—';
+
+                renderOrders(customer.orders || []);
+            } catch (error) {
+                console.error('Failed to load customer:', error);
+                Components.showToast('Ошибка', 'Не удалось загрузить клиента', 'error');
+            }
+        }
+
+        function renderOrders(orders) {
+            const container = document.getElementById('customerOrders');
+            if (!orders.length) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-title">Заказов нет</div></div>';
+                return;
+            }
+
+            const rows = orders.map(order => {
+                const orderNumber = order.order_number || order.orderNumber || order.id;
+                const total = order.total || 0;
+                const createdAt = order.created_at || order.createdAt;
+
+                return `
+                    <tr>
+                        <td><strong>${orderNumber}</strong></td>
+                        <td>${formatDate(createdAt)}</td>
+                        <td>${Components.formatPrice(total)}</td>
+                        <td>
+                            <a class="btn btn-sm btn-secondary" href="/admin/order-view?id=${order.id}">Открыть</a>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Номер</th>
+                                <th>Дата</th>
+                                <th>Сумма</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        document.getElementById('sidebar-toggle')?.addEventListener('click', () => {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+        });
+
+        loadCustomer();
+    </script>
+</body>
+
+</html>

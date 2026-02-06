@@ -205,6 +205,12 @@
                                 </div>
 
                                 <div class="form-group">
+                                    <label class="form-label">Доступные цвета</label>
+                                    <div class="color-options" id="colorPaletteSelect"></div>
+                                    <div class="form-hint">Выберите из палитры или введите свои значения.</div>
+                                </div>
+
+                                <div class="form-group">
                                     <label class="form-label">Размеры (через запятую)</label>
                                     <input type="text" class="form-input" name="sizes" placeholder="XS, S, M, L, XL">
                                 </div>
@@ -253,7 +259,14 @@
                                         <input type="url" class="form-input" id="new-image-url"
                                             placeholder="https://..." style="flex: 1;">
                                         <button type="button" class="btn btn-secondary" onclick="addImage()">Добавить
-                                            фото</button>
+                                            по ссылке</button>
+                                    </div>
+                                    <div class="flex gap-md" style="margin-top: 12px;">
+                                        <input type="file" class="form-input" id="new-image-file" accept="image/*"
+                                            style="flex: 1;">
+                                        <button type="button" class="btn btn-secondary" onclick="uploadImageFile()">
+                                            Загрузить файл
+                                        </button>
                                     </div>
                                     <div class="form-hint">Добавьте несколько фотографий товара. Первое фото будет
                                         главным.</div>
@@ -276,6 +289,7 @@
         let editingId = null;
         let allCategories = [];
         let productImages = [];
+        let paletteColors = [];
 
         async function loadCategories() {
             try {
@@ -337,8 +351,10 @@
                 return;
             }
 
-            if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                Components.showToast('Ошибка', 'URL должен начинаться с http:// или https://', 'error');
+            const isRemote = url.startsWith('http://') || url.startsWith('https://');
+            const isLocal = url.startsWith('/images/');
+            if (!isRemote && !isLocal) {
+                Components.showToast('Ошибка', 'Введите ссылку http(s) или путь /images/...', 'error');
                 return;
             }
 
@@ -346,6 +362,42 @@
             input.value = '';
             renderImages();
             Components.showToast('Успешно', 'Изображение добавлено', 'success');
+        }
+
+        async function uploadImageFile() {
+            const input = document.getElementById('new-image-file');
+            const file = input.files && input.files[0];
+
+            if (!file) {
+                Components.showToast('Ошибка', 'Выберите файл изображения', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const response = await fetch('/api/uploads/products', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+
+                const payload = await response.json().catch(() => ({}));
+
+                if (!response.ok || !payload.url) {
+                    Components.showToast('Ошибка', payload.message || 'Не удалось загрузить файл', 'error');
+                    return;
+                }
+
+                productImages.push(payload.url);
+                input.value = '';
+                renderImages();
+                Components.showToast('Успешно', 'Файл загружен', 'success');
+            } catch (error) {
+                console.error('Upload failed:', error);
+                Components.showToast('Ошибка', 'Не удалось загрузить файл', 'error');
+            }
         }
 
         function removeImage(index) {
@@ -395,6 +447,91 @@
                 .split(',')
                 .map(item => item.trim())
                 .filter(item => item.length > 0);
+        }
+
+        const defaultPalette = [
+            { name: 'Black', hex: '#2D2D2D' },
+            { name: 'White', hex: '#FFFFFF' },
+            { name: 'Beige', hex: '#D4C4B0' },
+            { name: 'Navy', hex: '#1A2B4A' },
+            { name: 'Grey', hex: '#8B8B8B' },
+            { name: 'Brown', hex: '#6B4423' }
+        ];
+
+        function normalizePalette(value) {
+            if (!value) return [...defaultPalette];
+            try {
+                const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+                if (!Array.isArray(parsed)) return [...defaultPalette];
+                const cleaned = parsed
+                    .filter(item => item && item.name)
+                    .map(item => ({
+                        name: String(item.name).trim(),
+                        hex: String(item.hex || '').trim() || '#CCCCCC'
+                    }))
+                    .filter(item => item.name.length > 0);
+                return cleaned.length > 0 ? cleaned : [...defaultPalette];
+            } catch (error) {
+                return [...defaultPalette];
+            }
+        }
+
+        async function loadColorPalette() {
+            try {
+                const settings = await API.settings.get();
+                paletteColors = normalizePalette(settings.color_palette);
+            } catch (error) {
+                paletteColors = [...defaultPalette];
+            }
+
+            renderColorPaletteOptions();
+        }
+
+        function renderColorPaletteOptions() {
+            const container = document.getElementById('colorPaletteSelect');
+            if (!container) return;
+
+            container.innerHTML = paletteColors.map(color => {
+                const hex = color.hex || '#CCCCCC';
+                return `
+                    <label class="form-checkbox color-option">
+                        <input type="checkbox" value="${color.name}">
+                        <span><span class="color-dot" style="background: ${hex}"></span>${color.name}</span>
+                    </label>
+                `;
+            }).join('');
+
+            container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    syncColorsInputFromPalette();
+                });
+            });
+
+            syncPaletteFromInput();
+        }
+
+        function syncPaletteFromInput() {
+            const colorsInput = document.querySelector('[name="colors"]');
+            if (!colorsInput) return;
+            const current = parseListInput(colorsInput.value);
+            document.querySelectorAll('#colorPaletteSelect input[type="checkbox"]').forEach(cb => {
+                cb.checked = current.includes(cb.value);
+            });
+        }
+
+        function syncColorsInputFromPalette() {
+            const colorsInput = document.querySelector('[name="colors"]');
+            if (!colorsInput) return;
+
+            const selected = Array.from(document.querySelectorAll('#colorPaletteSelect input[type="checkbox"]'))
+                .filter(cb => cb.checked)
+                .map(cb => cb.value);
+
+            const paletteNames = paletteColors.map(color => color.name);
+            const manual = parseListInput(colorsInput.value).filter(value => !paletteNames.includes(value));
+            const merged = [...manual, ...selected];
+
+            colorsInput.value = merged.join(', ');
         }
 
         function getVariantsFromMatrix() {
@@ -532,6 +669,8 @@
             renderVariantsMatrix(colors, sizes, product.variants || []);
             initializeVariantsMatrix();
 
+            syncPaletteFromInput();
+
             // Tags
             if (product.tags) {
                 product.tags.forEach(tag => {
@@ -663,9 +802,15 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
             await loadCategories();
+            await loadColorPalette();
             await loadProduct();
             if (!editingId) {
                 initializeVariantsMatrix();
+            }
+
+            const colorsInput = document.querySelector('[name="colors"]');
+            if (colorsInput) {
+                colorsInput.addEventListener('input', syncPaletteFromInput);
             }
         });
     </script>

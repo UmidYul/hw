@@ -1,5 +1,6 @@
 import express from 'express';
 import { dbAll, dbGet, dbRun } from '../database/db.js';
+import { requireAdmin } from '../services/auth.js';
 
 const router = express.Router();
 
@@ -19,7 +20,7 @@ router.get('/', async (req, res) => {
 
         if (active !== undefined) {
             conditions.push('is_active = ?');
-            params.push(active === 'true' ? 1 : 0);
+            params.push(active === 'true');
         }
 
         if (conditions.length > 0) {
@@ -40,7 +41,7 @@ router.get('/active', async (req, res) => {
     try {
         const sql = `
       SELECT * FROM banners 
-      WHERE is_active = 1 
+    WHERE is_active = true 
       AND (start_date IS NULL OR start_date <= CURRENT_TIMESTAMP)
       AND (end_date IS NULL OR end_date >= CURRENT_TIMESTAMP)
       ORDER BY order_index ASC
@@ -69,17 +70,18 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create banner
-router.post('/', async (req, res) => {
+router.post('/', requireAdmin, async (req, res) => {
     try {
         const { title, subtitle, description, buttonText, buttonLink, image, backgroundColor, textColor, placement, isActive, startDate, endDate, orderIndex } = req.body;
 
         const sql = `
-      INSERT INTO banners (
-        title, subtitle, description, button_text, button_link,
-        image, background_color, text_color, placement, is_active,
-        start_date, end_date, order_index
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
+            INSERT INTO banners (
+                title, subtitle, description, button_text, button_link,
+                image, background_color, text_color, placement, is_active,
+                start_date, end_date, order_index
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            RETURNING id
+        `;
 
         const result = await dbRun(sql, [
             title, subtitle || null, description || null,
@@ -88,7 +90,7 @@ router.post('/', async (req, res) => {
             backgroundColor || '#F5F5F5',
             textColor || '#2D2D2D',
             placement || 'hero',
-            isActive !== undefined ? isActive : 1,
+            isActive !== undefined ? !!isActive : true,
             startDate || null, endDate || null,
             orderIndex || 0
         ]);
@@ -100,7 +102,7 @@ router.post('/', async (req, res) => {
 });
 
 // Update banner
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireAdmin, async (req, res) => {
     try {
         const { title, subtitle, description, buttonText, buttonLink, image, backgroundColor, textColor, placement, isActive, startDate, endDate, orderIndex } = req.body;
 
@@ -117,7 +119,7 @@ router.put('/:id', async (req, res) => {
             title, subtitle || null, description || null,
             buttonText || null, buttonLink || null, image || null,
             backgroundColor || '#F5F5F5', textColor || '#2D2D2D',
-            placement || 'hero', isActive !== undefined ? isActive : 1,
+            placement || 'hero', isActive !== undefined ? !!isActive : true,
             startDate || null, endDate || null, orderIndex || 0,
             req.params.id
         ]);
@@ -129,7 +131,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete banner
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAdmin, async (req, res) => {
     try {
         await dbRun('DELETE FROM banners WHERE id = ?', [req.params.id]);
         res.json({ message: 'Banner deleted successfully' });

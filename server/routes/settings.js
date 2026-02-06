@@ -1,5 +1,6 @@
 import express from 'express';
 import { dbAll, dbGet, dbRun } from '../database/db.js';
+import { requireAdmin } from '../services/auth.js';
 
 const router = express.Router();
 
@@ -13,6 +14,10 @@ const initSettingsTable = async () => {
             store_description TEXT,
             contact_email TEXT,
             contact_phone TEXT,
+            social_instagram TEXT,
+            social_facebook TEXT,
+            social_telegram TEXT,
+            color_palette JSONB,
             currency TEXT DEFAULT 'UZS',
             currency_symbol TEXT DEFAULT 'Сумм',
             vat_rate REAL DEFAULT 0,
@@ -34,27 +39,17 @@ const initSettingsTable = async () => {
         `);
     } else {
         // Add missing columns if they don't exist (for existing databases)
-        try {
-            await dbRun('ALTER TABLE settings ADD COLUMN logo_text TEXT DEFAULT "AURA"');
-        } catch (e) { /* Column already exists */ }
-        try {
-            await dbRun('ALTER TABLE settings ADD COLUMN store_description TEXT');
-        } catch (e) { /* Column already exists */ }
-        try {
-            await dbRun('ALTER TABLE settings ADD COLUMN contact_email TEXT');
-        } catch (e) { /* Column already exists */ }
-        try {
-            await dbRun('ALTER TABLE settings ADD COLUMN contact_phone TEXT');
-        } catch (e) { /* Column already exists */ }
-        try {
-            await dbRun('ALTER TABLE settings ADD COLUMN enable_taxes INTEGER DEFAULT 0');
-        } catch (e) { /* Column already exists */ }
-        try {
-            await dbRun('ALTER TABLE settings ADD COLUMN return_policy TEXT');
-        } catch (e) { /* Column already exists */ }
-        try {
-            await dbRun('ALTER TABLE settings ADD COLUMN privacy_policy TEXT');
-        } catch (e) { /* Column already exists */ }
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS logo_text TEXT DEFAULT "AURA"');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS store_description TEXT');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS contact_email TEXT');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS contact_phone TEXT');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS social_instagram TEXT');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS social_facebook TEXT');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS social_telegram TEXT');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS color_palette JSONB');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS enable_taxes BOOLEAN DEFAULT false');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS return_policy TEXT');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS privacy_policy TEXT');
     }
 };
 
@@ -79,7 +74,7 @@ router.get('/', async (req, res) => {
 });
 
 // Update settings
-router.put('/', async (req, res) => {
+router.put('/', requireAdmin, async (req, res) => {
     try {
         const {
             storeName,
@@ -87,6 +82,10 @@ router.put('/', async (req, res) => {
             storeDescription,
             contactEmail,
             contactPhone,
+            socialInstagram,
+            socialFacebook,
+            socialTelegram,
+            colorPalette,
             currency,
             currencySymbol,
             freeShippingThreshold,
@@ -104,6 +103,10 @@ router.put('/', async (req, res) => {
                 store_description = ?,
                 contact_email = ?,
                 contact_phone = ?,
+                social_instagram = ?,
+                social_facebook = ?,
+                social_telegram = ?,
+                color_palette = ?,
                 currency = ?,
                 currency_symbol = ?,
                 shipping_cost = ?,
@@ -120,11 +123,15 @@ router.put('/', async (req, res) => {
             storeDescription || null,
             contactEmail || null,
             contactPhone || null,
+            socialInstagram || null,
+            socialFacebook || null,
+            socialTelegram || null,
+            colorPalette || null,
             currency || 'UZS',
             currencySymbol || 'Сумм',
             flatShippingRate || 0,
             freeShippingThreshold || 0,
-            enableTaxes ? 1 : 0,
+            enableTaxes ? true : false,
             taxPercent || 0,
             returnPolicy || null,
             privacyPolicy || null

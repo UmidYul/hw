@@ -425,14 +425,21 @@
                     document.getElementById('isActive').checked = discount.is_active ?? discount.isActive;
                     document.getElementById('combineWithOther').checked = discount.combine_with_other ?? discount.combineWithOther ?? false;
 
+                    const toLocalInputValue = (value) => {
+                        const date = new Date(value);
+                        if (Number.isNaN(date.getTime())) return '';
+                        const offsetMs = date.getTimezoneOffset() * 60000;
+                        return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
+                    };
+
                     const startDate = discount.start_date || discount.startDate;
                     if (startDate) {
-                        document.getElementById('startDate').value = startDate.split('T')[0];
+                        document.getElementById('startDate').value = toLocalInputValue(startDate);
                     }
 
                     const endDate = discount.end_date || discount.endDate;
                     if (endDate) {
-                        document.getElementById('endDate').value = endDate.split('T')[0];
+                        document.getElementById('endDate').value = toLocalInputValue(endDate);
                     }
 
                     // Set target-specific fields

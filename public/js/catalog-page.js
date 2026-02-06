@@ -25,6 +25,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         await window.discountSystem.loadActiveDiscounts();
     }
 
+    if (typeof loadSiteSettings === 'function') {
+        await loadSiteSettings();
+    }
+
     // Load products from API
     await loadProducts();
 
@@ -35,6 +39,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Load categories dynamically
     await loadCategoryFilters();
+
+    renderColorFilters();
 
     // Get loaded products
     const allProducts = typeof getProducts === 'function' ? getProducts() : products;
@@ -52,6 +58,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         applyFilters();
     }, 800);
 });
+
+function renderColorFilters() {
+    const container = document.getElementById('colorFilter');
+    if (!container) return;
+
+    const fallbackPalette = [
+        { name: 'Black', hex: '#2D2D2D' },
+        { name: 'White', hex: '#FFFFFF' },
+        { name: 'Beige', hex: '#D4C4B0' },
+        { name: 'Navy', hex: '#1A2B4A' },
+        { name: 'Grey', hex: '#8B8B8B' },
+        { name: 'Brown', hex: '#6B4423' }
+    ];
+
+    const palette = typeof getColorPalette === 'function' ? getColorPalette() : fallbackPalette;
+
+    container.innerHTML = palette.map(color => {
+        const hex = color.hex || '#CCCCCC';
+        const isWhite = hex.toLowerCase() === '#ffffff';
+        const border = isWhite ? 'border: 1px solid #E8E8E8;' : '';
+        return `
+            <button class="color-swatch" data-color="${color.name}" style="background: ${hex}; ${border}"
+                aria-label="${color.name}"></button>
+        `;
+    }).join('');
+}
 
 // Load categories from API
 async function loadCategoryFilters() {

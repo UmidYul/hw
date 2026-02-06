@@ -1,10 +1,11 @@
 import express from 'express';
 import { dbAll, dbGet, dbRun } from '../database/db.js';
+import { requireAdmin } from '../services/auth.js';
 
 const router = express.Router();
 
 // Get all promocodes
-router.get('/', async (req, res) => {
+router.get('/', requireAdmin, async (req, res) => {
     try {
         const promocodes = await dbAll('SELECT * FROM promocodes ORDER BY created_at DESC');
         res.json(promocodes);
@@ -14,7 +15,7 @@ router.get('/', async (req, res) => {
 });
 
 // Get promocode by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', requireAdmin, async (req, res) => {
     try {
         const promocode = await dbGet('SELECT * FROM promocodes WHERE id = ?', [req.params.id]);
 
@@ -36,7 +37,7 @@ router.post('/validate', async (req, res) => {
         const sql = `
       SELECT * FROM promocodes 
       WHERE code = ? 
-      AND is_active = 1
+    AND is_active = true
       AND (start_date IS NULL OR start_date <= CURRENT_TIMESTAMP)
       AND (end_date IS NULL OR end_date >= CURRENT_TIMESTAMP)
       AND (usage_limit IS NULL OR usage_count < usage_limit)
@@ -92,26 +93,25 @@ router.post('/validate', async (req, res) => {
 });
 
 // Create promocode
-router.post('/', async (req, res) => {
+router.post('/', requireAdmin, async (req, res) => {
     try {
         const { code, type, value, minAmount, excludeSale, usageLimit, maxUsesPerUser, startDate, endDate } = req.body;
 
-        // Convert ISO dates to SQLite format
-        const formatDateForSQLite = (isoDate) => {
+        const formatDateForDb = (isoDate) => {
             if (!isoDate) return null;
-            const date = new Date(isoDate);
-            return date.toISOString().replace('T', ' ').substring(0, 19);
+            return new Date(isoDate).toISOString();
         };
 
         const sql = `
-      INSERT INTO promocodes (code, type, value, min_amount, exclude_sale, usage_limit, max_uses_per_user, start_date, end_date)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
+            INSERT INTO promocodes (code, type, value, min_amount, exclude_sale, usage_limit, max_uses_per_user, start_date, end_date)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            RETURNING id
+        `;
 
         const result = await dbRun(sql, [
             code.toUpperCase(), type, value, minAmount || 0,
-            excludeSale ? 1 : 0, usageLimit || null, maxUsesPerUser || null,
-            formatDateForSQLite(startDate), formatDateForSQLite(endDate)
+            excludeSale ? true : false, usageLimit || null, maxUsesPerUser || null,
+            formatDateForDb(startDate), formatDateForDb(endDate)
         ]);
 
         res.status(201).json({ id: result.id, message: 'Promocode created successfully' });
@@ -121,15 +121,13 @@ router.post('/', async (req, res) => {
 });
 
 // Update promocode
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireAdmin, async (req, res) => {
     try {
         const { code, type, value, minAmount, excludeSale, usageLimit, maxUsesPerUser, isActive, startDate, endDate } = req.body;
 
-        // Convert ISO dates to SQLite format
-        const formatDateForSQLite = (isoDate) => {
+        const formatDateForDb = (isoDate) => {
             if (!isoDate) return null;
-            const date = new Date(isoDate);
-            return date.toISOString().replace('T', ' ').substring(0, 19);
+            return new Date(isoDate).toISOString();
         };
 
         const sql = `
@@ -142,8 +140,8 @@ router.put('/:id', async (req, res) => {
 
         await dbRun(sql, [
             code.toUpperCase(), type, value, minAmount || 0,
-            excludeSale ? 1 : 0, usageLimit || null, maxUsesPerUser || null, isActive ? 1 : 0,
-            formatDateForSQLite(startDate), formatDateForSQLite(endDate), req.params.id
+            excludeSale ? true : false, usageLimit || null, maxUsesPerUser || null, isActive ? true : false,
+            formatDateForDb(startDate), formatDateForDb(endDate), req.params.id
         ]);
 
         res.json({ message: 'Promocode updated successfully' });
@@ -153,7 +151,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete promocode
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAdmin, async (req, res) => {
     try {
         await dbRun('DELETE FROM promocodes WHERE id = ?', [req.params.id]);
         res.json({ message: 'Promocode deleted successfully' });
@@ -193,7 +191,7 @@ router.post('/record-usage', async (req, res) => {
 });
 
 // Get promo statistics
-router.get('/:id/stats', async (req, res) => {
+router.get('/:id/stats', requireAdmin, async (req, res) => {
     try {
         const promo = await dbGet('SELECT * FROM promocodes WHERE id = ?', [req.params.id]);
 

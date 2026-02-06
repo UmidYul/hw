@@ -1,5 +1,6 @@
 import express from 'express';
 import { dbAll, dbGet, dbRun } from '../database/db.js';
+import { requireAdmin } from '../services/auth.js';
 
 const router = express.Router();
 
@@ -16,7 +17,7 @@ router.get('/', async (req, res) => {
 // Get visible categories
 router.get('/visible', async (req, res) => {
     try {
-        const categories = await dbAll('SELECT * FROM categories WHERE is_visible = 1 ORDER BY order_index ASC');
+        const categories = await dbAll('SELECT * FROM categories WHERE is_visible = true ORDER BY order_index ASC');
         res.json(categories);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -39,18 +40,19 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create category
-router.post('/', async (req, res) => {
+router.post('/', requireAdmin, async (req, res) => {
     try {
         const { name, slug, description, image, parentId, orderIndex, isVisible } = req.body;
 
         const sql = `
-      INSERT INTO categories (name, slug, description, image, parent_id, order_index, is_visible)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `;
+            INSERT INTO categories (name, slug, description, image, parent_id, order_index, is_visible)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            RETURNING id
+        `;
 
         const result = await dbRun(sql, [
             name, slug, description || null, image || null,
-            parentId || null, orderIndex || 0, isVisible !== undefined ? isVisible : 1
+            parentId || null, orderIndex || 0, isVisible !== undefined ? !!isVisible : true
         ]);
 
         res.status(201).json({ id: result.id, message: 'Category created successfully' });
@@ -60,7 +62,7 @@ router.post('/', async (req, res) => {
 });
 
 // Update category
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireAdmin, async (req, res) => {
     try {
         const { name, slug, description, image, parentId, orderIndex, isVisible } = req.body;
 
@@ -73,7 +75,7 @@ router.put('/:id', async (req, res) => {
 
         await dbRun(sql, [
             name, slug, description || null, image || null,
-            parentId || null, orderIndex || 0, isVisible !== undefined ? isVisible : 1,
+            parentId || null, orderIndex || 0, isVisible !== undefined ? !!isVisible : true,
             req.params.id
         ]);
 
@@ -84,7 +86,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete category
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAdmin, async (req, res) => {
     try {
         await dbRun('DELETE FROM categories WHERE id = ?', [req.params.id]);
         res.json({ message: 'Category deleted successfully' });

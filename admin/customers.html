@@ -433,13 +433,13 @@
                         <td>${lastOrderDate}</td>
                         <td>
                             <div class="action-buttons">
-                                <button 
+                                <a 
                                     class="btn-icon" 
-                                    onclick="openCustomerModal('${customer.id}')"
+                                    href="/admin/customer-view?id=${customer.id}"
                                     title="Подробнее"
                                 >
                                     Подробнее
-                                </button>
+                                </a>
                                 <button 
                                     class="btn-icon" 
                                     onclick="deleteCustomer('${customer.id}')"
