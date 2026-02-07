@@ -707,6 +707,11 @@
                 return false;
             }
 
+            if (!data.category) {
+                Components.showToast('Ошибка', 'Выберите категорию', 'error');
+                return false;
+            }
+
             if (data.price <= 0) {
                 Components.showToast('Ошибка', 'Укажите цену', 'error');
                 return false;

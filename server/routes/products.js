@@ -189,6 +189,10 @@ router.get('/:id', async (req, res) => {
 router.post('/', requireAdmin, async (req, res) => {
     try {
         const { title, category, price, oldPrice, stock, tags, colors, sizes, description, material, care, fit, deliveryInfo, images, variants } = req.body;
+        const normalizedPrice = Number(price);
+        if (!title || !category || !Number.isFinite(normalizedPrice) || normalizedPrice <= 0) {
+            return res.status(400).json({ error: 'Title, category, and price are required.' });
+        }
 
         const normalizedVariants = normalizeVariants(variants);
         const totalStock = normalizedVariants.length > 0
@@ -210,7 +214,7 @@ router.post('/', requireAdmin, async (req, res) => {
         `;
 
         const result = await dbRun(sql, [
-            productId, title, sku, category, price, oldPrice || null, totalStock,
+            productId, title, sku, category, normalizedPrice, Number.isFinite(Number(oldPrice)) ? Number(oldPrice) : null, totalStock,
             JSON.stringify(tags || []),
             JSON.stringify(colors || []),
             JSON.stringify(sizes || []),
@@ -239,6 +243,10 @@ router.post('/', requireAdmin, async (req, res) => {
 router.put('/:id', requireAdmin, async (req, res) => {
     try {
         const { title, category, price, oldPrice, stock, tags, colors, sizes, description, material, care, fit, deliveryInfo, images, isActive, variants } = req.body;
+        const normalizedPrice = Number(price);
+        if (!title || !category || !Number.isFinite(normalizedPrice) || normalizedPrice <= 0) {
+            return res.status(400).json({ error: 'Title, category, and price are required.' });
+        }
 
         const existing = await dbGet('SELECT * FROM products WHERE id = ?', [req.params.id]);
         if (!existing) {
@@ -253,7 +261,7 @@ router.put('/:id', requireAdmin, async (req, res) => {
 
         const sql = `
       UPDATE products SET
-        title = ?, category = ?, price = ?, old_price = ?, stock = ?,
+                title = ?, category = ?, price = ?, old_price = ?, stock = ?,
         tags = ?, colors = ?, sizes = ?, description = ?,
         material = ?, care = ?, fit = ?, delivery_info = ?,
         images = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP
@@ -261,7 +269,7 @@ router.put('/:id', requireAdmin, async (req, res) => {
     `;
 
         await dbRun(sql, [
-            title, category, price, oldPrice || null, totalStock,
+            title, category, normalizedPrice, Number.isFinite(Number(oldPrice)) ? Number(oldPrice) : null, totalStock,
             JSON.stringify(tags || []),
             JSON.stringify(colors || []),
             JSON.stringify(sizes || []),
