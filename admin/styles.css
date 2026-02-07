@@ -1786,11 +1786,13 @@ a:hover {
     .products-table td {
         display: block;
         padding: 0;
+        text-align: left;
     }
 
     .products-table td::before {
         display: block;
         margin-bottom: 2px;
+        text-align: left;
     }
 
     .products-table .products-col-select,
@@ -2300,6 +2302,10 @@ a:hover {
 .card table.table {
     table-layout: auto;
     width: 100%;
+}
+
+.card table.table td {
+    width: auto !important;
 }
 
 .card table.table th:nth-child(1),
