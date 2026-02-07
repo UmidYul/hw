@@ -125,7 +125,7 @@
                     <div>
                         <button class="btn btn-secondary btn-sm" onclick="history.back()" style="margin-bottom: 8px;">←
                             Назад к заказам</button>
-                        <h1 class="page-title" id="orderTitle">Заказ #...</h1>
+                        <h1 class="page-title order-title" id="orderTitle">Заказ #...</h1>
                         <p class="page-subtitle" id="orderDate">...</p>
                     </div>
                     <div style="display: flex; gap: 8px;">
@@ -500,8 +500,27 @@
             font-size: 28px;
         }
 
+        .order-view-page .order-title {
+            font-family: var(--font-primary);
+            font-weight: 600;
+            letter-spacing: 0;
+        }
+
         .order-view-page .page-subtitle {
             font-size: 14px;
+        }
+
+        .order-view-page .card {
+            width: 100%;
+        }
+
+        .order-view-page .page-content>.grid,
+        .order-view-page .page-content>.card {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .order-view-page .page-content> :last-child {
+            margin-bottom: 0;
         }
 
         .order-view-page .grid-3 {
@@ -663,6 +682,10 @@
                 grid-template-columns: 1fr;
             }
 
+            .order-view-page .col-span-2 {
+                grid-column: auto;
+            }
+
             .order-info-grid {
                 grid-template-columns: 1fr;
                 gap: 12px;
@@ -691,7 +714,8 @@
             }
 
             #statusSelect {
-                width: 100%;
+                width: auto;
+                max-width: 220px;
             }
         }
 
