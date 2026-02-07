@@ -55,6 +55,12 @@ const renameColumn = async (client, table, from, to) => {
     await client.query(`ALTER TABLE ${table} RENAME COLUMN ${from} TO ${to}`);
 };
 
+const dropNotNull = async (client, table, column) => {
+    const hasColumn = await columnExists(client, table, column);
+    if (!hasColumn) return;
+    await client.query(`ALTER TABLE ${table} ALTER COLUMN ${column} DROP NOT NULL`);
+};
+
 const addPrimaryKey = async (client, table, column = 'id') => {
     const hasColumn = await columnExists(client, table, column);
     if (!hasColumn) return;
@@ -355,6 +361,7 @@ const migrate = async () => {
         await renameColumn(client, 'refresh_tokens', 'id_uuid', 'id');
         await renameColumn(client, 'refresh_tokens', 'user_id', 'legacy_user_id');
         await renameColumn(client, 'refresh_tokens', 'user_id_uuid', 'user_id');
+        await dropNotNull(client, 'refresh_tokens', 'legacy_user_id');
 
         await addPrimaryKey(client, 'products');
         await addPrimaryKey(client, 'product_variants');

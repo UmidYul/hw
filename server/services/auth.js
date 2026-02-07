@@ -116,6 +116,19 @@ export const initAuthTables = async () => {
         )
     `);
 
+    await dbRun(`
+        DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'refresh_tokens'
+                  AND column_name = 'legacy_user_id'
+            ) THEN
+                EXECUTE 'ALTER TABLE refresh_tokens ALTER COLUMN legacy_user_id DROP NOT NULL';
+            END IF;
+        END $$;
+    `);
+
     const existing = await dbGet('SELECT id FROM admin_users LIMIT 1');
     if (!existing) {
         const seedUser = process.env.ADMIN_USER || 'admin';
