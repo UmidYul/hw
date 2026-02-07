@@ -62,4 +62,24 @@ router.post('/banners', requireAdmin, createUploader(bannerUploadDir, 'banner').
     return res.json({ success: true, url });
 });
 
+router.post('/banners/delete', requireAdmin, (req, res) => {
+    try {
+        const { url } = req.body || {};
+        if (!url || typeof url !== 'string' || !url.startsWith('/images/banners/')) {
+            return res.status(400).json({ success: false, message: 'Некорректный URL' });
+        }
+
+        const filename = path.basename(url);
+        const filePath = path.join(bannerUploadDir, filename);
+        if (!fs.existsSync(filePath)) {
+            return res.json({ success: true, removed: false });
+        }
+
+        fs.unlinkSync(filePath);
+        return res.json({ success: true, removed: true });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 export default router;

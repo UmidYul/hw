@@ -1,9 +1,36 @@
 import express from 'express';
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { dbAll, dbGet, dbRun } from '../database/db.js';
 import { requireAdmin } from '../services/auth.js';
 
 const router = express.Router();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const bannerDir = path.join(__dirname, '../../public/images/banners');
+
+const getBannerFilePath = (url) => {
+    if (!url || typeof url !== 'string' || !url.startsWith('/images/banners/')) {
+        return null;
+    }
+    const filename = path.basename(url);
+    return path.join(bannerDir, filename);
+};
+
+const safeDeleteBannerImage = (url) => {
+    const filePath = getBannerFilePath(url);
+    if (!filePath) return;
+    try {
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+    } catch (error) {
+        console.warn('Failed to delete banner image:', error.message);
+    }
+};
 
 // Get all banners
 router.get('/', async (req, res) => {
@@ -109,6 +136,11 @@ router.put('/:id', requireAdmin, async (req, res) => {
     try {
         const { title, subtitle, description, buttonText, buttonLink, image, backgroundColor, textColor, placement, isActive, startDate, endDate, orderIndex } = req.body;
 
+        const existing = await dbGet('SELECT * FROM banners WHERE id = ?', [req.params.id]);
+        if (!existing) {
+            return res.status(404).json({ error: 'Banner not found' });
+        }
+
         const sql = `
       UPDATE banners SET
         title = ?, subtitle = ?, description = ?, button_text = ?,
@@ -127,6 +159,10 @@ router.put('/:id', requireAdmin, async (req, res) => {
             req.params.id
         ]);
 
+        if (existing.image && existing.image !== image) {
+            safeDeleteBannerImage(existing.image);
+        }
+
         res.json({ message: 'Banner updated successfully' });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -136,7 +172,11 @@ router.put('/:id', requireAdmin, async (req, res) => {
 // Delete banner
 router.delete('/:id', requireAdmin, async (req, res) => {
     try {
+        const existing = await dbGet('SELECT * FROM banners WHERE id = ?', [req.params.id]);
         await dbRun('DELETE FROM banners WHERE id = ?', [req.params.id]);
+        if (existing?.image) {
+            safeDeleteBannerImage(existing.image);
+        }
         res.json({ message: 'Banner deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: error.message });
