@@ -219,9 +219,7 @@ const applyAdminBranding = async () => {
                 iconEl.style.padding = '0';
                 iconEl.innerHTML = `<img src="${logoIcon}" alt="${logoText}" style="width:100%;height:100%;object-fit:cover;border-radius:var(--border-radius);">`;
             } else {
-                iconEl.innerHTML = '';
-                iconEl.style.background = '';
-                iconEl.textContent = logoText.trim().charAt(0).toUpperCase();
+                iconEl.style.background = 'none';
             }
         }
 

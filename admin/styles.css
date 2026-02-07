@@ -154,7 +154,6 @@ a:hover {
     font-family: var(--font-headings);
     font-size: 18px;
     font-weight: 600;
-    display: none;
 }
 
 .sidebar-logo-text {
