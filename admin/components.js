@@ -202,3 +202,22 @@ const Components = {
 
 // Make globally available
 window.Components = Components;
+
+const setupAdminSidebarToggle = () => {
+    const toggle = document.getElementById('sidebar-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    if (!toggle || !sidebar) return;
+
+    if (toggle.dataset.bound === 'true') return;
+    toggle.dataset.bound = 'true';
+
+    toggle.addEventListener('click', () => {
+        sidebar.classList.toggle('sidebar-collapsed');
+    });
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupAdminSidebarToggle);
+} else {
+    setupAdminSidebarToggle();
+}
