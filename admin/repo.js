@@ -1,5 +1,5 @@
 // ========================================
-// AURA Admin Panel - Repository Layer
+// Higher Waist Admin Panel - Repository Layer
 // Data Management with LocalStorage
 // ========================================
 

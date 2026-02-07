@@ -9,8 +9,8 @@ const initSettingsTable = async () => {
     await dbRun(`
         CREATE TABLE IF NOT EXISTS settings (
             id INTEGER PRIMARY KEY CHECK (id = 1),
-            site_name TEXT DEFAULT 'AURA',
-            logo_text TEXT DEFAULT 'AURA',
+            site_name TEXT DEFAULT 'Higher Waist',
+            logo_text TEXT DEFAULT 'Higher Waist',
             store_description TEXT,
             contact_email TEXT,
             contact_phone TEXT,
@@ -36,11 +36,11 @@ const initSettingsTable = async () => {
     if (!existing) {
         await dbRun(`
             INSERT INTO settings (id, site_name, logo_text, currency, currency_symbol, vat_rate, shipping_cost, free_shipping_threshold, enable_taxes)
-            VALUES (1, 'AURA', 'AURA', 'UZS', 'Сумм', 0, 0, 0, 0)
+            VALUES (1, 'Higher Waist', 'Higher Waist', 'UZS', 'Сумм', 0, 0, 0, 0)
         `);
     } else {
         // Add missing columns if they don't exist (for existing databases)
-        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS logo_text TEXT DEFAULT "AURA"');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS logo_text TEXT DEFAULT "Higher Waist"');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS store_description TEXT');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS contact_email TEXT');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS contact_phone TEXT');
@@ -62,7 +62,7 @@ router.get('/', async (req, res) => {
     try {
         const settings = await dbGet('SELECT * FROM settings WHERE id = 1');
         res.json(settings || {
-            site_name: 'AURA',
+            site_name: 'Higher Waist',
             currency: 'UZS',
             currency_symbol: 'Сумм',
             vat_rate: 0,
@@ -129,8 +129,8 @@ router.put('/', requireAdmin, async (req, res) => {
                 updated_at = CURRENT_TIMESTAMP
             WHERE id = 1
         `, [
-            storeName || 'AURA',
-            logoText || 'AURA',
+            storeName || 'Higher Waist',
+            logoText || 'Higher Waist',
             storeDescription || null,
             contactEmail || null,
             contactPhone || null,

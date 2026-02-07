@@ -37,16 +37,16 @@ function toAbsoluteUrl(url) {
 }
 
 function updateProductSeo(product, finalPrice, inStock) {
-    const description = (product.description || 'Товар AURA.').replace(/<[^>]*>/g, '').trim();
+    const description = (product.description || 'Товар Higher Waist.').replace(/<[^>]*>/g, '').trim();
     const shortDescription = description.length > 160 ? `${description.slice(0, 157)}...` : description;
     const rawImageUrl = Array.isArray(product.images) ? product.images[0] : (product.images || product.image || `${BASE_URL}/images/logo.PNG`);
     const imageUrl = toAbsoluteUrl(rawImageUrl);
     const canonicalUrl = `${BASE_URL}/product?id=${product.id}`;
 
-    document.title = `${product.title} · AURA`;
+    document.title = `${product.title} · Higher Waist`;
     setMetaTag('description', shortDescription);
-    setMetaTag('og:site_name', 'AURA', true);
-    setMetaTag('og:title', `${product.title} · AURA`, true);
+    setMetaTag('og:site_name', 'Higher Waist', true);
+    setMetaTag('og:title', `${product.title} · Higher Waist`, true);
     setMetaTag('og:description', shortDescription, true);
     setMetaTag('og:type', 'product', true);
     setMetaTag('og:url', canonicalUrl, true);

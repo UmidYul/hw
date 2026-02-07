@@ -1,6 +1,6 @@
-# AURA E-commerce Server
+# Higher Waist E-commerce Server
 
-Backend API для интернет-магазина AURA на Express.js + PostgreSQL.
+Backend API для интернет-магазина Higher Waist на Express.js + PostgreSQL.
 
 ## 🚀 Быстрый старт
 
@@ -164,7 +164,7 @@ PORT=3000
 NODE_ENV=development
 PGHOST=localhost
 PGPORT=5432
-PGDATABASE=aura
+PGDATABASE=Higher Waist
 PGUSER=postgres
 PGPASSWORD=changeme
 PGSSL=false
@@ -220,7 +220,7 @@ npm run migrate
 heroku login
 
 # Создать приложение
-heroku create aura-ecommerce
+heroku create Higher Waist-ecommerce
 
 # Деплой
 git push heroku main
@@ -250,7 +250,7 @@ npm run migrate
 npm install -g pm2
 
 # Запустить
-pm2 start server.js --name aura-api
+pm2 start server.js --name Higher Waist-api
 
 # Автозапуск
 pm2 startup
@@ -324,7 +324,7 @@ fetch('http://localhost:3000/api/orders', {
 1. Установлены ли все зависимости (`npm install`)
 2. Запущены ли миграции (`npm run migrate`)
 3. Доступен ли порт 3000
-4. Существует ли файл БД (`server/database/aura.db`)
+4. Существует ли файл БД (`server/database/Higher Waist.db`)
 
 ---
 

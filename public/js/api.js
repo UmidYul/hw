@@ -1,4 +1,4 @@
-// API Client for AURA E-commerce
+// API Client for Higher Waist E-commerce
 // Replaces LocalStorage with real backend API calls
 
 if (typeof API_BASE_URL === 'undefined') {

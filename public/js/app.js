@@ -38,12 +38,12 @@ async function updateStoreTexts() {
         }
     }
 
-    const logoTextValue = siteSettings?.logoText || siteSettings?.storeName || 'AURA';
+    const logoTextValue = siteSettings?.logoText || siteSettings?.storeName || 'Higher Waist';
     document.querySelectorAll('.logo-text').forEach((el) => {
         el.textContent = logoTextValue;
     });
 
-    const footerName = siteSettings?.storeName || siteSettings?.logoText || 'AURA';
+    const footerName = siteSettings?.storeName || siteSettings?.logoText || 'Higher Waist';
     const year = new Date().getFullYear();
     document.querySelectorAll('.footer-bottom p, .footer-copyright').forEach((el) => {
         if (el.textContent) {

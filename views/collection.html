@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Коллекция · AURA</title>
+    <title>Коллекция · Higher Waist
+
+    </title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -25,7 +27,9 @@
             </div>
 
             <a href="/" class="logo">
-                <span class="logo-text">AURA</span>
+                <span class="logo-text">Higher Waist
+
+                </span>
                 <span class="logo-dot">·</span>
             </a>
 
@@ -126,7 +130,9 @@
             <div class="footer-grid">
                 <div class="footer-col">
                     <div class="logo footer-logo">
-                        <span class="logo-text">AURA</span>
+                        <span class="logo-text">Higher Waist
+
+                        </span>
                         <span class="logo-dot">·</span>
                     </div>
                     <p class="footer-text">Минималистичная мода для современной жизни</p>
@@ -175,7 +181,9 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 AURA. Все права защищены.</p>
+                <p>&copy; 2026 Higher Waist
+
+                    . Все права защищены.</p>
             </div>
         </div>
     </footer>
@@ -259,7 +267,9 @@
 
                 // Update page title and meta
                 const collectionName = currentCollection?.name || currentCollection?.title || 'Коллекция';
-                document.title = `${collectionName} · AURA`;
+                document.title = `${collectionName} · Higher Waist
+
+`;
                 collectionTitle.textContent = collectionName;
                 breadcrumbCurrent.textContent = collectionName;
 
@@ -315,7 +325,7 @@
                 if (!response.ok) return;
                 const settings = await response.json();
 
-                const logoText = settings.logo_text || settings.site_name || 'AURA';
+                const logoText = settings.logo_text || settings.site_name || 'Higher Waist';
                 document.querySelectorAll('.logo-text').forEach((el) => {
                     el.textContent = logoText;
                 });
@@ -342,7 +352,7 @@
                     }
                 }
 
-                const footerName = settings.site_name || settings.logo_text || 'AURA';
+                const footerName = settings.site_name || settings.logo_text || 'Higher Waist';
                 const year = new Date().getFullYear();
                 document.querySelectorAll('.footer-bottom p, .footer-copyright').forEach((el) => {
                     if (el.textContent) {

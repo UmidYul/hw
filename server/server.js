@@ -93,7 +93,7 @@ app.use('/admin', (req, res, next) => {
 
 // Health check
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', message: 'AURA API is running' });
+    res.json({ status: 'ok', message: 'Higher Waist API is running' });
 });
 
 // Error handler
@@ -110,7 +110,7 @@ const startServer = async () => {
     try {
         await initAuthTables();
         app.listen(PORT, () => {
-            console.log(`🚀 AURA Server running on http://localhost:${PORT}`);
+            console.log(`🚀 Higher Waist Server running on http://localhost:${PORT}`);
             console.log(`📊 API: http://localhost:${PORT}/api`);
             console.log(`🌐 Frontend: http://localhost:${PORT}/views/index.html`);
         });

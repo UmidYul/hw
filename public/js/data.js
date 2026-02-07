@@ -452,7 +452,7 @@ if (typeof window.products === 'undefined') {
             minAmount: 0,
             excludeSale: true
         },
-        'AURA15': {
+        'Higher Waist15': {
             type: 'percent',
             value: 15,
             minAmount: 10000,

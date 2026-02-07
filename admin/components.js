@@ -1,5 +1,5 @@
 // ========================================
-// AURA Admin Panel - Components
+// Higher Waist Admin Panel - Components
 // Reusable UI Components
 // ========================================
 

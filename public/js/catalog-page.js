@@ -42,13 +42,13 @@ function setCanonical(url) {
 }
 
 function updateCatalogSeo(titleSuffix, description) {
-    const title = titleSuffix ? `${titleSuffix} · AURA` : 'Каталог · AURA';
-    const desc = description || 'Каталог AURA: одежда и аксессуары, подборки и сезонные предложения.';
+    const title = titleSuffix ? `${titleSuffix} · Higher Waist` : 'Каталог · Higher Waist';
+    const desc = description || 'Каталог Higher Waist: одежда и аксессуары, подборки и сезонные предложения.';
     const canonicalUrl = `${BASE_URL}${window.location.pathname}${window.location.search}`;
 
     document.title = title;
     setMetaTag('description', desc);
-    setMetaTag('og:site_name', 'AURA', true);
+    setMetaTag('og:site_name', 'Higher Waist', true);
     setMetaTag('og:title', title, true);
     setMetaTag('og:description', desc, true);
     setMetaTag('og:type', 'website', true);
@@ -182,7 +182,7 @@ function parseURLFilters() {
         document.getElementById('catalogTitle').textContent = categoryTitle;
         document.getElementById('breadcrumbCurrent').textContent = categoryTitle;
         seoTitle = categoryTitle;
-        seoDescription = `Каталог AURA: ${categoryTitle}.`;
+        seoDescription = `Каталог Higher Waist: ${categoryTitle}.`;
     }
 
     if (tag) {
@@ -191,7 +191,7 @@ function parseURLFilters() {
         document.getElementById('catalogTitle').textContent = tagTitle;
         document.getElementById('breadcrumbCurrent').textContent = tagTitle;
         seoTitle = tagTitle;
-        seoDescription = `Каталог AURA: ${tagTitle}.`;
+        seoDescription = `Каталог Higher Waist: ${tagTitle}.`;
     }
 
     if (search) {
@@ -199,7 +199,7 @@ function parseURLFilters() {
         document.getElementById('catalogTitle').textContent = `Поиск: "${search}"`;
         document.getElementById('breadcrumbCurrent').textContent = 'Результаты поиска';
         seoTitle = `Поиск: ${search}`;
-        seoDescription = `Результаты поиска по запросу "${search}" в каталоге AURA.`;
+        seoDescription = `Результаты поиска по запросу "${search}" в каталоге Higher Waist.`;
 
         // Update search input if it exists
         const searchInput = document.getElementById('catalogSearch');

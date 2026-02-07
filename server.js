@@ -49,7 +49,7 @@ app.get('/admin/', (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-    console.log(`\n🎨 AURA E-commerce сайт запущен!`);
+    console.log(`\n🎨 Higher Waist E-commerce сайт запущен!`);
     console.log(`\n📍 Откройте в браузере: http://localhost:${PORT}`);
     console.log(`\n📄 Доступные страницы:`);
     console.log(`   • Главная:    http://localhost:${PORT}/`);

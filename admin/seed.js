@@ -1,5 +1,5 @@
 // ========================================
-// AURA Admin Panel - Seed Data
+// Higher Waist Admin Panel - Seed Data
 // Initialize demo data on first load
 // ========================================
 
@@ -335,10 +335,10 @@ function seedData() {
 
     // Settings
     const settings = {
-        storeName: 'AURA',
+        storeName: 'Higher Waist',
         storeDescription: 'Минималистичный магазин одежды премиум-класса',
-        logoText: 'AURA',
-        contactEmail: 'info@aura-store.com',
+        logoText: 'Higher Waist',
+        contactEmail: 'info@Higher Waist-store.com',
         contactPhone: '+7 999 999 9999',
         currency: 'UZS',
         currencySymbol: 'Сумм',
@@ -356,7 +356,7 @@ function seedData() {
     const users = [
         {
             name: 'Администратор',
-            email: 'admin@aura.com',
+            email: 'admin@Higher Waist.com',
             role: 'admin',
             status: 'active',
             permissions: {
@@ -370,7 +370,7 @@ function seedData() {
         },
         {
             name: 'Менеджер',
-            email: 'manager@aura.com',
+            email: 'manager@Higher Waist.com',
             role: 'manager',
             status: 'active',
             permissions: {
@@ -384,7 +384,7 @@ function seedData() {
         },
         {
             name: 'Контент-менеджер',
-            email: 'content@aura.com',
+            email: 'content@Higher Waist.com',
             role: 'editor',
             status: 'active',
             permissions: {

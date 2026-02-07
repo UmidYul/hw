@@ -1,5 +1,5 @@
 // ========================================
-// AURA Admin Panel - Validators
+// Higher Waist Admin Panel - Validators
 // Form validation utilities
 // ========================================
 

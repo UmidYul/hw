@@ -179,8 +179,8 @@ CREATE TABLE IF NOT EXISTS content_settings (
 -- Settings
 CREATE TABLE IF NOT EXISTS settings (
     id INTEGER PRIMARY KEY CHECK (id = 1),
-    site_name TEXT DEFAULT 'AURA',
-    logo_text TEXT DEFAULT 'AURA',
+    site_name TEXT DEFAULT 'Higher Waist',
+    logo_text TEXT DEFAULT 'Higher Waist',
     store_description TEXT,
     contact_email TEXT,
     contact_phone TEXT,

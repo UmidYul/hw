@@ -1,7 +1,7 @@
 {
-    "name": "aura-ecommerce-server",
+    "name": "Higher Waist-ecommerce-server",
     "version": "1.0.0",
-    "description": "AURA E-commerce Backend API",
+    "description": "Higher Waist E-commerce Backend API",
     "main": "server.js",
     "type": "module",
     "scripts": {
