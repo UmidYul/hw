@@ -1593,25 +1593,6 @@ a:hover {
         transform: translateX(0);
     }
 
-    .sidebar::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.35);
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.2s ease;
-        z-index: -1;
-    }
-
-    .sidebar.open::before,
-    .sidebar.sidebar-collapsed::before {
-        opacity: 1;
-        pointer-events: auto;
-    }
 
     .main-content {
         margin-left: 0;
