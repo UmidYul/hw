@@ -1748,6 +1748,14 @@ a:hover {
         display: none;
     }
 
+    .card table.table td {
+        width: 100% !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+
     .orders-table tr {
         text-align: left;
         display: flex;
