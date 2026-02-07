@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="/admin/styles.css">
 </head>
 
-<body>
+<body class="order-view-page">
     <div class="admin-layout">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
@@ -491,6 +491,27 @@
     </script>
 
     <style>
+        .order-view-page {
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .order-view-page .page-title {
+            font-size: 28px;
+        }
+
+        .order-view-page .page-subtitle {
+            font-size: 14px;
+        }
+
+        .order-view-page .grid-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .order-view-page .grid-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
         .order-info-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -621,6 +642,57 @@
             font-size: 14px;
             color: #666;
             margin-top: 4px;
+        }
+
+        @media (max-width: 1024px) {
+            .order-view-page .page-header {
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+
+            .order-view-page .page-header>div:last-child {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .order-view-page .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .order-view-page .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .order-info-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .order-item {
+                grid-template-columns: 1fr 1fr;
+                row-gap: 8px;
+            }
+
+            .order-item-info {
+                grid-column: 1 / -1;
+            }
+
+            .order-item-qty,
+            .order-item-price,
+            .order-item-total {
+                text-align: left;
+                font-size: 14px;
+            }
+
+            .order-item-total {
+                text-align: right;
+            }
+
+            #statusSelect {
+                width: 100%;
+            }
         }
 
         @media print {
