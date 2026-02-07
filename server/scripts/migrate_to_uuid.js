@@ -21,11 +21,23 @@ const addColumnIfMissing = async (client, table, column, type) => {
     await client.query(`ALTER TABLE ${table} ADD COLUMN IF NOT EXISTS ${column} ${type}`);
 };
 
+const columnExists = async (client, table, column) => {
+    const result = await client.query(
+        `SELECT 1 FROM information_schema.columns WHERE table_name = $1 AND column_name = $2`,
+        [table, column]
+    );
+    return result.rows.length > 0;
+};
+
 const dropConstraint = async (client, table, constraint) => {
     await client.query(`ALTER TABLE ${table} DROP CONSTRAINT IF EXISTS ${constraint} CASCADE`);
 };
 
 const renameColumn = async (client, table, from, to) => {
+    const hasFrom = await columnExists(client, table, from);
+    if (!hasFrom) return;
+    const hasTo = await columnExists(client, table, to);
+    if (hasTo) return;
     await client.query(`ALTER TABLE ${table} RENAME COLUMN ${from} TO ${to}`);
 };
 
