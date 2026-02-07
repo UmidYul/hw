@@ -11,14 +11,6 @@ let siteSettings = {
     storeName: '',
     logoText: '',
     logoIcon: '',
-    colorPrimary: '',
-    colorSecondary: '',
-    colorAccent: '',
-    colorBg: '',
-    colorSurface: '',
-    colorBorder: '',
-    colorSuccess: '',
-    colorError: '',
     socialInstagram: '',
     socialFacebook: '',
     socialTelegram: '',
@@ -65,21 +57,6 @@ const normalizeCurrencySymbol = (symbol) => {
     return value;
 };
 
-const defaultThemeColors = {
-    colorPrimary: '#2D2D2D',
-    colorSecondary: '#6B6B6B',
-    colorAccent: '#C9A26C',
-    colorBg: '#FAFAFA',
-    colorSurface: '#FFFFFF',
-    colorBorder: '#E8E8E8',
-    colorSuccess: '#4CAF50',
-    colorError: '#E57373'
-};
-
-const isValidHex = (value) => /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(String(value || '').trim());
-
-const resolveThemeColor = (value, fallback) => (isValidHex(value) ? value.trim() : fallback);
-
 // Load settings from API
 async function loadSiteSettings() {
     try {
@@ -94,14 +71,6 @@ async function loadSiteSettings() {
             siteSettings.storeName = settings.site_name || '';
             siteSettings.logoText = settings.logo_text || '';
             siteSettings.logoIcon = settings.logo_icon || '';
-            siteSettings.colorPrimary = settings.color_primary || '';
-            siteSettings.colorSecondary = settings.color_secondary || '';
-            siteSettings.colorAccent = settings.color_accent || '';
-            siteSettings.colorBg = settings.color_bg || '';
-            siteSettings.colorSurface = settings.color_surface || '';
-            siteSettings.colorBorder = settings.color_border || '';
-            siteSettings.colorSuccess = settings.color_success || '';
-            siteSettings.colorError = settings.color_error || '';
             siteSettings.socialInstagram = settings.social_instagram || '';
             siteSettings.socialFacebook = settings.social_facebook || '';
             siteSettings.socialTelegram = settings.social_telegram || '';
@@ -110,7 +79,6 @@ async function loadSiteSettings() {
             siteSettings.socialWhatsapp = settings.social_whatsapp || '';
             siteSettings.colorPalette = normalizeColorPalette(settings.color_palette);
             applyFavicon(siteSettings.logoIcon);
-            applyThemeColors(siteSettings);
         }
     } catch (error) {
         console.log('Using default settings');
@@ -133,26 +101,6 @@ function applyFavicon(url) {
 
     links.forEach(link => {
         link.href = url;
-    });
-}
-
-function applyThemeColors(theme) {
-    const root = document.documentElement;
-    if (!root || !theme) return;
-
-    const colorMap = {
-        '--color-primary': resolveThemeColor(theme.colorPrimary, defaultThemeColors.colorPrimary),
-        '--color-secondary': resolveThemeColor(theme.colorSecondary, defaultThemeColors.colorSecondary),
-        '--color-accent': resolveThemeColor(theme.colorAccent, defaultThemeColors.colorAccent),
-        '--color-bg': resolveThemeColor(theme.colorBg, defaultThemeColors.colorBg),
-        '--color-surface': resolveThemeColor(theme.colorSurface, defaultThemeColors.colorSurface),
-        '--color-border': resolveThemeColor(theme.colorBorder, defaultThemeColors.colorBorder),
-        '--color-success': resolveThemeColor(theme.colorSuccess, defaultThemeColors.colorSuccess),
-        '--color-error': resolveThemeColor(theme.colorError, defaultThemeColors.colorError)
-    };
-
-    Object.entries(colorMap).forEach(([key, value]) => {
-        root.style.setProperty(key, value);
     });
 }
 

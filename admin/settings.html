@@ -238,55 +238,6 @@
 
                     <div class="card mt-lg">
                         <div class="card-header">
-                            <h3 class="card-title">Цвета сайта</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="grid grid-cols-2">
-                                <div class="form-group">
-                                    <label class="form-label">Основной текст</label>
-                                    <input type="color" class="form-input color-input" name="colorPrimary">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Вторичный текст</label>
-                                    <input type="color" class="form-input color-input" name="colorSecondary">
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2">
-                                <div class="form-group">
-                                    <label class="form-label">Акцент</label>
-                                    <input type="color" class="form-input color-input" name="colorAccent">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Фон</label>
-                                    <input type="color" class="form-input color-input" name="colorBg">
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2">
-                                <div class="form-group">
-                                    <label class="form-label">Поверхность</label>
-                                    <input type="color" class="form-input color-input" name="colorSurface">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Границы</label>
-                                    <input type="color" class="form-input color-input" name="colorBorder">
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2">
-                                <div class="form-group">
-                                    <label class="form-label">Успех</label>
-                                    <input type="color" class="form-input color-input" name="colorSuccess">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Ошибка</label>
-                                    <input type="color" class="form-input color-input" name="colorError">
-                                </div>
-                            </div>
-                            <div class="form-hint">Используется для оформления кнопок, текста и фона сайта.</div>
-                        </div>
-                    </div>
-
-                    <div class="card mt-lg">
-                        <div class="card-header">
                             <h3 class="card-title">Размеры</h3>
                         </div>
                         <div class="card-body">
@@ -435,14 +386,6 @@
                     'store_description': 'storeDescription',
                     'contact_email': 'contactEmail',
                     'contact_phone': 'contactPhone',
-                    'color_primary': 'colorPrimary',
-                    'color_secondary': 'colorSecondary',
-                    'color_accent': 'colorAccent',
-                    'color_bg': 'colorBg',
-                    'color_surface': 'colorSurface',
-                    'color_border': 'colorBorder',
-                    'color_success': 'colorSuccess',
-                    'color_error': 'colorError',
                     'social_instagram': 'socialInstagram',
                     'social_facebook': 'socialFacebook',
                     'social_telegram': 'socialTelegram',
@@ -471,8 +414,6 @@
                     }
                 });
 
-                applyThemeDefaults(settings, form);
-
                 const sizesInput = form.querySelector('[name="sizesList"]');
                 if (sizesInput) {
                     sizesInput.value = normalizeSizesList(settings.sizes_list).join(', ');
@@ -497,26 +438,6 @@
         ];
 
         const defaultSizes = ['XS', 'S', 'M', 'L', 'XL'];
-        const defaultThemeColors = {
-            colorPrimary: '#2D2D2D',
-            colorSecondary: '#6B6B6B',
-            colorAccent: '#C9A26C',
-            colorBg: '#FAFAFA',
-            colorSurface: '#FFFFFF',
-            colorBorder: '#E8E8E8',
-            colorSuccess: '#4CAF50',
-            colorError: '#E57373'
-        };
-        const themeDbKeys = {
-            colorPrimary: 'color_primary',
-            colorSecondary: 'color_secondary',
-            colorAccent: 'color_accent',
-            colorBg: 'color_bg',
-            colorSurface: 'color_surface',
-            colorBorder: 'color_border',
-            colorSuccess: 'color_success',
-            colorError: 'color_error'
-        };
 
         let paletteState = [...defaultPalette];
 
@@ -550,17 +471,6 @@
             } catch (error) {
                 return [...defaultSizes];
             }
-        }
-
-        function applyThemeDefaults(settings, form) {
-            Object.entries(defaultThemeColors).forEach(([formKey, fallback]) => {
-                const input = form.querySelector(`[name="${formKey}"]`);
-                if (!input) return;
-
-                const dbKey = themeDbKeys[formKey];
-                const stored = settings?.[dbKey];
-                input.value = stored && String(stored).trim() ? stored : fallback;
-            });
         }
 
         function parseSizesInput(value) {
