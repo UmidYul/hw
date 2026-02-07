@@ -1792,7 +1792,7 @@ a:hover {
     .products-table td::before {
         display: block;
         margin-bottom: 2px;
-        text-align: left;
+        text-align: center;
     }
 
     .products-table .products-col-select,
