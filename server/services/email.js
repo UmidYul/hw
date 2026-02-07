@@ -124,7 +124,7 @@ const getNewsletterCategory = (category) => {
     return map[category] || { label: 'Новости', color: '#1d4f9a', bg: '#e8f0ff' };
 };
 
-export const sendNewsletterWelcomeEmail = async ({ to, storeName = 'AURA', unsubscribeId = '' }) => {
+export const sendNewsletterWelcomeEmail = async ({ to, storeName = 'Higher Waist', unsubscribeId = '' }) => {
     const mailer = ensureTransporter();
     if (!mailer) return false;
 
@@ -186,7 +186,7 @@ export const sendOrderConfirmationEmail = async ({
     items,
     total,
     shippingAddress,
-    storeName = 'AURA'
+    storeName = 'Higher Waist'
 }) => {
     const mailer = ensureTransporter();
     if (!mailer) return false;
@@ -194,16 +194,31 @@ export const sendOrderConfirmationEmail = async ({
     const subject = `${storeName}: заказ ${orderNumber} оформлен`;
     const text = `Ваш заказ ${orderNumber} принят. Сумма: ${formatPrice(total)}.`;
     const itemsTable = formatItemsTable(items);
+    const supportEmail = getSupportEmail();
 
     const html = `
-        <div style="font-family: Arial, sans-serif; color: #2d2d2d;">
-            <h2 style="margin: 0 0 12px;">Спасибо за заказ!</h2>
-            <p>Здравствуйте${customerName ? `, ${customerName}` : ''}! Мы приняли ваш заказ.</p>
-            <p><strong>Номер заказа:</strong> ${orderNumber}</p>
-            ${shippingAddress ? `<p><strong>Адрес доставки:</strong> ${shippingAddress}</p>` : ''}
-            ${itemsTable}
-            <p style="margin-top: 12px;"><strong>Итого:</strong> ${formatPrice(total)}</p>
-            <p>Мы сообщим о дальнейших обновлениях статуса.</p>
+        <div style="background: #f7f4f0; padding: 28px 12px; font-family: Arial, sans-serif; color: #2d2d2d;">
+            <div style="max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #ece6dd; border-radius: 14px; overflow: hidden;">
+                <div style="padding: 18px 24px; border-bottom: 1px solid #f0e9df; background: #faf7f2;">
+                    <div style="font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #c9a26c;">${storeName}</div>
+                </div>
+                <div style="padding: 24px;">
+                    <h2 style="margin: 0 0 8px; font-weight: 500; font-size: 26px;">Спасибо за заказ!</h2>
+                    <p style="margin: 0 0 12px; font-size: 15px; color: #5c5c5c;">Здравствуйте${customerName ? `, ${customerName}` : ''}! Мы приняли ваш заказ.</p>
+                    <div style="display: inline-block; padding: 6px 12px; border-radius: 999px; font-size: 12px; background: #f2f2f2; color: #2d2d2d; margin-bottom: 16px;">
+                        Заказ № ${orderNumber}
+                    </div>
+                    ${shippingAddress ? `<p style="margin: 0 0 14px;"><strong>Адрес доставки:</strong> ${shippingAddress}</p>` : ''}
+                    ${itemsTable}
+                    <div style="margin-top: 16px; font-size: 16px;">
+                        <strong>Итого:</strong> ${formatPrice(total)}
+                    </div>
+                    <p style="margin: 14px 0 0; color: #5c5c5c;">Мы сообщим о дальнейших обновлениях статуса.</p>
+                </div>
+                <div style="padding: 18px 24px; border-top: 1px solid #f0e9df; background: #faf7f2;">
+                    <p style="margin: 0; font-size: 12px; color: #6b6b6b;">Есть вопросы? Напишите на <a href="mailto:${supportEmail}" style="color: #2d2d2d;">${supportEmail}</a>.</p>
+                </div>
+            </div>
         </div>
     `;
 
@@ -223,7 +238,7 @@ export const sendOrderStatusEmail = async ({
     orderNumber,
     customerName,
     status,
-    storeName = 'AURA'
+    storeName = 'Higher Waist'
 }) => {
     const mailer = ensureTransporter();
     if (!mailer) return false;
@@ -231,13 +246,26 @@ export const sendOrderStatusEmail = async ({
     const statusLabel = getStatusLabel(status);
     const subject = `${storeName}: статус заказа ${orderNumber} обновлен`;
     const text = `Статус заказа ${orderNumber}: ${statusLabel}.`;
+    const supportEmail = getSupportEmail();
 
     const html = `
-        <div style="font-family: Arial, sans-serif; color: #2d2d2d;">
-            <h2 style="margin: 0 0 12px;">Статус заказа обновлен</h2>
-            <p>Здравствуйте${customerName ? `, ${customerName}` : ''}!</p>
-            <p>Статус вашего заказа <strong>${orderNumber}</strong> теперь: <strong>${statusLabel}</strong>.</p>
-            <p>Если у вас есть вопросы, ответьте на это письмо.</p>
+        <div style="background: #f7f4f0; padding: 28px 12px; font-family: Arial, sans-serif; color: #2d2d2d;">
+            <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border: 1px solid #ece6dd; border-radius: 14px; overflow: hidden;">
+                <div style="padding: 18px 24px; border-bottom: 1px solid #f0e9df; background: #faf7f2;">
+                    <div style="font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #c9a26c;">${storeName}</div>
+                </div>
+                <div style="padding: 24px;">
+                    <h2 style="margin: 0 0 8px; font-weight: 500; font-size: 24px;">Статус заказа обновлен</h2>
+                    <p style="margin: 0 0 12px; color: #5c5c5c;">Здравствуйте${customerName ? `, ${customerName}` : ''}!</p>
+                    <div style="display: inline-block; padding: 6px 12px; border-radius: 999px; font-size: 12px; background: #e8f0ff; color: #1d4f9a; margin-bottom: 12px;">
+                        Заказ № ${orderNumber}
+                    </div>
+                    <p style="margin: 0; font-size: 16px;">Текущий статус: <strong>${statusLabel}</strong>.</p>
+                </div>
+                <div style="padding: 18px 24px; border-top: 1px solid #f0e9df; background: #faf7f2;">
+                    <p style="margin: 0; font-size: 12px; color: #6b6b6b;">Если у вас есть вопросы, ответьте на это письмо или напишите на <a href="mailto:${supportEmail}" style="color: #2d2d2d;">${supportEmail}</a>.</p>
+                </div>
+            </div>
         </div>
     `;
 
@@ -252,7 +280,7 @@ export const sendOrderStatusEmail = async ({
     return true;
 };
 
-export const sendTestEmail = async ({ to, storeName = 'AURA' }) => {
+export const sendTestEmail = async ({ to, storeName = 'Higher Waist' }) => {
     const mailer = ensureTransporter();
     if (!mailer) return false;
 
@@ -280,7 +308,7 @@ export const sendNewsletterCampaignEmail = async ({
     to,
     unsubscribeId,
     campaign,
-    storeName = 'AURA',
+    storeName = 'Higher Waist',
     supportEmail
 }) => {
     const mailer = ensureTransporter();

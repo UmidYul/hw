@@ -51,14 +51,39 @@ async function sendTelegramMessage(text, parseMode = 'HTML', replyMarkup = null)
  * Format order notification for Telegram
  */
 function formatOrderNotification(order) {
-    const { orderNumber, customerName, customerPhone, total, items, shippingAddress } = order;
+    const {
+        orderNumber,
+        customerName,
+        customerPhone,
+        total,
+        items,
+        shippingAddress,
+        subtotal,
+        discount,
+        shipping
+    } = order;
 
     let itemsList = '';
     items.forEach(item => {
         const itemTotal = item.price * item.quantity;
+        const sizePart = item.size ? `, размер: ${item.size}` : '';
+        const colorPart = item.color ? `, цвет: ${item.color}` : '';
         itemsList += `  • ${item.title || item.name}\n`;
-        itemsList += `    ${item.quantity} шт × ${formatPrice(item.price)} = ${formatPrice(itemTotal)}\n`;
+        itemsList += `    ${item.quantity} шт × ${formatPrice(item.price)} = ${formatPrice(itemTotal)}${sizePart}${colorPart}\n`;
     });
+
+    const hasSubtotal = Number(subtotal || 0) > 0;
+    const discountValue = Number(discount || 0);
+    const shippingValue = Number(shipping || 0);
+    const subtotalLine = hasSubtotal
+        ? `\n🧾 <b>Подытог:</b> ${formatPrice(subtotal)} Сумм`
+        : '';
+    const discountLine = discountValue > 0
+        ? `\n🏷️ <b>Скидка:</b> -${formatPrice(discountValue)} Сумм`
+        : '';
+    const shippingLine = shippingValue > 0
+        ? `\n🚚 <b>Доставка:</b> ${formatPrice(shippingValue)} Сумм`
+        : '';
 
     const message = `
 🛍️ <b>НОВЫЙ ЗАКАЗ!</b>
@@ -68,7 +93,7 @@ function formatOrderNotification(order) {
 📞 <b>Телефон:</b> <code>${customerPhone}</code>
 
 <b>Товары:</b>
-${itemsList}
+${itemsList}${subtotalLine}${discountLine}${shippingLine}
 💰 <b>Итого:</b> ${formatPrice(total)} Сумм
 
 📍 <b>Адрес доставки:</b>
