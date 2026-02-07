@@ -301,6 +301,7 @@
             loadBanners();
             setupSidebar();
             setupSearch();
+            setupBannerModal();
         });
 
         // Load banners
@@ -636,6 +637,22 @@
                 if (e.key === '/' && !isTyping && document.activeElement !== input) {
                     e.preventDefault();
                     input?.focus();
+                }
+            });
+        }
+
+        function setupBannerModal() {
+            const modal = document.getElementById('bannerModal');
+            const backdrop = modal?.querySelector('.modal-backdrop');
+
+            backdrop?.addEventListener('click', () => {
+                if (isBannerModalOpen) closeBannerModal();
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && isBannerModalOpen) {
+                    event.preventDefault();
+                    closeBannerModal();
                 }
             });
         }

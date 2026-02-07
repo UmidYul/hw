@@ -99,7 +99,7 @@
         <main class="main-content">
             <header class="topbar">
                 <div class="topbar-left">
-                    <button class="topbar-btn" onclick="window.history.back()">← Назад</button>
+                    <button class="topbar-btn" onclick="handleBackNavigation()">← Назад</button>
                 </div>
                 <div class="topbar-right">
                     <button class="btn btn-secondary" onclick="saveDraft()">Сохранить черновик</button>
@@ -425,6 +425,18 @@
             } catch (error) {
                 console.warn('Failed to delete product image:', error);
             }
+        }
+
+        async function cleanupSessionUploads() {
+            const uploads = Array.from(sessionUploadedImages);
+            if (uploads.length === 0) return;
+            await Promise.all(uploads.map((url) => deleteProductImage(url)));
+            sessionUploadedImages.clear();
+        }
+
+        async function handleBackNavigation() {
+            await cleanupSessionUploads();
+            window.history.back();
         }
 
         // Drag and Drop handlers
