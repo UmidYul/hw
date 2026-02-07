@@ -1605,22 +1605,6 @@ a:hover {
     .grid-cols-4 {
         grid-template-columns: repeat(2, 1fr);
     }
-
-    .orders-table {
-        display: block;
-        border: none;
-    }
-
-    .orders-table thead {
-        display: none;
-    }
-
-    .orders-table tbody,
-    .orders-table tr,
-    .orders-table td {
-        display: block;
-        width: 100%;
-    }
 }
 
 @media (max-width: 768px) {
