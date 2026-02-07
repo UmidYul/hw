@@ -537,6 +537,13 @@ a:hover {
     margin-bottom: var(--spacing-lg);
 }
 
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
 .form-label {
     display: block;
     font-weight: 500;
