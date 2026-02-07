@@ -22,6 +22,7 @@ import uploadsRouter from './routes/uploads.js';
 import subscribersRouter from './routes/subscribers.js';
 import emailRouter from './routes/email.js';
 import newslettersRouter from './routes/newsletters.js';
+import contentRouter from './routes/content.js';
 import { initAuthTables, requireAdmin } from './services/auth.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -62,6 +63,7 @@ app.use('/api/stats', statsRouter);
 app.use('/api/subscribers', subscribersRouter);
 app.use('/api/email', emailRouter);
 app.use('/api/newsletters', newslettersRouter);
+app.use('/api/content', contentRouter);
 
 // Admin auth (UI gate)
 // Page routes (without .html extension)
@@ -97,6 +99,7 @@ app.get('/admin/promocodes', requireAdmin, (req, res) => res.sendFile(path.join(
 app.get('/admin/discounts', requireAdmin, (req, res) => res.sendFile(path.join(__dirname, '../admin/discounts.html')));
 app.get('/admin/newsletters', requireAdmin, (req, res) => res.sendFile(path.join(__dirname, '../admin/newsletters.html')));
 app.get('/admin/settings', requireAdmin, (req, res) => res.sendFile(path.join(__dirname, '../admin/settings.html')));
+app.get('/admin/pages', requireAdmin, (req, res) => res.sendFile(path.join(__dirname, '../admin/pages.html')));
 
 // Admin assets (protect everything except login and its CSS)
 app.use('/admin', (req, res, next) => {

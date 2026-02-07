@@ -72,38 +72,16 @@
             <nav class="breadcrumbs" aria-label="breadcrumb">
                 <a href="/">Главная</a>
                 <span>/</span>
-                <span>Контакты</span>
+                <span id="breadcrumbCurrent">Контакты</span>
             </nav>
 
             <div class="page-header">
-                <h1 class="page-title">Контакты</h1>
+                <h1 class="page-title" id="infoTitle">Контакты</h1>
             </div>
 
-            <div class="content-block content-accordion">
-                <details class="accordion-item" open>
-                    <summary>Как с нами связаться</summary>
-                    <div class="accordion-body">
-                        <p>Мы на связи каждый день и готовы помочь с подбором, оплатой и доставкой.</p>
-                    </div>
-                </details>
-                <details class="accordion-item">
-                    <summary>Телефон</summary>
-                    <div class="accordion-body">
-                        <p id="contactPhoneInline">Уточняйте внизу страницы.</p>
-                    </div>
-                </details>
-                <details class="accordion-item">
-                    <summary>Email</summary>
-                    <div class="accordion-body">
-                        <p id="contactEmailInline">Уточняйте внизу страницы.</p>
-                    </div>
-                </details>
-                <details class="accordion-item">
-                    <summary>Социальные сети</summary>
-                    <div class="accordion-body">
-                        <p>Подписывайтесь на нас в социальных сетях — ссылки доступны в футере.</p>
-                    </div>
-                </details>
+            <div class="content-block">
+                <p class="content-meta" id="infoMeta" style="display: none;"></p>
+                <div class="content-accordion" id="infoContent"></div>
             </div>
         </div>
     </div>
@@ -176,21 +154,9 @@
     <script src="/js/api.js"></script>
     <script src="/js/utils.js"></script>
     <script src="/js/app.js"></script>
+    <script src="/js/info-pages.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const phoneFooter = document.getElementById('contactPhone');
-            const emailFooter = document.getElementById('contactEmail');
-            const phoneInline = document.getElementById('contactPhoneInline');
-            const emailInline = document.getElementById('contactEmailInline');
-
-            if (phoneFooter && phoneInline) {
-                phoneInline.textContent = phoneFooter.textContent || '—';
-            }
-
-            if (emailFooter && emailInline) {
-                emailInline.textContent = emailFooter.textContent || '—';
-            }
-        });
+        initInfoPage('contacts');
     </script>
 </body>
 

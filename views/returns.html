@@ -72,43 +72,16 @@
             <nav class="breadcrumbs" aria-label="breadcrumb">
                 <a href="/">Главная</a>
                 <span>/</span>
-                <span>Возврат и обмен</span>
+                <span id="breadcrumbCurrent">Возврат и обмен</span>
             </nav>
 
             <div class="page-header">
-                <h1 class="page-title">Возврат и обмен</h1>
+                <h1 class="page-title" id="infoTitle">Возврат и обмен</h1>
             </div>
 
-            <div class="content-block content-accordion">
-                <details class="accordion-item" open>
-                    <summary>Срок возврата</summary>
-                    <div class="accordion-body">
-                        <p>Вы можете вернуть товар в течение 14 дней с момента получения, если он не был в
-                            использовании.</p>
-                    </div>
-                </details>
-                <details class="accordion-item">
-                    <summary>Условия возврата</summary>
-                    <div class="accordion-body">
-                        <p>Сохраните бирки и упаковку, приложите чек или подтверждение заказа.</p>
-                    </div>
-                </details>
-                <details class="accordion-item">
-                    <summary>Как оформить возврат</summary>
-                    <div class="accordion-body">
-                        <ol>
-                            <li>Свяжитесь с нами через раздел контактов.</li>
-                            <li>Укажите номер заказа и причину возврата.</li>
-                            <li>Мы подтвердим адрес и способ отправки.</li>
-                        </ol>
-                    </div>
-                </details>
-                <details class="accordion-item">
-                    <summary>Обмен</summary>
-                    <div class="accordion-body">
-                        <p>Если нужен другой размер или цвет, мы быстро поможем оформить обмен.</p>
-                    </div>
-                </details>
+            <div class="content-block">
+                <p class="content-meta" id="infoMeta" style="display: none;"></p>
+                <div class="content-accordion" id="infoContent"></div>
             </div>
         </div>
     </div>
@@ -181,6 +154,10 @@
     <script src="/js/api.js"></script>
     <script src="/js/utils.js"></script>
     <script src="/js/app.js"></script>
+    <script src="/js/info-pages.js"></script>
+    <script>
+        initInfoPage('returns');
+    </script>
 </body>
 
 </html>

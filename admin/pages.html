@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Страницы - Higher Waist Admin</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/admin/styles.css">
+</head>
+
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">A</div>
+                    <div class="sidebar-logo-text">Higher Waist Admin</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Основное</div>
+                    <a href="/admin" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Каталог</div>
+                    <a href="/admin/products" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Товары</span>
+                    </a>
+                    <a href="/admin/categories" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Категории</span>
+                    </a>
+                    <a href="/admin/collections" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Коллекции</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Маркетинг</div>
+                    <a href="/admin/discounts" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Скидки</span>
+                    </a>
+                    <a href="/admin/promocodes" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Промокоды</span>
+                    </a>
+                    <a href="/admin/banners" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Баннеры</span>
+                    </a>
+                    <a href="/admin/newsletters" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Рассылки</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Продажи</div>
+                    <a href="/admin/orders" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Заказы</span>
+                    </a>
+                    <a href="/admin/customers" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Клиенты</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Контент</div>
+                    <a href="/admin/pages" class="sidebar-nav-link active">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Страницы</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Настройки</div>
+                    <a href="/admin/settings" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Настройки</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="topbar-btn" id="sidebar-toggle">Меню</button>
+                </div>
+                <div class="topbar-right">
+                    <div class="topbar-profile">
+                        <div class="topbar-profile-avatar">A</div>
+                        <div class="topbar-profile-name">Администратор</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Страницы</h1>
+                        <p class="page-subtitle">Редактирование контента для футерных страниц</p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="btn btn-primary" id="savePageBtn">Сохранить изменения</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Настройки страницы</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="grid grid-cols-2">
+                            <div class="form-group">
+                                <label class="form-label">Страница</label>
+                                <select class="form-select" id="pageSelect"></select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Заголовок страницы</label>
+                                <input type="text" class="form-input" id="pageTitleInput">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Примечание (например, дата обновления)</label>
+                            <input type="text" class="form-input" id="pageMetaInput"
+                                placeholder="Последнее обновление: 07.02.2026">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-lg">
+                    <div class="card-header">
+                        <h3 class="card-title">Секции аккордеона</h3>
+                        <button class="btn btn-secondary" id="addSectionBtn">Добавить секцию</button>
+                    </div>
+                    <div class="card-body" id="sectionsContainer"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/js/api.js"></script>
+    <script src="/admin/components.js"></script>
+    <script>
+        const pagesCatalog = [
+            { slug: 'delivery', label: 'Доставка' },
+            { slug: 'payment', label: 'Оплата' },
+            { slug: 'returns', label: 'Возврат и обмен' },
+            { slug: 'faq', label: 'FAQ' },
+            { slug: 'privacy', label: 'Политика конфиденциальности' },
+            { slug: 'terms', label: 'Публичная оферта' },
+            { slug: 'contacts', label: 'Контакты' },
+            { slug: 'about', label: 'О нас' }
+        ];
+
+        let activeSlug = pagesCatalog[0].slug;
+        let activeEditor = null;
+
+        const pageSelect = document.getElementById('pageSelect');
+        const pageTitleInput = document.getElementById('pageTitleInput');
+        const pageMetaInput = document.getElementById('pageMetaInput');
+        const sectionsContainer = document.getElementById('sectionsContainer');
+        const savePageBtn = document.getElementById('savePageBtn');
+        const addSectionBtn = document.getElementById('addSectionBtn');
+
+        const createToolbar = () => {
+            const toolbar = document.createElement('div');
+            toolbar.className = 'editor-toolbar';
+            toolbar.innerHTML = `
+                <button class="editor-btn" data-cmd="bold" type="button"><strong>B</strong></button>
+                <button class="editor-btn" data-cmd="italic" type="button"><em>I</em></button>
+                <button class="editor-btn" data-cmd="underline" type="button"><u>U</u></button>
+                <button class="editor-btn" data-cmd="insertUnorderedList" type="button">• Список</button>
+                <button class="editor-btn" data-cmd="insertOrderedList" type="button">1. Список</button>
+                <button class="editor-btn" data-cmd="createLink" type="button">Ссылка</button>
+                <button class="editor-btn" data-cmd="removeFormat" type="button">Очистить</button>
+            `;
+
+            toolbar.addEventListener('click', (event) => {
+                const button = event.target.closest('[data-cmd]');
+                if (!button) return;
+                if (!activeEditor) return;
+
+                const command = button.dataset.cmd;
+                if (command === 'createLink') {
+                    const url = prompt('Введите ссылку (https://...)');
+                    if (!url) return;
+                    activeEditor.focus();
+                    document.execCommand(command, false, url);
+                    return;
+                }
+
+                activeEditor.focus();
+                document.execCommand(command, false, null);
+            });
+
+            return toolbar;
+        };
+
+        const createSection = (section = {}) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'section-item';
+
+            wrapper.innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Заголовок секции</label>
+                    <input type="text" class="form-input section-title" value="${section.title || ''}">
+                </div>
+            `;
+
+            const toolbar = createToolbar();
+            const editor = document.createElement('div');
+            editor.className = 'editor-area section-body';
+            editor.contentEditable = 'true';
+            editor.innerHTML = section.body || '';
+
+            editor.addEventListener('focus', () => {
+                activeEditor = editor;
+            });
+
+            wrapper.appendChild(toolbar);
+            wrapper.appendChild(editor);
+
+            const actions = document.createElement('div');
+            actions.className = 'section-actions';
+            actions.innerHTML = '<button class="btn btn-secondary" type="button">Удалить секцию</button>';
+            actions.querySelector('button').addEventListener('click', () => {
+                Components.confirm('Удалить секцию?', 'Секция будет удалена без возможности восстановления.', () => {
+                    wrapper.remove();
+                });
+            });
+            wrapper.appendChild(actions);
+
+            return wrapper;
+        };
+
+        const renderSections = (sections = []) => {
+            sectionsContainer.innerHTML = '';
+            if (!sections.length) {
+                sectionsContainer.appendChild(createSection());
+                return;
+            }
+            sections.forEach(section => sectionsContainer.appendChild(createSection(section)));
+        };
+
+        const loadPage = async (slug) => {
+            try {
+                const response = await API.content.getInfoPage(slug);
+                pageTitleInput.value = response.title || '';
+                pageMetaInput.value = response.meta || '';
+                renderSections(response.sections || []);
+            } catch (error) {
+                Components.showToast('Ошибка', 'Не удалось загрузить страницу', 'error');
+                renderSections([]);
+            }
+        };
+
+        const gatherSections = () => {
+            return Array.from(sectionsContainer.querySelectorAll('.section-item')).map(section => {
+                const title = section.querySelector('.section-title')?.value?.trim() || '';
+                const body = section.querySelector('.section-body')?.innerHTML?.trim() || '';
+                return { title, body };
+            }).filter(section => section.title || section.body);
+        };
+
+        const savePage = async () => {
+            const payload = {
+                title: pageTitleInput.value.trim(),
+                meta: pageMetaInput.value.trim(),
+                sections: gatherSections()
+            };
+
+            if (!payload.title) {
+                Components.showToast('Ошибка', 'Заполните заголовок страницы', 'error');
+                return;
+            }
+
+            try {
+                await API.content.updateInfoPage(activeSlug, payload);
+                Components.showToast('Готово', 'Страница сохранена', 'success');
+            } catch (error) {
+                Components.showToast('Ошибка', 'Не удалось сохранить страницу', 'error');
+            }
+        };
+
+        const initPageSelect = () => {
+            pagesCatalog.forEach(page => {
+                const option = document.createElement('option');
+                option.value = page.slug;
+                option.textContent = page.label;
+                pageSelect.appendChild(option);
+            });
+
+            pageSelect.value = activeSlug;
+            pageSelect.addEventListener('change', () => {
+                activeSlug = pageSelect.value;
+                loadPage(activeSlug);
+            });
+        };
+
+        addSectionBtn.addEventListener('click', () => {
+            sectionsContainer.appendChild(createSection());
+        });
+
+        savePageBtn.addEventListener('click', savePage);
+
+        initPageSelect();
+        loadPage(activeSlug);
+    </script>
+</body>
+
+</html>

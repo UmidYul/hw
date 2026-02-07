@@ -345,6 +345,21 @@ const contentAPI = {
             method: 'PUT',
             body: JSON.stringify({ value })
         });
+    },
+
+    async getInfoPages() {
+        return await apiCall('/content/pages');
+    },
+
+    async getInfoPage(slug) {
+        return await apiCall(`/content/pages/${slug}`);
+    },
+
+    async updateInfoPage(slug, payload) {
+        return await apiCall(`/content/pages/${slug}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+        });
     }
 };
 

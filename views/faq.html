@@ -72,38 +72,16 @@
             <nav class="breadcrumbs" aria-label="breadcrumb">
                 <a href="/">Главная</a>
                 <span>/</span>
-                <span>FAQ</span>
+                <span id="breadcrumbCurrent">FAQ</span>
             </nav>
 
             <div class="page-header">
-                <h1 class="page-title">Частые вопросы</h1>
+                <h1 class="page-title" id="infoTitle">Частые вопросы</h1>
             </div>
 
-            <div class="content-block content-accordion">
-                <details class="accordion-item" open>
-                    <summary>Как выбрать размер?</summary>
-                    <div class="accordion-body">
-                        <p>Ориентируйтесь на описание товара и таблицу размеров. Если сомневаетесь, напишите нам.</p>
-                    </div>
-                </details>
-                <details class="accordion-item">
-                    <summary>Можно ли примерить перед покупкой?</summary>
-                    <div class="accordion-body">
-                        <p>Возможность примерки зависит от способа доставки. Уточните при оформлении заказа.</p>
-                    </div>
-                </details>
-                <details class="accordion-item">
-                    <summary>Как отследить заказ?</summary>
-                    <div class="accordion-body">
-                        <p>После отправки мы пришлем трек-номер и ссылку для отслеживания.</p>
-                    </div>
-                </details>
-                <details class="accordion-item">
-                    <summary>Как оформить возврат?</summary>
-                    <div class="accordion-body">
-                        <p>Свяжитесь с нами через контакты, укажите номер заказа и причину возврата.</p>
-                    </div>
-                </details>
+            <div class="content-block">
+                <p class="content-meta" id="infoMeta" style="display: none;"></p>
+                <div class="content-accordion" id="infoContent"></div>
             </div>
         </div>
     </div>
@@ -176,6 +154,10 @@
     <script src="/js/api.js"></script>
     <script src="/js/utils.js"></script>
     <script src="/js/app.js"></script>
+    <script src="/js/info-pages.js"></script>
+    <script>
+        initInfoPage('faq');
+    </script>
 </body>
 
 </html>

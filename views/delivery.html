@@ -74,42 +74,16 @@
             <nav class="breadcrumbs" aria-label="breadcrumb">
                 <a href="/">Главная</a>
                 <span>/</span>
-                <span>Доставка</span>
+                <span id="breadcrumbCurrent">Доставка</span>
             </nav>
 
             <div class="page-header">
-                <h1 class="page-title">Доставка</h1>
+                <h1 class="page-title" id="infoTitle">Доставка</h1>
             </div>
 
-            <div class="content-block content-accordion">
-                <details class="accordion-item" open>
-                    <summary>Сроки доставки</summary>
-                    <div class="accordion-body">
-                        <p>Мы отправляем заказы ежедневно. Срок зависит от региона и обычно составляет от 1 до 5 рабочих
-                            дней.</p>
-                    </div>
-                </details>
-                <details class="accordion-item">
-                    <summary>Стоимость</summary>
-                    <div class="accordion-body">
-                        <p>Стоимость доставки рассчитывается при оформлении заказа. Для заказов от порога бесплатной
-                            доставки действует бесплатная доставка.</p>
-                    </div>
-                </details>
-                <details class="accordion-item">
-                    <summary>Отслеживание</summary>
-                    <div class="accordion-body">
-                        <p>После отправки вы получите трек-номер. Проверяйте статус доставки в личных сообщениях или по
-                            ссылке от курьерской службы.</p>
-                    </div>
-                </details>
-                <details class="accordion-item">
-                    <summary>Получение заказа</summary>
-                    <div class="accordion-body">
-                        <p>Проверьте целостность упаковки и комплектацию заказа при получении. Если есть вопросы —
-                            свяжитесь с нами.</p>
-                    </div>
-                </details>
+            <div class="content-block">
+                <p class="content-meta" id="infoMeta" style="display: none;"></p>
+                <div class="content-accordion" id="infoContent"></div>
             </div>
         </div>
     </div>
@@ -183,6 +157,10 @@
     <script src="/js/api.js"></script>
     <script src="/js/utils.js"></script>
     <script src="/js/app.js"></script>
+    <script src="/js/info-pages.js"></script>
+    <script>
+        initInfoPage('delivery');
+    </script>
 </body>
 
 </html>

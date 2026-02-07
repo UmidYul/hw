@@ -72,39 +72,16 @@
             <nav class="breadcrumbs" aria-label="breadcrumb">
                 <a href="/">Главная</a>
                 <span>/</span>
-                <span>Политика конфиденциальности</span>
+                <span id="breadcrumbCurrent">Политика конфиденциальности</span>
             </nav>
 
             <div class="page-header">
-                <h1 class="page-title">Политика конфиденциальности</h1>
+                <h1 class="page-title" id="infoTitle">Политика конфиденциальности</h1>
             </div>
 
-            <div class="content-block content-accordion">
-                <p class="content-meta">Последнее обновление: 07.02.2026</p>
-                <details class="accordion-item" open>
-                    <summary>Какие данные мы собираем</summary>
-                    <div class="accordion-body">
-                        <p>Мы собираем данные, необходимые для оформления заказа, связи с вами и улучшения сервиса.</p>
-                    </div>
-                </details>
-                <details class="accordion-item">
-                    <summary>Как мы используем данные</summary>
-                    <div class="accordion-body">
-                        <p>Информация используется для обработки заказов, доставки и поддержки клиентов.</p>
-                    </div>
-                </details>
-                <details class="accordion-item">
-                    <summary>Передача третьим лицам</summary>
-                    <div class="accordion-body">
-                        <p>Мы передаем данные только партнерам, которые обеспечивают оплату и доставку.</p>
-                    </div>
-                </details>
-                <details class="accordion-item">
-                    <summary>Ваши права</summary>
-                    <div class="accordion-body">
-                        <p>Вы можете запросить изменение или удаление данных, обратившись через контакты.</p>
-                    </div>
-                </details>
+            <div class="content-block">
+                <p class="content-meta" id="infoMeta" style="display: none;"></p>
+                <div class="content-accordion" id="infoContent"></div>
             </div>
         </div>
     </div>
@@ -177,6 +154,10 @@
     <script src="/js/api.js"></script>
     <script src="/js/utils.js"></script>
     <script src="/js/app.js"></script>
+    <script src="/js/info-pages.js"></script>
+    <script>
+        initInfoPage('privacy');
+    </script>
 </body>
 
 </html>
