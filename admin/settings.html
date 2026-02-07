@@ -263,6 +263,38 @@
                         </div>
                     </div>
 
+                    <div class="card mt-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">Безопасность</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="grid grid-cols-2">
+                                <div class="form-group">
+                                    <label class="form-label" for="currentPassword">Текущий пароль</label>
+                                    <input type="password" class="form-input" id="currentPassword"
+                                        autocomplete="current-password">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="newPassword">Новый пароль</label>
+                                    <input type="password" class="form-input" id="newPassword"
+                                        autocomplete="new-password">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2">
+                                <div class="form-group">
+                                    <label class="form-label" for="confirmPassword">Повторите новый пароль</label>
+                                    <input type="password" class="form-input" id="confirmPassword"
+                                        autocomplete="new-password">
+                                </div>
+                                <div class="form-group" style="display: flex; align-items: end;">
+                                    <button type="button" class="btn btn-secondary" onclick="changeAdminPassword()">
+                                        Изменить пароль
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="flex justify-between mt-lg">
                         <button type="button" class="btn btn-secondary" onclick="window.history.back()">Отмена</button>
                         <button type="button" class="btn btn-primary" onclick="saveSettings()">Сохранить
@@ -464,6 +496,32 @@
             } catch (error) {
                 console.error('Failed to save settings:', error);
                 Components.showToast('Ошибка', 'Не удалось сохранить настройки', 'error');
+            }
+        }
+
+        async function changeAdminPassword() {
+            const currentPassword = document.getElementById('currentPassword')?.value || '';
+            const newPassword = document.getElementById('newPassword')?.value || '';
+            const confirmPassword = document.getElementById('confirmPassword')?.value || '';
+
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                Components.showToast('Ошибка', 'Заполните все поля пароля', 'error');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                Components.showToast('Ошибка', 'Пароли не совпадают', 'error');
+                return;
+            }
+
+            try {
+                await API.auth.changePassword(currentPassword, newPassword, confirmPassword);
+                Components.showToast('Успешно', 'Пароль обновлен', 'success');
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+            } catch (error) {
+                Components.showToast('Ошибка', 'Не удалось обновить пароль', 'error');
             }
         }
 

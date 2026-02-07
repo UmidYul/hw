@@ -150,6 +150,29 @@ const getAdminUserById = async (id) => {
     return dbGet('SELECT * FROM admin_users WHERE id = ? AND is_active = true', [id]);
 };
 
+const getAdminFromRequest = async (req) => {
+    const accessToken = req.cookies?.accessToken;
+    if (accessToken) {
+        try {
+            const decoded = jwt.verify(accessToken, JWT_SECRET);
+            const user = await getAdminUserById(decoded.sub);
+            if (user) return user;
+        } catch (error) {
+            if (error.name !== 'TokenExpiredError') {
+                return null;
+            }
+        }
+    }
+
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) return null;
+
+    const { record } = await findRefreshToken(refreshToken);
+    if (!record || isRefreshExpired(record)) return null;
+
+    return getAdminUserById(record.user_id);
+};
+
 const storeRefreshToken = async (userId, token, req) => {
     const expiresAt = new Date(Date.now() + REFRESH_TTL_SECONDS * 1000).toISOString();
     const tokenHash = hashToken(token);
@@ -269,6 +292,48 @@ export const logout = async (req, res) => {
     }
     clearAuthCookies(res);
     return res.json({ success: true });
+};
+
+export const changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword, confirmPassword } = req.body || {};
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            return res.status(400).json({ success: false, message: 'Заполните все поля.' });
+        }
+
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({ success: false, message: 'Пароли не совпадают.' });
+        }
+
+        if (String(newPassword).length < 6) {
+            return res.status(400).json({ success: false, message: 'Пароль должен быть не короче 6 символов.' });
+        }
+
+        const user = await getAdminFromRequest(req);
+        if (!user) {
+            return res.status(401).json({ success: false, message: 'Unauthorized' });
+        }
+
+        const valid = await bcrypt.compare(currentPassword, user.password_hash);
+        if (!valid) {
+            return res.status(400).json({ success: false, message: 'Неверный текущий пароль.' });
+        }
+
+        const samePassword = await bcrypt.compare(newPassword, user.password_hash);
+        if (samePassword) {
+            return res.status(400).json({ success: false, message: 'Новый пароль должен отличаться от текущего.' });
+        }
+
+        const nextHash = await bcrypt.hash(newPassword, 12);
+        await dbRun(
+            'UPDATE admin_users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+            [nextHash, user.id]
+        );
+
+        return res.json({ success: true, message: 'Пароль обновлен.' });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
 };
 
 export const requireAdmin = async (req, res, next) => {

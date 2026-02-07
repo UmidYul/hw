@@ -95,6 +95,16 @@ const ordersAPI = {
     }
 };
 
+// Auth API
+const authAPI = {
+    async changePassword(currentPassword, newPassword, confirmPassword) {
+        return await apiCall('/auth/change-password', {
+            method: 'POST',
+            body: JSON.stringify({ currentPassword, newPassword, confirmPassword })
+        });
+    }
+};
+
 // Customers API
 const customersAPI = {
     async getAll() {
@@ -412,7 +422,8 @@ const API = {
     settings: settingsAPI,
     stats: statsAPI,
     newsletters: newslettersAPI,
-    subscribers: subscribersAPI
+    subscribers: subscribersAPI,
+    auth: authAPI
 };
 
 // Make API available globally
