@@ -1746,6 +1746,18 @@ a:hover {
         display: none;
     }
 
+    .orders-table tr {
+        text-align: center;
+    }
+
+    .orders-table td {
+        justify-content: center;
+    }
+
+    .orders-table td::before {
+        display: none;
+    }
+
     .orders-table .orders-col-id::before,
     .orders-table .orders-col-customer::before,
     .orders-table .orders-col-total::before,
@@ -1755,6 +1767,7 @@ a:hover {
 
     .orders-table .orders-col-actions {
         gap: var(--spacing-sm);
+        flex-direction: column;
     }
 
     .orders-table .orders-col-actions .btn {
