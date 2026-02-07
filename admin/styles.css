@@ -1712,6 +1712,7 @@ a:hover {
     .table td::before {
         content: attr(data-label);
         min-width: 120px;
+        text-align: center;
         font-size: 11px;
         text-transform: uppercase;
         letter-spacing: 0.04em;
