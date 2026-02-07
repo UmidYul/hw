@@ -30,31 +30,74 @@
                         <label class="form-label" for="password">Пароль</label>
                         <input class="form-input" type="password" id="password" name="password" required>
                     </div>
+                    <div class="form-group" id="twoFactorGroup" style="display: none;">
+                        <label class="form-label" for="twoFactorCode">Код из письма</label>
+                        <input class="form-input" type="text" id="twoFactorCode" inputmode="numeric"
+                            placeholder="6 цифр">
+                        <div class="form-hint" id="twoFactorHint" style="margin-top: 6px;"></div>
+                        <button class="btn btn-ghost" type="button" id="twoFactorResendBtn" style="margin-top: 10px;">
+                            Отправить код еще раз
+                        </button>
+                    </div>
                     <div class="form-group" id="loginError" style="display: none; color: var(--color-error);">
                         Неверный логин или пароль.
                     </div>
-                    <button class="btn btn-primary" type="submit" style="width: 100%;">Войти</button>
+                    <button class="btn btn-primary" type="submit" style="width: 100%;"
+                        id="loginSubmitBtn">Войти</button>
                 </form>
             </div>
         </div>
     </div>
 
     <script>
+        let twoFactorRequired = false;
+        let twoFactorChallengeId = null;
+
+        function updateTwoFactorUI(payload) {
+            const twoFactorGroup = document.getElementById('twoFactorGroup');
+            const twoFactorHint = document.getElementById('twoFactorHint');
+            const submitBtn = document.getElementById('loginSubmitBtn');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+
+            if (twoFactorRequired) {
+                twoFactorGroup.style.display = 'block';
+                const target = payload?.delivery?.target || 'email';
+                twoFactorHint.textContent = `Код отправлен на ${target}.`;
+                submitBtn.textContent = 'Подтвердить';
+                usernameInput.disabled = true;
+                passwordInput.disabled = true;
+            } else {
+                twoFactorGroup.style.display = 'none';
+                submitBtn.textContent = 'Войти';
+                usernameInput.disabled = false;
+                passwordInput.disabled = false;
+            }
+        }
+
         document.getElementById('loginForm').addEventListener('submit', async (event) => {
             event.preventDefault();
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
+            const code = document.getElementById('twoFactorCode').value.trim();
             const error = document.getElementById('loginError');
 
             error.style.display = 'none';
 
             try {
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ username, password })
-                });
+                const response = twoFactorRequired
+                    ? await fetch('/api/auth/2fa/verify-login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ challengeId: twoFactorChallengeId, code })
+                    })
+                    : await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ username, password })
+                    });
 
                 const payload = await response.json().catch(() => ({}));
 
@@ -64,9 +107,49 @@
                     return;
                 }
 
+                if (payload.requires2fa) {
+                    twoFactorRequired = true;
+                    twoFactorChallengeId = payload.challengeId;
+                    updateTwoFactorUI(payload);
+                    return;
+                }
+
                 window.location.href = '/admin';
             } catch (err) {
                 error.textContent = 'Не удалось войти. Проверьте подключение и попробуйте снова.';
+                error.style.display = 'block';
+            }
+        });
+
+        document.getElementById('twoFactorResendBtn').addEventListener('click', async () => {
+            const error = document.getElementById('loginError');
+            const hint = document.getElementById('twoFactorHint');
+            error.style.display = 'none';
+
+            if (!twoFactorChallengeId) {
+                error.textContent = 'Сначала выполните вход.';
+                error.style.display = 'block';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/2fa/resend-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ challengeId: twoFactorChallengeId })
+                });
+
+                const payload = await response.json().catch(() => ({}));
+                if (!response.ok || payload.success === false) {
+                    throw new Error(payload.message || 'Не удалось отправить код');
+                }
+
+                twoFactorChallengeId = payload.challengeId || twoFactorChallengeId;
+                const target = payload?.delivery?.target || 'email';
+                hint.textContent = `Код отправлен на ${target}.`;
+            } catch (err) {
+                error.textContent = err?.message || 'Не удалось отправить код.';
                 error.style.display = 'block';
             }
         });

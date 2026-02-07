@@ -110,6 +110,68 @@ const authAPI = {
         }
 
         return payload;
+    },
+
+    async getTwoFactorSettings() {
+        const response = await fetch(`${API_BASE_URL}/auth/2fa`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(payload?.message || `HTTP error! status: ${response.status}`);
+        }
+
+        return payload;
+    },
+
+    async sendTwoFactorSetupCode(email) {
+        const response = await fetch(`${API_BASE_URL}/auth/2fa/send-setup`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ email })
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(payload?.message || `HTTP error! status: ${response.status}`);
+        }
+
+        return payload;
+    },
+
+    async confirmTwoFactorSetup(challengeId, code) {
+        const response = await fetch(`${API_BASE_URL}/auth/2fa/confirm-setup`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ challengeId, code })
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(payload?.message || `HTTP error! status: ${response.status}`);
+        }
+
+        return payload;
+    },
+
+    async disableTwoFactor() {
+        const response = await fetch(`${API_BASE_URL}/auth/2fa/disable`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(payload?.message || `HTTP error! status: ${response.status}`);
+        }
+
+        return payload;
     }
 };
 

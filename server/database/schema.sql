@@ -206,6 +206,47 @@ CREATE TABLE IF NOT EXISTS newsletters (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Admin Users
+CREATE TABLE IF NOT EXISTS admin_users (
+    id UUID PRIMARY KEY,
+    username TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    role TEXT DEFAULT 'admin',
+    is_active BOOLEAN DEFAULT TRUE,
+    two_factor_enabled BOOLEAN DEFAULT FALSE,
+    two_factor_email TEXT,
+    two_factor_verified BOOLEAN DEFAULT FALSE,
+    last_login TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Refresh Tokens
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES admin_users(id) ON DELETE CASCADE,
+    token_hash TEXT NOT NULL UNIQUE,
+    expires_at TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    revoked_at TIMESTAMPTZ,
+    replaced_by TEXT,
+    ip TEXT,
+    user_agent TEXT
+);
+
+-- Admin Two Factor Tokens
+CREATE TABLE IF NOT EXISTS admin_two_factor_tokens (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES admin_users(id) ON DELETE CASCADE,
+    code_hash TEXT NOT NULL,
+    purpose TEXT NOT NULL,
+    email TEXT,
+    attempts INTEGER DEFAULT 0,
+    expires_at TIMESTAMPTZ NOT NULL,
+    consumed_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Settings
 CREATE TABLE IF NOT EXISTS settings (
     id UUID PRIMARY KEY,

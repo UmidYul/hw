@@ -114,6 +114,52 @@ const formatParagraphs = (value) => {
     return safe.replace(/\n/g, '<br>');
 };
 
+export const sendAdminTwoFactorEmail = async ({
+    to,
+    code,
+    reason = 'login',
+    storeName = 'Higher Waist'
+}) => {
+    const mailer = ensureTransporter();
+    if (!mailer) return false;
+
+    const subject = reason === 'setup'
+        ? `${storeName}: подтверждение 2FA`
+        : `${storeName}: код входа в админку`;
+
+    const text = reason === 'setup'
+        ? `Ваш код подтверждения 2FA: ${code}. Он действителен 10 минут.`
+        : `Ваш код входа в админку: ${code}. Он действителен 10 минут.`;
+
+    const html = `
+        <div style="background: #f7f4f0; padding: 24px 12px; font-family: Arial, sans-serif; color: #2d2d2d;">
+            <div style="max-width: 520px; margin: 0 auto; background: #ffffff; border: 1px solid #ece6dd; border-radius: 12px; padding: 22px;">
+                <div style="font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #c9a26c;">${storeName}</div>
+                <h2 style="margin: 10px 0 12px; font-weight: 500;">${reason === 'setup' ? 'Подтверждение 2FA' : 'Вход в админку'}</h2>
+                <p style="margin: 0 0 12px; line-height: 1.6;">
+                    ${reason === 'setup'
+            ? 'Используйте код ниже, чтобы включить двухфакторную защиту.'
+            : 'Введите код ниже, чтобы завершить вход в админку.'}
+                </p>
+                <div style="font-size: 28px; letter-spacing: 4px; font-weight: 600; padding: 12px 16px; border-radius: 10px; background: #f7f5f1; display: inline-block;">
+                    ${code}
+                </div>
+                <p style="margin: 16px 0 0; font-size: 12px; color: #6b6b6b;">Код действителен 10 минут.</p>
+            </div>
+        </div>
+    `;
+
+    await mailer.sendMail({
+        from: smtpConfig.from,
+        to,
+        subject,
+        text,
+        html
+    });
+
+    return true;
+};
+
 const getNewsletterCategory = (category) => {
     const map = {
         promo: { label: 'Акции', color: '#9a2f2f', bg: '#fde7e7' },

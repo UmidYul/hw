@@ -333,6 +333,42 @@
 
                     <div class="card mt-lg">
                         <div class="card-header">
+                            <h3 class="card-title">Двухфакторная защита</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label" for="twoFactorEmail">Email для кодов</label>
+                                <input type="email" class="form-input" id="twoFactorEmail"
+                                    placeholder="admin@example.com">
+                                <div class="form-hint">Коды подтверждения будут приходить на этот адрес.</div>
+                            </div>
+
+                            <div class="grid grid-cols-2">
+                                <div class="form-group">
+                                    <label class="form-label" for="twoFactorCode">Код из письма</label>
+                                    <input type="text" class="form-input" id="twoFactorCode" inputmode="numeric"
+                                        placeholder="6 цифр">
+                                </div>
+                                <div class="form-group" style="display: flex; align-items: end; gap: 12px;">
+                                    <button type="button" class="btn btn-secondary" id="twoFactorSendBtn">
+                                        Отправить код
+                                    </button>
+                                    <button type="button" class="btn btn-primary" id="twoFactorVerifyBtn">
+                                        Подтвердить и включить
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="form-hint" id="twoFactorStatus">2FA выключена.</div>
+                            <button type="button" class="btn btn-ghost" id="twoFactorDisableBtn"
+                                style="margin-top: 12px; display: none;">
+                                Отключить 2FA
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card mt-lg">
+                        <div class="card-header">
                             <h3 class="card-title">Очистка файлов</h3>
                         </div>
                         <div class="card-body">
@@ -415,6 +451,7 @@
 
                 loadColorPalette(settings.color_palette);
                 updateLogoIconPreviewFromUrl();
+                loadTwoFactorSettings();
             } catch (error) {
                 console.error('Failed to load settings:', error);
                 Components.showToast('Ошибка', 'Не удалось загрузить настройки', 'error');
@@ -653,6 +690,128 @@
                 Components.showToast('Ошибка', message, 'error');
             }
         }
+
+        let twoFactorChallengeId = null;
+        let twoFactorState = {
+            enabled: false,
+            email: '',
+            verified: false,
+            emailMasked: ''
+        };
+
+        function updateTwoFactorStatus(message) {
+            const status = document.getElementById('twoFactorStatus');
+            const disableBtn = document.getElementById('twoFactorDisableBtn');
+
+            if (message) {
+                status.textContent = message;
+                disableBtn.style.display = twoFactorState.enabled ? 'inline-flex' : 'none';
+                return;
+            }
+
+            if (twoFactorState.enabled) {
+                const target = twoFactorState.emailMasked || twoFactorState.email || 'email';
+                status.textContent = `2FA включена. Код приходит на ${target}.`;
+                disableBtn.style.display = 'inline-flex';
+            } else {
+                status.textContent = '2FA выключена.';
+                disableBtn.style.display = 'none';
+            }
+        }
+
+        async function loadTwoFactorSettings() {
+            try {
+                const payload = await API.auth.getTwoFactorSettings();
+                twoFactorState = {
+                    enabled: !!payload.enabled,
+                    email: payload.email || '',
+                    verified: !!payload.verified,
+                    emailMasked: payload.emailMasked || ''
+                };
+
+                const emailInput = document.getElementById('twoFactorEmail');
+                if (emailInput) emailInput.value = twoFactorState.email || '';
+
+                updateTwoFactorStatus();
+            } catch (error) {
+                console.error('Failed to load 2FA settings:', error);
+                updateTwoFactorStatus('Не удалось загрузить 2FA настройки.');
+            }
+        }
+
+        async function sendTwoFactorSetupCode() {
+            const emailInput = document.getElementById('twoFactorEmail');
+            const sendBtn = document.getElementById('twoFactorSendBtn');
+            const verifyBtn = document.getElementById('twoFactorVerifyBtn');
+            const email = emailInput?.value?.trim();
+
+            if (!email) {
+                Components.showToast('Ошибка', 'Введите email для 2FA', 'error');
+                return;
+            }
+
+            try {
+                sendBtn.disabled = true;
+                verifyBtn.disabled = true;
+                const payload = await API.auth.sendTwoFactorSetupCode(email);
+                twoFactorChallengeId = payload.challengeId || null;
+                twoFactorState.email = email;
+                twoFactorState.emailMasked = payload.delivery?.target || '';
+                updateTwoFactorStatus(`Код отправлен на ${twoFactorState.emailMasked || email}.`);
+                Components.showToast('Успешно', 'Код отправлен на email', 'success');
+            } catch (error) {
+                const message = error?.message || 'Не удалось отправить код';
+                Components.showToast('Ошибка', message, 'error');
+            } finally {
+                sendBtn.disabled = false;
+                verifyBtn.disabled = false;
+            }
+        }
+
+        async function confirmTwoFactorSetup() {
+            const code = document.getElementById('twoFactorCode')?.value?.trim();
+
+            if (!twoFactorChallengeId) {
+                Components.showToast('Ошибка', 'Сначала отправьте код', 'error');
+                return;
+            }
+
+            if (!code) {
+                Components.showToast('Ошибка', 'Введите код из письма', 'error');
+                return;
+            }
+
+            try {
+                const payload = await API.auth.confirmTwoFactorSetup(twoFactorChallengeId, code);
+                twoFactorState.enabled = !!payload.enabled;
+                twoFactorState.email = payload.email || twoFactorState.email;
+                twoFactorState.emailMasked = twoFactorState.emailMasked || twoFactorState.email;
+                twoFactorChallengeId = null;
+                document.getElementById('twoFactorCode').value = '';
+                updateTwoFactorStatus();
+                Components.showToast('Успешно', '2FA включена', 'success');
+            } catch (error) {
+                const message = error?.message || 'Не удалось подтвердить код';
+                Components.showToast('Ошибка', message, 'error');
+            }
+        }
+
+        async function disableTwoFactor() {
+            try {
+                await API.auth.disableTwoFactor();
+                twoFactorState.enabled = false;
+                twoFactorState.verified = false;
+                updateTwoFactorStatus();
+                Components.showToast('Успешно', '2FA отключена', 'success');
+            } catch (error) {
+                const message = error?.message || 'Не удалось отключить 2FA';
+                Components.showToast('Ошибка', message, 'error');
+            }
+        }
+
+        document.getElementById('twoFactorSendBtn')?.addEventListener('click', sendTwoFactorSetupCode);
+        document.getElementById('twoFactorVerifyBtn')?.addEventListener('click', confirmTwoFactorSetup);
+        document.getElementById('twoFactorDisableBtn')?.addEventListener('click', disableTwoFactor);
 
 
         let latestCleanupResult = null;
