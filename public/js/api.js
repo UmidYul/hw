@@ -552,5 +552,13 @@ const API = {
 
 // Make API available globally
 if (typeof window !== 'undefined') {
-    window.API = API;
+    if (window.API && typeof window.API === 'object') {
+        window.API = { ...window.API, ...API };
+    } else {
+        window.API = API;
+    }
+
+    if (typeof window.API.getCsrfToken !== 'function') {
+        window.API.getCsrfToken = getCsrfToken;
+    }
 }
