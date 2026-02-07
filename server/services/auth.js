@@ -15,6 +15,7 @@ const LOGIN_LIMIT = {
 
 const TWO_FACTOR_CODE_TTL_MINUTES = parseInt(process.env.TWO_FACTOR_CODE_TTL_MINUTES || '10', 10);
 const TWO_FACTOR_MAX_ATTEMPTS = parseInt(process.env.TWO_FACTOR_MAX_ATTEMPTS || '5', 10);
+const TWO_FACTOR_SEND_COOLDOWN_SECONDS = parseInt(process.env.TWO_FACTOR_SEND_COOLDOWN_SECONDS || '60', 10);
 
 const loginAttempts = new Map();
 
@@ -146,6 +147,7 @@ export const initAuthTables = async () => {
             purpose TEXT NOT NULL,
             email TEXT,
             attempts INTEGER DEFAULT 0,
+            last_sent_at TIMESTAMPTZ,
             expires_at TIMESTAMPTZ NOT NULL,
             consumed_at TIMESTAMPTZ,
             created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
@@ -156,6 +158,7 @@ export const initAuthTables = async () => {
     await dbRun('ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS two_factor_enabled BOOLEAN DEFAULT FALSE');
     await dbRun('ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS two_factor_email TEXT');
     await dbRun('ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS two_factor_verified BOOLEAN DEFAULT FALSE');
+    await dbRun('ALTER TABLE admin_two_factor_tokens ADD COLUMN IF NOT EXISTS last_sent_at TIMESTAMPTZ');
 
     await dbRun(`
         DO $$
@@ -263,14 +266,43 @@ const isTwoFactorExpired = (record) => {
     return new Date(record.expires_at).getTime() <= Date.now();
 };
 
+const getCooldownRemainingSeconds = (record) => {
+    if (!record?.last_sent_at) return 0;
+    const lastSent = new Date(record.last_sent_at).getTime();
+    if (Number.isNaN(lastSent)) return 0;
+    const elapsedMs = Date.now() - lastSent;
+    const cooldownMs = TWO_FACTOR_SEND_COOLDOWN_SECONDS * 1000;
+    if (elapsedMs >= cooldownMs) return 0;
+    return Math.ceil((cooldownMs - elapsedMs) / 1000);
+};
+
+const getLatestTwoFactorToken = async (userId, purpose) => {
+    return dbGet(
+        `SELECT * FROM admin_two_factor_tokens
+         WHERE user_id = ? AND purpose = ?
+         ORDER BY last_sent_at DESC NULLS LAST, created_at DESC
+         LIMIT 1`,
+        [userId, purpose]
+    );
+};
+
+const checkTwoFactorCooldown = async (userId, purpose) => {
+    const latest = await getLatestTwoFactorToken(userId, purpose);
+    const remaining = getCooldownRemainingSeconds(latest);
+    if (remaining > 0) {
+        return { ok: false, remaining };
+    }
+    return { ok: true, remaining: 0 };
+};
+
 const createTwoFactorToken = async ({ userId, purpose, email }) => {
     const code = createVerificationCode();
     const tokenId = crypto.randomUUID();
     const expiresAt = new Date(Date.now() + TWO_FACTOR_CODE_TTL_MINUTES * 60 * 1000).toISOString();
 
     await dbRun(
-        `INSERT INTO admin_two_factor_tokens (id, user_id, code_hash, purpose, email, expires_at)
-         VALUES (?, ?, ?, ?, ?, ?)`
+        `INSERT INTO admin_two_factor_tokens (id, user_id, code_hash, purpose, email, last_sent_at, expires_at)
+         VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)`
         , [tokenId, userId, hashCode(code), purpose, email || null, expiresAt]
     );
 
@@ -282,7 +314,7 @@ const refreshTwoFactorToken = async (tokenId) => {
     const expiresAt = new Date(Date.now() + TWO_FACTOR_CODE_TTL_MINUTES * 60 * 1000).toISOString();
 
     await dbRun(
-        'UPDATE admin_two_factor_tokens SET code_hash = ?, expires_at = ?, attempts = 0, consumed_at = NULL WHERE id = ?',
+        'UPDATE admin_two_factor_tokens SET code_hash = ?, expires_at = ?, attempts = 0, consumed_at = NULL, last_sent_at = CURRENT_TIMESTAMP WHERE id = ?',
         [hashCode(code), expiresAt, tokenId]
     );
 
@@ -361,6 +393,14 @@ export const login = async (req, res) => {
     }
 
     if (user.two_factor_enabled && user.two_factor_email) {
+        const cooldown = await checkTwoFactorCooldown(user.id, 'login');
+        if (!cooldown.ok) {
+            return res.status(429).json({
+                success: false,
+                message: `Повторите попытку через ${cooldown.remaining} сек.`
+            });
+        }
+
         const { tokenId, code } = await createTwoFactorToken({
             userId: user.id,
             purpose: 'login',
@@ -432,6 +472,14 @@ export const resendTwoFactorLogin = async (req, res) => {
         return res.status(400).json({ success: false, message: '2FA недоступна.' });
     }
 
+    const remaining = getCooldownRemainingSeconds(record);
+    if (remaining > 0) {
+        return res.status(429).json({
+            success: false,
+            message: `Повторите попытку через ${remaining} сек.`
+        });
+    }
+
     let tokenId = record.id;
     let code;
     if (isTwoFactorExpired(record)) {
@@ -483,6 +531,14 @@ export const sendTwoFactorSetupCode = async (req, res) => {
     const emailValid = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
     if (!emailValid) {
         return res.status(400).json({ success: false, message: 'Введите корректный email.' });
+    }
+
+    const cooldown = await checkTwoFactorCooldown(user.id, 'setup');
+    if (!cooldown.ok) {
+        return res.status(429).json({
+            success: false,
+            message: `Повторите попытку через ${cooldown.remaining} сек.`
+        });
     }
 
     const { tokenId, code } = await createTwoFactorToken({

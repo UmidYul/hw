@@ -242,6 +242,7 @@ CREATE TABLE IF NOT EXISTS admin_two_factor_tokens (
     purpose TEXT NOT NULL,
     email TEXT,
     attempts INTEGER DEFAULT 0,
+    last_sent_at TIMESTAMPTZ,
     expires_at TIMESTAMPTZ NOT NULL,
     consumed_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
