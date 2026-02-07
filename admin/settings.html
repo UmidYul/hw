@@ -321,6 +321,24 @@
                         </div>
                     </div>
 
+                    <div class="card mt-lg">
+                        <div class="card-header">
+                            <h3 class="card-title">Очистка файлов</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="form-hint">Удаляет изображения товаров и баннеров, которые не используются.</p>
+                            <div class="flex gap-md" style="align-items: center; flex-wrap: wrap;">
+                                <select class="form-select" id="cleanupUploadsType" style="min-width: 220px;">
+                                    <option value="all">Товары + баннеры</option>
+                                    <option value="products">Только товары</option>
+                                    <option value="banners">Только баннеры</option>
+                                </select>
+                                <button type="button" class="btn btn-secondary" id="cleanupUploadsBtn"
+                                    onclick="runUploadsCleanup()">Очистить неиспользуемые</button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="flex justify-between mt-lg">
                         <button type="button" class="btn btn-secondary" onclick="window.history.back()">Отмена</button>
                         <button type="button" class="btn btn-primary" onclick="saveSettings()">Сохранить
@@ -593,6 +611,49 @@
                     REPO.resetData();
                     Components.showToast('Успешно', 'Данные сброшены', 'success');
                     setTimeout(() => window.location.reload(), 1000);
+                }
+            );
+        }
+
+        async function runUploadsCleanup() {
+            Components.confirm(
+                'Очистить неиспользуемые файлы?',
+                'Будут удалены изображения товаров и баннеров, не привязанные к базе данных.',
+                async () => {
+                    const button = document.getElementById('cleanupUploadsBtn');
+                    const type = document.getElementById('cleanupUploadsType')?.value || 'all';
+                    if (button) button.disabled = true;
+                    try {
+                        const response = await fetch('/api/uploads/cleanup', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ type })
+                        });
+
+                        const payload = await response.json().catch(() => ({}));
+                        if (!response.ok || !payload.success) {
+                            throw new Error(payload.message || 'Не удалось выполнить очистку');
+                        }
+
+                        const products = payload.result?.products;
+                        const banners = payload.result?.banners;
+                        const productsText = products
+                            ? `товары ${products.removed ?? 0}/${products.scanned ?? 0}`
+                            : null;
+                        const bannersText = banners
+                            ? `баннеры ${banners.removed ?? 0}/${banners.scanned ?? 0}`
+                            : null;
+                        const details = [productsText, bannersText].filter(Boolean).join(', ');
+                        const message = details ? `Удалено: ${details}` : 'Очистка завершена.';
+
+                        Components.showToast('Успешно', message, 'success');
+                    } catch (error) {
+                        console.error('Cleanup failed:', error);
+                        Components.showToast('Ошибка', error.message || 'Не удалось выполнить очистку', 'error');
+                    } finally {
+                        if (button) button.disabled = false;
+                    }
                 }
             );
         }
