@@ -1703,12 +1703,18 @@ a:hover {
         width: 100%;
     }
 
+    .table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
     .table tr {
         border: 1px solid var(--color-border);
         border-radius: var(--border-radius);
         background: var(--color-surface);
         padding: var(--spacing-md);
-        margin-bottom: var(--spacing-md);
+        margin: 0;
         box-shadow: var(--shadow-sm);
     }
 
