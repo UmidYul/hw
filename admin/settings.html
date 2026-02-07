@@ -618,6 +618,8 @@
             );
         }
 
+        let latestCleanupResult = null;
+
         async function runUploadsCleanup() {
             Components.confirm(
                 'Очистить неиспользуемые файлы?',
@@ -674,19 +676,28 @@
         function showCleanupDetailsModal(result) {
             const modal = document.createElement('div');
             modal.className = 'modal show';
+            latestCleanupResult = result;
+
+            const listLimit = 5;
 
             const renderSection = (title, data) => {
                 if (!data) return '';
                 const removedUrls = Array.isArray(data.removedUrls) ? data.removedUrls : [];
+                const visibleUrls = removedUrls.slice(0, listLimit);
+                const hiddenCount = Math.max(removedUrls.length - visibleUrls.length, 0);
                 const removedItems = removedUrls.length
-                    ? `<ul class="cleanup-list">${removedUrls.map(url => `<li>${url}</li>`).join('')}</ul>`
+                    ? `<ul class="cleanup-list">${visibleUrls.map(url => `<li>${url}</li>`).join('')}</ul>`
                     : '<div class="cleanup-empty">Ничего не удалено.</div>';
+                const moreInfo = hiddenCount > 0
+                    ? `<div class="cleanup-more">И еще ${hiddenCount}</div>`
+                    : '';
 
                 return `
                     <div class="cleanup-section">
                         <h4>${title}</h4>
                         <div class="cleanup-meta">Удалено: ${data.removed ?? 0} из ${data.scanned ?? 0}</div>
                         ${removedItems}
+                        ${moreInfo}
                     </div>
                 `;
             };
@@ -707,12 +718,75 @@
                         ${bodyHtml}
                     </div>
                     <div class="modal-footer">
+                        <div class="cleanup-actions">
+                            <button class="btn btn-ghost" onclick="copyCleanupList()">Скопировать список</button>
+                            <button class="btn btn-ghost" onclick="downloadCleanupCsv()">Скачать CSV</button>
+                        </div>
                         <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Закрыть</button>
                     </div>
                 </div>
             `;
 
             document.body.appendChild(modal);
+        }
+
+        function collectCleanupUrls(result) {
+            const items = [];
+            const products = Array.isArray(result?.products?.removedUrls) ? result.products.removedUrls : [];
+            const banners = Array.isArray(result?.banners?.removedUrls) ? result.banners.removedUrls : [];
+
+            products.forEach(url => items.push({ type: 'products', url }));
+            banners.forEach(url => items.push({ type: 'banners', url }));
+
+            return items;
+        }
+
+        async function copyCleanupList() {
+            const items = collectCleanupUrls(latestCleanupResult || {});
+            if (items.length === 0) {
+                Components.showToast('Инфо', 'Нет удаленных файлов для копирования', 'info');
+                return;
+            }
+
+            const text = items.map(item => `${item.type}\t${item.url}`).join('\n');
+            try {
+                if (navigator?.clipboard?.writeText) {
+                    await navigator.clipboard.writeText(text);
+                } else {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    textarea.setAttribute('readonly', '');
+                    textarea.style.position = 'absolute';
+                    textarea.style.left = '-9999px';
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    textarea.remove();
+                }
+                Components.showToast('Успешно', 'Список скопирован', 'success');
+            } catch (error) {
+                console.error('Copy failed:', error);
+                Components.showToast('Ошибка', 'Не удалось скопировать список', 'error');
+            }
+        }
+
+        function downloadCleanupCsv() {
+            const items = collectCleanupUrls(latestCleanupResult || {});
+            if (items.length === 0) {
+                Components.showToast('Инфо', 'Нет удаленных файлов для экспорта', 'info');
+                return;
+            }
+
+            const header = 'type,url';
+            const rows = items.map(item => `${item.type},"${String(item.url).replace(/"/g, '""')}"`);
+            const csv = [header, ...rows].join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `uploads-cleanup-${Date.now()}.csv`;
+            link.click();
+            URL.revokeObjectURL(url);
         }
 
         document.addEventListener('DOMContentLoaded', loadSettings);

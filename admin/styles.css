@@ -1166,6 +1166,19 @@ a:hover {
     border-bottom: none;
 }
 
+.cleanup-more {
+    margin-top: var(--spacing-sm);
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}
+
+.cleanup-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: center;
+    margin-right: auto;
+}
+
 .cleanup-empty {
     font-size: 12px;
     color: var(--color-text-secondary);
