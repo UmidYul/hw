@@ -229,7 +229,14 @@
 
                         <div class="form-group">
                             <label for="imageFile">Или загрузить файл</label>
-                            <input type="file" id="imageFile" name="imageFile" accept="image/*">
+                            <div class="file-upload">
+                                <input type="file" id="imageFile" name="imageFile" accept="image/*">
+                                <button type="button" class="file-upload-button" id="imageFileBtn">Выбрать файл</button>
+                                <span class="file-upload-name" id="imageFileName">Файл не выбран</span>
+                            </div>
+                            <div class="file-preview" id="imageFilePreview">
+                                <div class="file-preview-empty">Превью изображения</div>
+                            </div>
                             <small class="text-muted" id="imageUploadStatus">Поддерживаются JPG/PNG до 5MB</small>
                         </div>
 
@@ -402,6 +409,7 @@
 
             currentBannerId = id;
             form.reset();
+            resetFileUpload();
 
             try {
                 if (id) {
@@ -419,6 +427,7 @@
                     document.getElementById('placement').value = banner.placement;
                     document.getElementById('theme').value = banner.theme || banner.text_color || 'light';
                     document.getElementById('imageUrl').value = banner.image || banner.imageUrl || '';
+                    syncFilePreviewFromUrl();
                     document.getElementById('order').value = banner.order_index || banner.order || 0;
                     const isActive = banner.is_active !== undefined ? banner.is_active : (banner.isActive !== undefined ? banner.isActive : 1);
                     document.getElementById('isActive').checked = Boolean(isActive);
@@ -435,6 +444,7 @@
                     title.textContent = 'Новый баннер';
                     const banners = await API.banners.getAll();
                     document.getElementById('order').value = banners.length;
+                    syncFilePreviewFromUrl();
                 }
 
                 updatePreview();
@@ -622,6 +632,9 @@
             document.getElementById(id)?.addEventListener('input', updatePreview);
         });
         document.getElementById('imageUrl')?.addEventListener('input', updatePreview);
+        document.getElementById('imageFileBtn')?.addEventListener('click', () => {
+            document.getElementById('imageFile')?.click();
+        });
 
         document.getElementById('imageFile')?.addEventListener('change', async (event) => {
             const file = event.target.files?.[0];
@@ -629,6 +642,7 @@
 
             const status = document.getElementById('imageUploadStatus');
             status.textContent = 'Загрузка файла...';
+            updateFilePreview(file);
 
             try {
                 const formData = new FormData();
@@ -657,6 +671,46 @@
                 Components.showToast('Ошибка', 'Не удалось загрузить изображение', 'error');
             }
         });
+
+        function resetFileUpload() {
+            const input = document.getElementById('imageFile');
+            const name = document.getElementById('imageFileName');
+            const preview = document.getElementById('imageFilePreview');
+            const status = document.getElementById('imageUploadStatus');
+
+            if (input) input.value = '';
+            if (name) name.textContent = 'Файл не выбран';
+            if (preview) {
+                preview.innerHTML = '<div class="file-preview-empty">Превью изображения</div>';
+            }
+            if (status) status.textContent = 'Поддерживаются JPG/PNG до 5MB';
+        }
+
+        function updateFilePreview(file) {
+            const name = document.getElementById('imageFileName');
+            const preview = document.getElementById('imageFilePreview');
+            if (name) name.textContent = file?.name || 'Файл не выбран';
+            if (!preview || !file) return;
+
+            const url = URL.createObjectURL(file);
+            preview.innerHTML = `<img src="${url}" alt="${file.name}">`;
+            preview.querySelector('img')?.addEventListener('load', () => URL.revokeObjectURL(url));
+        }
+
+        function syncFilePreviewFromUrl() {
+            const url = document.getElementById('imageUrl')?.value?.trim();
+            const name = document.getElementById('imageFileName');
+            const preview = document.getElementById('imageFilePreview');
+            if (!preview) return;
+
+            if (url) {
+                if (name) name.textContent = 'Используется URL';
+                preview.innerHTML = `<img src="${url}" alt="Preview">`;
+            } else {
+                if (name) name.textContent = 'Файл не выбран';
+                preview.innerHTML = '<div class="file-preview-empty">Превью изображения</div>';
+            }
+        }
     </script>
 
     <style>
