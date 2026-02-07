@@ -264,6 +264,12 @@ a:hover {
     transform: translateY(-50%);
     color: var(--color-text-tertiary);
     pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.topbar-search-input:focus+.topbar-search-icon,
+.topbar-search-input:not(:placeholder-shown)+.topbar-search-icon {
+    opacity: 0;
 }
 
 .topbar-right {
