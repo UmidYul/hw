@@ -1,4 +1,5 @@
 import express from 'express';
+import crypto from 'crypto';
 import { dbAll, dbGet, dbRun } from '../database/db.js';
 import { requireAdmin } from '../services/auth.js';
 
@@ -64,13 +65,14 @@ router.post('/', requireAdmin, async (req, res) => {
             product_ids
         } = req.body;
 
+        const discountId = crypto.randomUUID();
         const sql = `
             INSERT INTO discounts (
-                name, description, discount_type, discount_value, target,
+                id, name, description, discount_type, discount_value, target,
                 category_id, collection_id, product_ids, min_amount, priority,
                 is_active, combine_with_other, start_date, end_date
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             RETURNING id
         `;
 
@@ -79,6 +81,7 @@ router.post('/', requireAdmin, async (req, res) => {
             null;
 
         const result = await dbRun(sql, [
+            discountId,
             name,
             description || null,
             discount_type,

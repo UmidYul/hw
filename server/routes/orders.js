@@ -1,4 +1,5 @@
 import express from 'express';
+import crypto from 'crypto';
 import { dbAll, dbGet, dbRun } from '../database/db.js';
 import { notifyNewOrder, notifyStatusChange } from '../services/telegram.js';
 import { sendOrderConfirmationEmail, sendOrderStatusEmail } from '../services/email.js';
@@ -92,9 +93,10 @@ router.post('/', async (req, res) => {
 
         if (!customer) {
             // Create new customer
+            const customerId = crypto.randomUUID();
             const customerResult = await dbRun(
-                'INSERT INTO customers (name, phone, email, total_orders, total_spent) VALUES (?, ?, ?, 1, ?) RETURNING id',
-                [customerName, customerPhone, customerEmail || null, total]
+                'INSERT INTO customers (id, name, phone, email, total_orders, total_spent) VALUES (?, ?, ?, ?, 1, ?) RETURNING id',
+                [customerId, customerName, customerPhone, customerEmail || null, total]
             );
             customer = { id: customerResult.id };
         } else {
@@ -138,17 +140,18 @@ router.post('/', async (req, res) => {
         }
 
         // Create order
+        const orderId = crypto.randomUUID();
         const sql = `
             INSERT INTO orders (
-                order_number, customer_id, customer_name, customer_phone, customer_email,
+                id, order_number, customer_id, customer_name, customer_phone, customer_email,
                 shipping_address, items, subtotal, discount, shipping, total,
                 status, payment_method, notes, promo_code
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             RETURNING id
         `;
 
         const result = await dbRun(sql, [
-            orderNumber, customer.id, customerName, customerPhone, customerEmail || null,
+            orderId, orderNumber, customer.id, customerName, customerPhone, customerEmail || null,
             shippingAddress || null,
             JSON.stringify(items),
             subtotal, discount || 0, shipping || 0, total,

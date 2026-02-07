@@ -1,5 +1,6 @@
 import express from 'express';
-import { dbAll, dbGet, dbRun } from '../database/db.js';
+import crypto from 'crypto';
+import { dbGet, dbRun } from '../database/db.js';
 import { requireAdmin } from '../services/auth.js';
 
 const router = express.Router();
@@ -8,7 +9,7 @@ const router = express.Router();
 const initSettingsTable = async () => {
     await dbRun(`
         CREATE TABLE IF NOT EXISTS settings (
-            id INTEGER PRIMARY KEY CHECK (id = 1),
+            id UUID PRIMARY KEY,
             site_name TEXT DEFAULT 'Higher Waist',
             logo_text TEXT DEFAULT 'Higher Waist',
             store_description TEXT,
@@ -32,12 +33,14 @@ const initSettingsTable = async () => {
     `);
 
     // Insert default settings if not exists
-    const existing = await dbGet('SELECT * FROM settings WHERE id = 1');
+    const existing = await dbGet('SELECT * FROM settings LIMIT 1');
     if (!existing) {
-        await dbRun(`
-            INSERT INTO settings (id, site_name, logo_text, currency, currency_symbol, vat_rate, shipping_cost, free_shipping_threshold, enable_taxes)
-            VALUES (1, 'Higher Waist', 'Higher Waist', 'UZS', 'Сумм', 0, 0, 0, 0)
-        `);
+        const settingsId = crypto.randomUUID();
+        await dbRun(
+            `INSERT INTO settings (id, site_name, logo_text, currency, currency_symbol, vat_rate, shipping_cost, free_shipping_threshold, enable_taxes)
+             VALUES (?, 'Higher Waist', 'Higher Waist', 'UZS', 'Сумм', 0, 0, 0, 0)`
+            , [settingsId]
+        );
     } else {
         // Add missing columns if they don't exist (for existing databases)
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS logo_text TEXT DEFAULT "Higher Waist"');
@@ -60,7 +63,7 @@ initSettingsTable().catch(console.error);
 // Get settings
 router.get('/', async (req, res) => {
     try {
-        const settings = await dbGet('SELECT * FROM settings WHERE id = 1');
+        const settings = await dbGet('SELECT * FROM settings LIMIT 1');
         res.json(settings || {
             site_name: 'Higher Waist',
             currency: 'UZS',
@@ -106,6 +109,16 @@ router.put('/', requireAdmin, async (req, res) => {
 
         const enableTaxesDbValue = enableTaxesValue ? 1 : 0;
 
+        let settings = await dbGet('SELECT * FROM settings LIMIT 1');
+        if (!settings) {
+            const settingsId = crypto.randomUUID();
+            await dbRun(
+                'INSERT INTO settings (id, site_name, logo_text) VALUES (?, ?, ?)',
+                [settingsId, storeName || 'Higher Waist', logoText || 'Higher Waist']
+            );
+            settings = await dbGet('SELECT * FROM settings LIMIT 1');
+        }
+
         await dbRun(`
             UPDATE settings SET
                 site_name = ?,
@@ -127,7 +140,7 @@ router.put('/', requireAdmin, async (req, res) => {
                 return_policy = ?,
                 privacy_policy = ?,
                 updated_at = CURRENT_TIMESTAMP
-            WHERE id = 1
+            WHERE id = ?
         `, [
             storeName || 'Higher Waist',
             logoText || 'Higher Waist',
@@ -146,10 +159,11 @@ router.put('/', requireAdmin, async (req, res) => {
             enableTaxesDbValue,
             taxPercent || 0,
             returnPolicy || null,
-            privacyPolicy || null
+            privacyPolicy || null,
+            settings.id
         ]);
 
-        const updated = await dbGet('SELECT * FROM settings WHERE id = 1');
+        const updated = await dbGet('SELECT * FROM settings LIMIT 1');
         res.json({ message: 'Settings updated successfully', settings: updated });
     } catch (error) {
         console.error('Failed to update settings:', error);

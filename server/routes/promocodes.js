@@ -1,4 +1,5 @@
 import express from 'express';
+import crypto from 'crypto';
 import { dbAll, dbGet, dbRun } from '../database/db.js';
 import { requireAdmin } from '../services/auth.js';
 
@@ -102,14 +103,15 @@ router.post('/', requireAdmin, async (req, res) => {
             return new Date(isoDate).toISOString();
         };
 
+        const promoId = crypto.randomUUID();
         const sql = `
-            INSERT INTO promocodes (code, type, value, min_amount, exclude_sale, usage_limit, max_uses_per_user, start_date, end_date)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO promocodes (id, code, type, value, min_amount, exclude_sale, usage_limit, max_uses_per_user, start_date, end_date)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             RETURNING id
         `;
 
         const result = await dbRun(sql, [
-            code.toUpperCase(), type, value, minAmount || 0,
+            promoId, code.toUpperCase(), type, value, minAmount || 0,
             excludeSale ? true : false, usageLimit || null, maxUsesPerUser || null,
             formatDateForDb(startDate), formatDateForDb(endDate)
         ]);
@@ -173,9 +175,10 @@ router.post('/record-usage', async (req, res) => {
         }
 
         // Insert usage record
+        const usageId = crypto.randomUUID();
         await dbRun(
-            'INSERT INTO promocode_usage (promocode_id, order_id, customer_phone) VALUES (?, ?, ?)',
-            [promo.id, orderId || null, customerPhone || null]
+            'INSERT INTO promocode_usage (id, promocode_id, order_id, customer_phone) VALUES (?, ?, ?, ?)',
+            [usageId, promo.id, orderId || null, customerPhone || null]
         );
 
         // Increment usage count in promocodes table

@@ -1,4 +1,5 @@
 import express from 'express';
+import crypto from 'crypto';
 import { dbAll, dbGet, dbRun } from '../database/db.js';
 
 const router = express.Router();
@@ -103,9 +104,10 @@ router.put('/:key', async (req, res) => {
                 [JSON.stringify(value), req.params.key]
             );
         } else {
+            const settingId = crypto.randomUUID();
             await dbRun(
-                'INSERT INTO content_settings (key, value) VALUES (?, ?)',
-                [req.params.key, JSON.stringify(value)]
+                'INSERT INTO content_settings (id, key, value) VALUES (?, ?, ?)',
+                [settingId, req.params.key, JSON.stringify(value)]
             );
         }
 

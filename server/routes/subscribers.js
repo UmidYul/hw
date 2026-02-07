@@ -1,4 +1,5 @@
 import express from 'express';
+import crypto from 'crypto';
 import { dbGet, dbRun } from '../database/db.js';
 import { sendNewsletterWelcomeEmail } from '../services/email.js';
 
@@ -7,7 +8,7 @@ const router = express.Router();
 const initSubscribersTable = async () => {
     await dbRun(`
         CREATE TABLE IF NOT EXISTS subscribers (
-            id SERIAL PRIMARY KEY,
+            id UUID PRIMARY KEY,
             email TEXT UNIQUE NOT NULL,
             status TEXT DEFAULT 'active',
             source TEXT,
@@ -46,12 +47,13 @@ router.post('/', async (req, res) => {
             });
         }
 
+        const subscriberId = crypto.randomUUID();
         await dbRun(
-            `INSERT INTO subscribers (email, status, source)
-             VALUES (?, 'active', ?)
+            `INSERT INTO subscribers (id, email, status, source)
+             VALUES (?, ?, 'active', ?)
              ON CONFLICT (email)
              DO UPDATE SET status = 'active', source = EXCLUDED.source, updated_at = CURRENT_TIMESTAMP`,
-            [normalized, source || 'website']
+            [subscriberId, normalized, source || 'website']
         );
 
         const subscriber = await dbGet('SELECT * FROM subscribers WHERE email = ?', [normalized]);

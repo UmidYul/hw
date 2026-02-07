@@ -1,4 +1,5 @@
 import express from 'express';
+import crypto from 'crypto';
 import { dbAll, dbGet, dbRun } from '../database/db.js';
 import { requireAdmin } from '../services/auth.js';
 
@@ -161,16 +162,17 @@ router.post('/', requireAdmin, async (req, res) => {
         const randomPart = Math.random().toString(36).substring(2, 5).toUpperCase();
         const sku = `PRD-${timestamp}-${randomPart}`;
 
+        const productId = crypto.randomUUID();
         const sql = `
             INSERT INTO products (
-                title, sku, category, price, old_price, stock, tags, colors, sizes,
+                id, title, sku, category, price, old_price, stock, tags, colors, sizes,
                 description, material, care, fit, delivery_info, images
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             RETURNING id
         `;
 
         const result = await dbRun(sql, [
-            title, sku, category, price, oldPrice || null, totalStock,
+            productId, title, sku, category, price, oldPrice || null, totalStock,
             JSON.stringify(tags || []),
             JSON.stringify(colors || []),
             JSON.stringify(sizes || []),
@@ -181,9 +183,10 @@ router.post('/', requireAdmin, async (req, res) => {
 
         if (normalizedVariants.length > 0) {
             for (const variant of normalizedVariants) {
+                const variantId = crypto.randomUUID();
                 await dbRun(
-                    'INSERT INTO product_variants (product_id, color, size, stock) VALUES (?, ?, ?, ?)',
-                    [result.id, variant.color, variant.size, variant.stock]
+                    'INSERT INTO product_variants (id, product_id, color, size, stock) VALUES (?, ?, ?, ?, ?)',
+                    [variantId, result.id, variant.color, variant.size, variant.stock]
                 );
             }
         }
@@ -229,9 +232,10 @@ router.put('/:id', requireAdmin, async (req, res) => {
         if (hasVariants) {
             await dbRun('DELETE FROM product_variants WHERE product_id = ?', [req.params.id]);
             for (const variant of normalizedVariants) {
+                const variantId = crypto.randomUUID();
                 await dbRun(
-                    'INSERT INTO product_variants (product_id, color, size, stock) VALUES (?, ?, ?, ?)',
-                    [req.params.id, variant.color, variant.size, variant.stock]
+                    'INSERT INTO product_variants (id, product_id, color, size, stock) VALUES (?, ?, ?, ?, ?)',
+                    [variantId, req.params.id, variant.color, variant.size, variant.stock]
                 );
             }
         }

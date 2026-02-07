@@ -206,17 +206,17 @@ function renderCartItem(item) {
 }
 
 function getProductColors(productId) {
-    const product = products.find(p => p.id === productId);
+    const product = products.find(p => String(p.id) === String(productId));
     return product ? product.colors : [];
 }
 
 function getProductSizes(productId) {
-    const product = products.find(p => p.id === productId);
+    const product = products.find(p => String(p.id) === String(productId));
     return product ? product.sizes : [];
 }
 
 function getProductVariants(productId) {
-    const product = products.find(p => p.id === productId);
+    const product = products.find(p => String(p.id) === String(productId));
     return Array.isArray(product?.variants) ? product.variants : [];
 }
 
@@ -256,7 +256,7 @@ function getMaxQtyForItem(item) {
         return variant ? (variant.stock || 0) : 0;
     }
 
-    const product = products.find(p => p.id === item.id);
+    const product = products.find(p => String(p.id) === String(item.id));
     return product?.stock ?? item.stock ?? 0;
 }
 

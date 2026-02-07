@@ -135,7 +135,12 @@ const storage = {
 // Cart operations
 const cart = {
     getItems() {
-        return storage.get('cart') || [];
+        const items = storage.get('cart') || [];
+        return items.map(item => ({
+            ...item,
+            id: item?.id !== undefined ? String(item.id) : item.id,
+            variantId: item?.variantId !== undefined && item.variantId !== null ? String(item.variantId) : item.variantId
+        }));
     },
 
     setItems(items) {
@@ -245,7 +250,7 @@ const cart = {
 // Wishlist operations
 const wishlist = {
     getItems() {
-        return storage.get('wishlist') || [];
+        return (storage.get('wishlist') || []).map(id => String(id));
     },
 
     setItems(items) {
@@ -349,7 +354,7 @@ const recentlyViewed = {
     },
 
     get() {
-        return storage.get('recentlyViewed') || [];
+        return (storage.get('recentlyViewed') || []).map(id => String(id));
     }
 };
 
@@ -507,7 +512,7 @@ function attachProductCardListeners(container) {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            const productId = parseInt(btn.dataset.id);
+            const productId = String(btn.dataset.id);
             const added = wishlist.toggleItem(productId);
 
             const icon = btn.querySelector('i');
@@ -522,7 +527,7 @@ function attachProductCardListeners(container) {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            const productId = parseInt(btn.dataset.id);
+            const productId = String(btn.dataset.id);
             openQuickView(productId);
         });
     });
@@ -531,8 +536,8 @@ function attachProductCardListeners(container) {
     container.querySelectorAll('.add-to-cart-quick').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
-            const productId = parseInt(btn.dataset.id);
-            const product = products.find(p => p.id === productId);
+            const productId = String(btn.dataset.id);
+            const product = products.find(p => String(p.id) === productId);
 
             if (product) {
                 const productVariants = Array.isArray(product.variants) ? product.variants : [];

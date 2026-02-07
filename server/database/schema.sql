@@ -1,6 +1,6 @@
 -- Products
 CREATE TABLE IF NOT EXISTS products (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     title TEXT NOT NULL,
     category TEXT NOT NULL,
     price NUMERIC NOT NULL,
@@ -25,8 +25,8 @@ CREATE TABLE IF NOT EXISTS products (
 
 -- Product Variants (color/size stock)
 CREATE TABLE IF NOT EXISTS product_variants (
-    id SERIAL PRIMARY KEY,
-    product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY,
+    product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
     color TEXT NOT NULL,
     size TEXT NOT NULL,
     stock INTEGER DEFAULT 0,
@@ -37,12 +37,12 @@ CREATE TABLE IF NOT EXISTS product_variants (
 
 -- Categories
 CREATE TABLE IF NOT EXISTS categories (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     name TEXT NOT NULL UNIQUE,
     slug TEXT NOT NULL UNIQUE,
     description TEXT,
     image TEXT,
-    parent_id INTEGER REFERENCES categories(id),
+    parent_id UUID REFERENCES categories(id),
     order_index INTEGER DEFAULT 0,
     is_visible BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS categories (
 
 -- Collections
 CREATE TABLE IF NOT EXISTS collections (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     name TEXT NOT NULL,
     slug TEXT NOT NULL UNIQUE,
     description TEXT,
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS collections (
 
 -- Banners
 CREATE TABLE IF NOT EXISTS banners (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     title TEXT NOT NULL,
     subtitle TEXT,
     description TEXT,
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS banners (
 
 -- Customers
 CREATE TABLE IF NOT EXISTS customers (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     name TEXT,
     email TEXT,
     phone TEXT UNIQUE NOT NULL,
@@ -99,9 +99,9 @@ CREATE TABLE IF NOT EXISTS customers (
 
 -- Orders
 CREATE TABLE IF NOT EXISTS orders (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     order_number TEXT NOT NULL UNIQUE,
-    customer_id INTEGER REFERENCES customers(id),
+    customer_id UUID REFERENCES customers(id),
     customer_name TEXT,
     customer_phone TEXT,
     customer_email TEXT,
@@ -122,7 +122,7 @@ CREATE TABLE IF NOT EXISTS orders (
 
 -- Promocodes
 CREATE TABLE IF NOT EXISTS promocodes (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     code TEXT NOT NULL UNIQUE,
     type TEXT NOT NULL,
     value NUMERIC NOT NULL,
@@ -140,23 +140,23 @@ CREATE TABLE IF NOT EXISTS promocodes (
 
 -- Promocode usage
 CREATE TABLE IF NOT EXISTS promocode_usage (
-    id SERIAL PRIMARY KEY,
-    promocode_id INTEGER NOT NULL REFERENCES promocodes(id) ON DELETE CASCADE,
-    order_id INTEGER REFERENCES orders(id) ON DELETE SET NULL,
+    id UUID PRIMARY KEY,
+    promocode_id UUID NOT NULL REFERENCES promocodes(id) ON DELETE CASCADE,
+    order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
     customer_phone TEXT,
     used_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Discounts
 CREATE TABLE IF NOT EXISTS discounts (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,
     discount_type TEXT NOT NULL,
     discount_value NUMERIC NOT NULL,
     target TEXT NOT NULL,
-    category_id INTEGER REFERENCES categories(id),
-    collection_id INTEGER REFERENCES collections(id),
+    category_id UUID REFERENCES categories(id),
+    collection_id UUID REFERENCES collections(id),
     product_ids JSONB,
     min_amount NUMERIC DEFAULT 0,
     priority INTEGER DEFAULT 0,
@@ -170,7 +170,7 @@ CREATE TABLE IF NOT EXISTS discounts (
 
 -- Content Settings (for homepage)
 CREATE TABLE IF NOT EXISTS content_settings (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     key TEXT NOT NULL UNIQUE,
     value JSONB,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
@@ -178,7 +178,7 @@ CREATE TABLE IF NOT EXISTS content_settings (
 
 -- Subscribers
 CREATE TABLE IF NOT EXISTS subscribers (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
     status TEXT DEFAULT 'active',
     source TEXT,
@@ -188,7 +188,7 @@ CREATE TABLE IF NOT EXISTS subscribers (
 
 -- Settings
 CREATE TABLE IF NOT EXISTS settings (
-    id INTEGER PRIMARY KEY CHECK (id = 1),
+    id UUID PRIMARY KEY,
     site_name TEXT DEFAULT 'Higher Waist',
     logo_text TEXT DEFAULT 'Higher Waist',
     store_description TEXT,
@@ -212,8 +212,8 @@ CREATE TABLE IF NOT EXISTS settings (
 
 -- Reviews
 CREATE TABLE IF NOT EXISTS reviews (
-    id SERIAL PRIMARY KEY,
-    product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY,
+    product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
     customer_name TEXT NOT NULL,
     customer_email TEXT,
     rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),

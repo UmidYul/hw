@@ -1,4 +1,5 @@
 import express from 'express';
+import crypto from 'crypto';
 import { dbAll, dbGet, dbRun } from '../database/db.js';
 import { requireAdmin } from '../services/auth.js';
 
@@ -44,14 +45,15 @@ router.post('/', requireAdmin, async (req, res) => {
     try {
         const { name, slug, description, image, parentId, orderIndex, isVisible } = req.body;
 
+        const categoryId = crypto.randomUUID();
         const sql = `
-            INSERT INTO categories (name, slug, description, image, parent_id, order_index, is_visible)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO categories (id, name, slug, description, image, parent_id, order_index, is_visible)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             RETURNING id
         `;
 
         const result = await dbRun(sql, [
-            name, slug, description || null, image || null,
+            categoryId, name, slug, description || null, image || null,
             parentId || null, orderIndex || 0, isVisible !== undefined ? !!isVisible : true
         ]);
 

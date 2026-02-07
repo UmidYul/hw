@@ -52,7 +52,8 @@ function getProducts() {
 
 // Get product by ID
 function getProductById(id) {
-    return window.products.find(p => p.id === parseInt(id));
+    const target = String(id);
+    return window.products.find(p => String(p.id) === target);
 }
 
 // Get products by category

@@ -90,7 +90,7 @@ const isRateLimited = (ip) => {
 export const initAuthTables = async () => {
     await dbRun(`
         CREATE TABLE IF NOT EXISTS admin_users (
-            id SERIAL PRIMARY KEY,
+            id UUID PRIMARY KEY,
             username TEXT NOT NULL UNIQUE,
             password_hash TEXT NOT NULL,
             role TEXT DEFAULT 'admin',
@@ -103,8 +103,8 @@ export const initAuthTables = async () => {
 
     await dbRun(`
         CREATE TABLE IF NOT EXISTS refresh_tokens (
-            id SERIAL PRIMARY KEY,
-            user_id INTEGER NOT NULL,
+            id UUID PRIMARY KEY,
+            user_id UUID NOT NULL,
             token_hash TEXT NOT NULL UNIQUE,
             expires_at TIMESTAMPTZ NOT NULL,
             created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
@@ -121,9 +121,10 @@ export const initAuthTables = async () => {
         const seedUser = process.env.ADMIN_USER || 'admin';
         const seedPass = process.env.ADMIN_PASS || 'admin';
         const hash = await bcrypt.hash(seedPass, 12);
+        const adminId = crypto.randomUUID();
         await dbRun(
-            'INSERT INTO admin_users (username, password_hash) VALUES (?, ?)',
-            [seedUser, hash]
+            'INSERT INTO admin_users (id, username, password_hash) VALUES (?, ?, ?)',
+            [adminId, seedUser, hash]
         );
     }
 };
@@ -140,10 +141,12 @@ const storeRefreshToken = async (userId, token, req) => {
     const expiresAt = new Date(Date.now() + REFRESH_TTL_SECONDS * 1000).toISOString();
     const tokenHash = hashToken(token);
 
+    const refreshId = crypto.randomUUID();
     await dbRun(
-        `INSERT INTO refresh_tokens (user_id, token_hash, expires_at, ip, user_agent)
-         VALUES (?, ?, ?, ?, ?)`
+        `INSERT INTO refresh_tokens (id, user_id, token_hash, expires_at, ip, user_agent)
+         VALUES (?, ?, ?, ?, ?, ?)`
         , [
+            refreshId,
             userId,
             tokenHash,
             expiresAt,

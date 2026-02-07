@@ -7,7 +7,8 @@
     "scripts": {
         "start": "node server.js",
         "dev": "nodemon server.js",
-        "migrate": "node migrations/migrate.js"
+        "migrate": "node migrations/migrate.js",
+        "migrate:uuid": "node scripts/migrate_to_uuid.js"
     },
     "keywords": [
         "ecommerce",

@@ -341,7 +341,7 @@ function updateWishlistDrawer() {
         // Attach remove listeners
         drawerBody.querySelectorAll('.drawer-item-remove').forEach(btn => {
             btn.addEventListener('click', () => {
-                wishlist.removeItem(parseInt(btn.dataset.id));
+                wishlist.removeItem(String(btn.dataset.id));
                 showToast('Товар удален из избранного', 'info');
             });
         });
@@ -545,7 +545,8 @@ function initializeSearchModal() {
 
 // Quick View Modal (used in catalog)
 function openQuickView(productId) {
-    const product = products.find(p => p.id === productId);
+    const targetId = String(productId);
+    const product = products.find(p => String(p.id) === targetId);
     if (!product) return;
 
     const modal = document.getElementById('quickViewModal');

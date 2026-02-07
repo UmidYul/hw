@@ -103,14 +103,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Load products from API
     await loadProducts();
 
-    const productId = parseInt(getUrlParam('id'));
+    const productId = getUrlParam('id');
 
     if (!productId) {
         window.location.href = 'catalog.html';
         return;
     }
 
-    currentProduct = typeof getProductById === 'function' ? getProductById(productId) : products.find(p => p.id === productId);
+    currentProduct = typeof getProductById === 'function'
+        ? getProductById(productId)
+        : products.find(p => String(p.id) === String(productId));
 
     if (!currentProduct) {
         window.location.href = 'catalog.html';
@@ -118,7 +120,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Add to recently viewed
-    recentlyViewed.add(productId);
+    recentlyViewed.add(String(productId));
 
     // Render product
     renderProduct();

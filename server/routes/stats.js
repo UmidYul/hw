@@ -56,7 +56,7 @@ router.get('/dashboard', requireAdmin, async (req, res) => {
                 SUM((item.value->>'quantity')::int * (item.value->>'price')::numeric) as revenue
             FROM orders o
             CROSS JOIN LATERAL jsonb_array_elements(o.items) AS item(value)
-            JOIN products p ON p.id = (item.value->>'productId')::int
+            JOIN products p ON p.id = (item.value->>'productId')::uuid
             WHERE o.created_at >= NOW() - INTERVAL '${daysAgo} days'
             GROUP BY p.id
             ORDER BY revenue DESC
