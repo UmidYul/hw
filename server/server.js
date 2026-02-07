@@ -23,10 +23,10 @@ import subscribersRouter from './routes/subscribers.js';
 import emailRouter from './routes/email.js';
 import { initAuthTables, requireAdmin } from './services/auth.js';
 
-dotenv.config({ path: path.join(__dirname, '.env') });
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -53,6 +53,7 @@ app.use('/api/customers', customersRouter);
 app.use('/api/banners', bannersRouter);
 app.use('/api/collections', collectionsRouter);
 app.use('/api/categories', categoriesRouter);
+dotenv.config({ path: path.join(__dirname, '.env') });
 app.use('/api/promocodes', promocodesRouter);
 app.use('/api/discounts', discountsRouter);
 app.use('/api/settings', settingsRouter);
