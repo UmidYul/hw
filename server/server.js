@@ -82,10 +82,7 @@ app.get('/error-test', (req, res) => {
     res.sendFile(path.join(__dirname, '../views', 'error-test.html'));
 });
 
-// 404 Handler - должен быть после всех роутов
-app.use((req, res) => {
-    res.status(404).sendFile(path.join(__dirname, '../views', '404.html'));
-});
+
 
 // Error Handler - обработка серверных ошибок
 app.use((err, req, res, next) => {
@@ -148,7 +145,10 @@ app.use((err, req, res, next) => {
         message: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
 });
-
+// 404 Handler - должен быть после всех роутов
+app.use((req, res) => {
+    res.status(404).sendFile(path.join(__dirname, '../views', '404.html'));
+});
 // Start server
 const startServer = async () => {
     try {
