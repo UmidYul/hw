@@ -1606,23 +1606,18 @@ a:hover {
         grid-template-columns: repeat(2, 1fr);
     }
 
-    .orders-table,
-    .products-table {
+    .orders-table {
         display: block;
         border: none;
     }
 
-    .orders-table thead,
-    .products-table thead {
+    .orders-table thead {
         display: none;
     }
 
     .orders-table tbody,
     .orders-table tr,
-    .orders-table td,
-    .products-table tbody,
-    .products-table tr,
-    .products-table td {
+    .orders-table td {
         display: block;
         width: 100%;
     }
