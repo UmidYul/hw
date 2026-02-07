@@ -1,4 +1,5 @@
 import express from 'express';
+import crypto from 'crypto';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
@@ -34,11 +35,80 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const cacheStore = new Map();
+const CACHE_TTL_MS = parseInt(process.env.API_CACHE_TTL_MS || '60000', 10);
+const cacheAllowList = [
+    /^\/api\/products(\b|\/|\?)/,
+    /^\/api\/categories(\b|\/|\?)/,
+    /^\/api\/collections(\b|\/|\?)/,
+    /^\/api\/banners(\b|\/|\?)/,
+    /^\/api\/content(\b|\/|\?)/,
+    /^\/api\/stats\/dashboard(\b|\/|\?)/
+];
+
+const getCacheKey = (req) => `${req.method}:${req.originalUrl}`;
+
+const getCachedResponse = (key) => {
+    const cached = cacheStore.get(key);
+    if (!cached) return null;
+    if (Date.now() > cached.expiresAt) {
+        cacheStore.delete(key);
+        return null;
+    }
+    return cached;
+};
+
+const setCachedResponse = (key, payload, ttlMs = CACHE_TTL_MS) => {
+    cacheStore.set(key, {
+        payload,
+        expiresAt: Date.now() + ttlMs
+    });
+};
+
+const invalidateCache = (prefixes) => {
+    const keys = Array.from(cacheStore.keys());
+    keys.forEach((key) => {
+        if (prefixes.some(prefix => key.includes(prefix))) {
+            cacheStore.delete(key);
+        }
+    });
+};
+
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+app.use((req, res, next) => {
+    const requestId = crypto.randomUUID();
+    const start = process.hrtime.bigint();
+    req.requestId = requestId;
+    res.setHeader('X-Request-Id', requestId);
+
+    res.on('finish', () => {
+        const durationMs = Number(process.hrtime.bigint() - start) / 1e6;
+        console.log(
+            `[${new Date().toISOString()}] ${req.method} ${req.originalUrl} ${res.statusCode} ${durationMs.toFixed(1)}ms id=${requestId}`
+        );
+    });
+
+    next();
+});
+
+app.use((req, res, next) => {
+    if (req.method !== 'GET') return next();
+    if (!cacheAllowList.some(pattern => pattern.test(req.originalUrl))) return next();
+    if (req.query && req.query.nocache === '1') return next();
+
+    const key = getCacheKey(req);
+    const cached = getCachedResponse(key);
+    if (!cached) return next();
+
+    res.setHeader('X-Cache', 'HIT');
+    res.setHeader('Content-Type', 'application/json');
+    return res.send(cached.payload);
+});
 
 // Static files (serve frontend)
 app.use('/css', express.static(path.join(__dirname, '../public/css')));
@@ -50,21 +120,111 @@ app.get('/sitemap.xml', (req, res) => res.sendFile(path.join(__dirname, '../publ
 // API Routes
 app.use('/api/auth', authRouter);
 app.use('/api/uploads', uploadsRouter);
-app.use('/api/products', productsRouter);
-app.use('/api/orders', ordersRouter);
-app.use('/api/customers', customersRouter);
-app.use('/api/banners', bannersRouter);
-app.use('/api/collections', collectionsRouter);
-app.use('/api/categories', categoriesRouter);
+app.use('/api/products', (req, res, next) => {
+    res.sendResponse = res.send;
+    res.send = (body) => {
+        if (req.method === 'GET' && cacheAllowList.some(pattern => pattern.test(req.originalUrl))) {
+            setCachedResponse(getCacheKey(req), body);
+            res.setHeader('X-Cache', 'MISS');
+        } else if (req.method !== 'GET') {
+            invalidateCache(['/api/products']);
+        }
+        return res.sendResponse(body);
+    };
+    next();
+}, productsRouter);
+app.use('/api/orders', (req, res, next) => {
+    if (req.method !== 'GET') {
+        invalidateCache(['/api/orders', '/api/stats']);
+    }
+    next();
+}, ordersRouter);
+app.use('/api/customers', (req, res, next) => {
+    if (req.method !== 'GET') {
+        invalidateCache(['/api/customers', '/api/stats']);
+    }
+    next();
+}, customersRouter);
+app.use('/api/banners', (req, res, next) => {
+    res.sendResponse = res.send;
+    res.send = (body) => {
+        if (req.method === 'GET' && cacheAllowList.some(pattern => pattern.test(req.originalUrl))) {
+            setCachedResponse(getCacheKey(req), body);
+            res.setHeader('X-Cache', 'MISS');
+        } else if (req.method !== 'GET') {
+            invalidateCache(['/api/banners']);
+        }
+        return res.sendResponse(body);
+    };
+    next();
+}, bannersRouter);
+app.use('/api/collections', (req, res, next) => {
+    res.sendResponse = res.send;
+    res.send = (body) => {
+        if (req.method === 'GET' && cacheAllowList.some(pattern => pattern.test(req.originalUrl))) {
+            setCachedResponse(getCacheKey(req), body);
+            res.setHeader('X-Cache', 'MISS');
+        } else if (req.method !== 'GET') {
+            invalidateCache(['/api/collections']);
+        }
+        return res.sendResponse(body);
+    };
+    next();
+}, collectionsRouter);
+app.use('/api/categories', (req, res, next) => {
+    res.sendResponse = res.send;
+    res.send = (body) => {
+        if (req.method === 'GET' && cacheAllowList.some(pattern => pattern.test(req.originalUrl))) {
+            setCachedResponse(getCacheKey(req), body);
+            res.setHeader('X-Cache', 'MISS');
+        } else if (req.method !== 'GET') {
+            invalidateCache(['/api/categories']);
+        }
+        return res.sendResponse(body);
+    };
+    next();
+}, categoriesRouter);
 dotenv.config({ path: path.join(__dirname, '.env') });
 app.use('/api/promocodes', promocodesRouter);
-app.use('/api/discounts', discountsRouter);
-app.use('/api/settings', settingsRouter);
-app.use('/api/stats', statsRouter);
+app.use('/api/discounts', (req, res, next) => {
+    if (req.method !== 'GET') {
+        invalidateCache(['/api/discounts']);
+    }
+    next();
+}, discountsRouter);
+app.use('/api/settings', (req, res, next) => {
+    if (req.method !== 'GET') {
+        invalidateCache(['/api/settings']);
+    }
+    next();
+}, settingsRouter);
+app.use('/api/stats', (req, res, next) => {
+    res.sendResponse = res.send;
+    res.send = (body) => {
+        if (req.method === 'GET' && cacheAllowList.some(pattern => pattern.test(req.originalUrl))) {
+            setCachedResponse(getCacheKey(req), body);
+            res.setHeader('X-Cache', 'MISS');
+        }
+        return res.sendResponse(body);
+    };
+    next();
+}, statsRouter);
 app.use('/api/subscribers', subscribersRouter);
 app.use('/api/email', emailRouter);
 app.use('/api/newsletters', newslettersRouter);
-app.use('/api/content', contentRouter);
+app.use('/api/content', (req, res, next) => {
+    res.sendResponse = res.send;
+    res.send = (body) => {
+        if (req.method === 'GET' && cacheAllowList.some(pattern => pattern.test(req.originalUrl))) {
+            setCachedResponse(getCacheKey(req), body);
+            res.setHeader('X-Cache', 'MISS');
+        } else if (req.method !== 'GET') {
+            invalidateCache(['/api/content']);
+        }
+        return res.sendResponse(body);
+    };
+    next();
+}, contentRouter);
 
 // Admin auth (UI gate)
 // Page routes (without .html extension)
@@ -130,12 +290,26 @@ app.use('/admin', (req, res, next) => {
 
 // Health check
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', message: 'Higher Waist API is running' });
+    res.json({
+        status: 'ok',
+        message: 'Higher Waist API is running',
+        uptimeSec: Math.round(process.uptime()),
+        cacheEntries: cacheStore.size,
+        memory: {
+            rss: process.memoryUsage().rss,
+            heapUsed: process.memoryUsage().heapUsed
+        }
+    });
 });
 
 // Error handler
 app.use((err, req, res, next) => {
-    console.error(err.stack);
+    console.error('API Error:', {
+        requestId: req.requestId,
+        path: req.originalUrl,
+        method: req.method,
+        message: err.message
+    });
     res.status(500).json({
         error: 'Something went wrong!',
         message: process.env.NODE_ENV === 'development' ? err.message : undefined
