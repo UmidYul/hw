@@ -1401,6 +1401,10 @@ textarea {
 }
 
 /* === PAGE LAYOUTS === */
+.content-page {
+    padding: var(--spacing-lg) 0 var(--spacing-4xl);
+}
+
 .page-title {
     font-family: var(--font-display);
     font-size: 36px;
