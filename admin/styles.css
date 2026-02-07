@@ -1714,9 +1714,6 @@ a:hover {
         padding: var(--spacing-md);
         margin: 0;
         box-shadow: var(--shadow-sm);
-        max-width: 480px;
-        margin-left: auto;
-        margin-right: auto;
     }
 
     .table td {
