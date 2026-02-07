@@ -35,6 +35,10 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const CSRF_COOKIE = 'csrfToken';
+const CSRF_HEADER = 'x-csrf-token';
+const CSRF_TOKEN_BYTES = 32;
+
 const cacheStore = new Map();
 const CACHE_TTL_MS = parseInt(process.env.API_CACHE_TTL_MS || '60000', 10);
 const cacheAllowList = [
@@ -79,6 +83,87 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+const getSecureCookieFlag = (req) => {
+    const isProd = process.env.NODE_ENV === 'production';
+    const isSecureRequest = req.secure || req.headers['x-forwarded-proto'] === 'https';
+    return isProd && isSecureRequest;
+};
+
+const baseCspDirectives = [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    "img-src 'self' data: https:",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "connect-src 'self'",
+    "object-src 'none'"
+];
+
+app.use((req, res, next) => {
+    const cspDirectives = [...baseCspDirectives];
+    if (getSecureCookieFlag(req)) {
+        cspDirectives.push('upgrade-insecure-requests');
+    }
+
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+    res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+    res.setHeader('Content-Security-Policy', cspDirectives.join('; '));
+
+    if (getSecureCookieFlag(req)) {
+        res.setHeader('Strict-Transport-Security', 'max-age=15552000; includeSubDomains');
+    }
+
+    next();
+});
+
+app.use((req, res, next) => {
+    if (!req.path.startsWith('/admin')) return next();
+
+    const existingToken = req.cookies?.[CSRF_COOKIE];
+    if (!existingToken) {
+        const token = crypto.randomBytes(CSRF_TOKEN_BYTES).toString('hex');
+        res.cookie(CSRF_COOKIE, token, {
+            httpOnly: false,
+            sameSite: 'lax',
+            secure: getSecureCookieFlag(req)
+        });
+    }
+
+    next();
+});
+
+app.use('/api', (req, res, next) => {
+    const method = req.method.toUpperCase();
+    if (['GET', 'HEAD', 'OPTIONS'].includes(method)) return next();
+
+    const hasAdminSession = !!(req.cookies?.accessToken || req.cookies?.refreshToken);
+    if (!hasAdminSession) return next();
+
+    const openPaths = new Set([
+        '/auth/login',
+        '/auth/refresh',
+        '/auth/2fa/verify-login',
+        '/auth/2fa/resend-login'
+    ]);
+
+    if (openPaths.has(req.path)) return next();
+
+    const cookieToken = req.cookies?.[CSRF_COOKIE];
+    const headerToken = req.get(CSRF_HEADER);
+
+    if (!cookieToken || !headerToken || cookieToken !== headerToken) {
+        return res.status(403).json({ success: false, message: 'Invalid CSRF token.' });
+    }
+
+    return next();
+});
 
 app.use((req, res, next) => {
     const requestId = crypto.randomUUID();

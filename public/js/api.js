@@ -6,14 +6,27 @@ if (typeof API_BASE_URL === 'undefined') {
 }
 
 // Helper function for API calls
+function getCookie(name) {
+    if (typeof document === 'undefined') return '';
+    const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+    return match ? decodeURIComponent(match[1]) : '';
+}
+
+function getCsrfToken() {
+    return getCookie('csrfToken');
+}
+
 async function apiCall(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
+    const csrfToken = getCsrfToken();
 
     try {
         const response = await fetch(url, {
             ...options,
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
+                ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
                 ...options.headers
             }
         });
@@ -98,9 +111,14 @@ const ordersAPI = {
 // Auth API
 const authAPI = {
     async changePassword(currentPassword, newPassword, confirmPassword) {
+        const csrfToken = getCsrfToken();
         const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {})
+            },
+            credentials: 'include',
             body: JSON.stringify({ currentPassword, newPassword, confirmPassword })
         });
 
@@ -113,6 +131,7 @@ const authAPI = {
     },
 
     async getTwoFactorSettings() {
+        const csrfToken = getCsrfToken();
         const response = await fetch(`${API_BASE_URL}/auth/2fa`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
@@ -128,9 +147,13 @@ const authAPI = {
     },
 
     async sendTwoFactorSetupCode(email) {
+        const csrfToken = getCsrfToken();
         const response = await fetch(`${API_BASE_URL}/auth/2fa/send-setup`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {})
+            },
             credentials: 'include',
             body: JSON.stringify({ email })
         });
@@ -144,9 +167,13 @@ const authAPI = {
     },
 
     async confirmTwoFactorSetup(challengeId, code) {
+        const csrfToken = getCsrfToken();
         const response = await fetch(`${API_BASE_URL}/auth/2fa/confirm-setup`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {})
+            },
             credentials: 'include',
             body: JSON.stringify({ challengeId, code })
         });
@@ -160,9 +187,13 @@ const authAPI = {
     },
 
     async disableTwoFactor() {
+        const csrfToken = getCsrfToken();
         const response = await fetch(`${API_BASE_URL}/auth/2fa/disable`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {})
+            },
             credentials: 'include'
         });
 
@@ -515,7 +546,8 @@ const API = {
     stats: statsAPI,
     newsletters: newslettersAPI,
     subscribers: subscribersAPI,
-    auth: authAPI
+    auth: authAPI,
+    getCsrfToken
 };
 
 // Make API available globally

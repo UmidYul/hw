@@ -682,6 +682,9 @@
 
                 const response = await fetch('/api/uploads/banners', {
                     method: 'POST',
+                    headers: {
+                        'X-CSRF-Token': API.getCsrfToken()
+                    },
                     body: formData
                 });
 
@@ -720,7 +723,10 @@
             try {
                 await fetch('/api/uploads/banners/delete', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': API.getCsrfToken()
+                    },
                     body: JSON.stringify({ url })
                 });
             } catch (error) {

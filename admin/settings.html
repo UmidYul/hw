@@ -584,6 +584,9 @@
 
                 const response = await fetch('/api/uploads/logo', {
                     method: 'POST',
+                    headers: {
+                        'X-CSRF-Token': API.getCsrfToken()
+                    },
                     body: formData,
                     credentials: 'include'
                 });
@@ -832,7 +835,10 @@
                     try {
                         const response = await fetch('/api/uploads/cleanup', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-Token': API.getCsrfToken()
+                            },
                             credentials: 'include',
                             body: JSON.stringify({ type })
                         });

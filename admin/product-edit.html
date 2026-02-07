@@ -370,6 +370,9 @@
             try {
                 const response = await fetch('/api/uploads/products', {
                     method: 'POST',
+                    headers: {
+                        'X-CSRF-Token': API.getCsrfToken()
+                    },
                     body: formData,
                     credentials: 'include'
                 });
@@ -413,7 +416,10 @@
             try {
                 await fetch('/api/uploads/products/delete', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': API.getCsrfToken()
+                    },
                     body: JSON.stringify({ url })
                 });
             } catch (error) {
