@@ -12,6 +12,15 @@ router.get('/dashboard', requireAdmin, async (req, res) => {
         const startDate = new Date();
         startDate.setDate(startDate.getDate() - daysAgo);
 
+        const legacyColumn = await dbGet(
+            "SELECT 1 FROM information_schema.columns WHERE table_name = 'products' AND column_name = 'legacy_id'"
+        );
+        const hasLegacyProductId = !!legacyColumn;
+        const productIdExpr = "COALESCE(item.value->>'productId', item.value->>'id')";
+        const joinCondition = hasLegacyProductId
+            ? `p.id::text = ${productIdExpr} OR p.legacy_id::text = ${productIdExpr}`
+            : `p.id::text = ${productIdExpr}`;
+
         // Total revenue
         const revenueResult = await dbGet(`
             SELECT COALESCE(SUM(total), 0) as total_revenue,
@@ -56,7 +65,7 @@ router.get('/dashboard', requireAdmin, async (req, res) => {
                 SUM((item.value->>'quantity')::int * (item.value->>'price')::numeric) as revenue
             FROM orders o
             CROSS JOIN LATERAL jsonb_array_elements(o.items) AS item(value)
-            JOIN products p ON p.id = (item.value->>'productId')::uuid
+            JOIN products p ON ${joinCondition}
             WHERE o.created_at >= NOW() - INTERVAL '${daysAgo} days'
             GROUP BY p.id
             ORDER BY revenue DESC
