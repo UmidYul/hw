@@ -100,13 +100,13 @@ const getBaseUrl = () => {
 
 const getSupportEmail = () => smtpConfig.user || 'support@example.com';
 
-export const sendNewsletterWelcomeEmail = async ({ to, storeName = 'AURA' }) => {
+export const sendNewsletterWelcomeEmail = async ({ to, storeName = 'AURA', unsubscribeId = '' }) => {
     const mailer = ensureTransporter();
     if (!mailer) return false;
 
     const baseUrl = getBaseUrl();
-    const encodedEmail = encodeURIComponent(String(to || '').trim().toLowerCase());
-    const unsubscribeUrl = `${baseUrl}/api/subscribers/unsubscribe?email=${encodedEmail}`;
+    const encodedId = encodeURIComponent(String(unsubscribeId || '').trim());
+    const unsubscribeUrl = `${baseUrl}/api/subscribers/unsubscribe?id=${encodedId}`;
     const supportEmail = getSupportEmail();
 
     const subject = `${storeName}: подписка на новости`;

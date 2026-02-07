@@ -59,7 +59,10 @@ router.post('/', async (req, res) => {
         const subscriber = await dbGet('SELECT * FROM subscribers WHERE email = ?', [normalized]);
 
         try {
-            await sendNewsletterWelcomeEmail({ to: normalized });
+            await sendNewsletterWelcomeEmail({
+                to: normalized,
+                unsubscribeId: subscriber?.id
+            });
         } catch (error) {
             console.error('Failed to send welcome email:', error);
         }
@@ -72,17 +75,16 @@ router.post('/', async (req, res) => {
 
 router.get('/unsubscribe', async (req, res) => {
     try {
-        const email = req.query.email;
-        if (!isValidEmail(email)) {
-            return res.status(400).send('Некорректный email.');
+        const id = String(req.query.id || '').trim();
+        if (!id) {
+            return res.status(400).send('Некорректная ссылка отписки.');
         }
 
-        const normalized = String(email).trim().toLowerCase();
         await dbRun(
             `UPDATE subscribers
              SET status = 'unsubscribed', updated_at = CURRENT_TIMESTAMP
-             WHERE email = ?`,
-            [normalized]
+             WHERE id = ?`,
+            [id]
         );
 
         res.send(`
