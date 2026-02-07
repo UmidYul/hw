@@ -283,7 +283,7 @@ a:hover {
     color: var(--color-text-secondary);
     cursor: pointer;
     border-radius: var(--border-radius);
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
@@ -453,7 +453,6 @@ a:hover {
 
 .topbar-btn-burger {
     padding: 0;
-    display: none;
 }
 
 .topbar-btn-burger .burger {
