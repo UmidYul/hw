@@ -798,6 +798,65 @@ a:hover {
     margin-top: var(--spacing-sm);
 }
 
+.page-preview {
+    border: 1px solid var(--color-border);
+    padding: var(--spacing-md);
+    background: var(--color-bg);
+}
+
+.page-preview-breadcrumbs {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.page-preview-title {
+    font-family: var(--font-headings);
+    font-size: 26px;
+    margin-bottom: var(--spacing-sm);
+}
+
+.page-preview-meta {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-md);
+}
+
+.page-preview-accordion .accordion-item {
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--spacing-sm) 0;
+}
+
+.page-preview-accordion .accordion-item summary {
+    cursor: pointer;
+    list-style: none;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+}
+
+.page-preview-accordion .accordion-item summary::-webkit-details-marker {
+    display: none;
+}
+
+.page-preview-accordion .accordion-item summary::after {
+    content: '+';
+    font-size: 16px;
+    line-height: 1;
+    color: var(--color-text-secondary);
+}
+
+.page-preview-accordion .accordion-item[open] summary::after {
+    transform: rotate(45deg);
+}
+
+.page-preview-accordion .accordion-body {
+    color: var(--color-text-secondary);
+    padding-top: var(--spacing-sm);
+}
+
 /* Newsletter preview */
 .newsletter-preview {
     background: #f7f4f0;

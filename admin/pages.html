@@ -150,6 +150,20 @@
                     </div>
                     <div class="card-body" id="sectionsContainer"></div>
                 </div>
+
+                <div class="card mt-lg">
+                    <div class="card-header">
+                        <h3 class="card-title">Предпросмотр на витрине</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="page-preview">
+                            <div class="page-preview-breadcrumbs" id="previewBreadcrumbs">Главная /</div>
+                            <div class="page-preview-title" id="previewTitle">—</div>
+                            <div class="page-preview-meta" id="previewMeta"></div>
+                            <div class="page-preview-accordion" id="previewAccordion"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
@@ -177,6 +191,10 @@
         const pageTitleInput = document.getElementById('pageTitleInput');
         const pageMetaInput = document.getElementById('pageMetaInput');
         const sectionsContainer = document.getElementById('sectionsContainer');
+        const previewBreadcrumbs = document.getElementById('previewBreadcrumbs');
+        const previewTitle = document.getElementById('previewTitle');
+        const previewMeta = document.getElementById('previewMeta');
+        const previewAccordion = document.getElementById('previewAccordion');
         const savePageBtn = document.getElementById('savePageBtn');
         const addSectionBtn = document.getElementById('addSectionBtn');
 
@@ -209,6 +227,7 @@
 
                 activeEditor.focus();
                 document.execCommand(command, false, null);
+                updatePreview();
             });
 
             return toolbar;
@@ -235,6 +254,8 @@
                 activeEditor = editor;
             });
 
+            editor.addEventListener('input', updatePreview);
+
             wrapper.appendChild(toolbar);
             wrapper.appendChild(editor);
 
@@ -244,6 +265,7 @@
             actions.querySelector('button').addEventListener('click', () => {
                 Components.confirm('Удалить секцию?', 'Секция будет удалена без возможности восстановления.', () => {
                     wrapper.remove();
+                    updatePreview();
                 });
             });
             wrapper.appendChild(actions);
@@ -255,9 +277,46 @@
             sectionsContainer.innerHTML = '';
             if (!sections.length) {
                 sectionsContainer.appendChild(createSection());
+                updatePreview();
                 return;
             }
             sections.forEach(section => sectionsContainer.appendChild(createSection(section)));
+            updatePreview();
+        };
+
+        const updatePreview = () => {
+            const title = pageTitleInput.value.trim() || '—';
+            const meta = pageMetaInput.value.trim();
+            const sections = gatherSections();
+
+            previewBreadcrumbs.textContent = `Главная / ${title}`;
+            previewTitle.textContent = title;
+            if (meta) {
+                previewMeta.textContent = meta;
+                previewMeta.style.display = '';
+            } else {
+                previewMeta.textContent = '';
+                previewMeta.style.display = 'none';
+            }
+
+            previewAccordion.innerHTML = sections.map((section, index) => {
+                const open = index === 0 ? ' open' : '';
+                return `
+                    <details class="accordion-item"${open}>
+                        <summary>${section.title || `Раздел ${index + 1}`}</summary>
+                        <div class="accordion-body">${section.body || ''}</div>
+                    </details>
+                `;
+            }).join('');
+
+            previewAccordion.querySelectorAll('details.accordion-item').forEach((item) => {
+                item.addEventListener('toggle', () => {
+                    if (!item.open) return;
+                    previewAccordion.querySelectorAll('details.accordion-item[open]').forEach((openItem) => {
+                        if (openItem !== item) openItem.removeAttribute('open');
+                    });
+                });
+            });
         };
 
         const loadPage = async (slug) => {
@@ -315,8 +374,12 @@
             });
         };
 
+        pageTitleInput.addEventListener('input', updatePreview);
+        pageMetaInput.addEventListener('input', updatePreview);
+
         addSectionBtn.addEventListener('click', () => {
             sectionsContainer.appendChild(createSection());
+            updatePreview();
         });
 
         savePageBtn.addEventListener('click', savePage);

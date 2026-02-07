@@ -61,6 +61,14 @@ async function initInfoPage(slug) {
             `;
         }).join('');
 
+        contentEl.addEventListener('toggle', (event) => {
+            const target = event.target;
+            if (!target || target.tagName !== 'DETAILS' || !target.open) return;
+            contentEl.querySelectorAll('details.accordion-item[open]').forEach((item) => {
+                if (item !== target) item.removeAttribute('open');
+            });
+        }, true);
+
         if (slug === 'contacts') {
             const phoneFooter = document.getElementById('contactPhone');
             const emailFooter = document.getElementById('contactEmail');

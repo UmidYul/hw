@@ -227,6 +227,12 @@
                             <small class="text-muted">Рекомендуемый размер: 1920x600px</small>
                         </div>
 
+                        <div class="form-group">
+                            <label for="imageFile">Или загрузить файл</label>
+                            <input type="file" id="imageFile" name="imageFile" accept="image/*">
+                            <small class="text-muted" id="imageUploadStatus">Поддерживаются JPG/PNG до 5MB</small>
+                        </div>
+
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="startDate">Дата начала</label>
@@ -614,6 +620,42 @@
         // Update preview on input
         ['title', 'subtitle', 'ctaText'].forEach(id => {
             document.getElementById(id)?.addEventListener('input', updatePreview);
+        });
+        document.getElementById('imageUrl')?.addEventListener('input', updatePreview);
+
+        document.getElementById('imageFile')?.addEventListener('change', async (event) => {
+            const file = event.target.files?.[0];
+            if (!file) return;
+
+            const status = document.getElementById('imageUploadStatus');
+            status.textContent = 'Загрузка файла...';
+
+            try {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                const response = await fetch('/api/uploads/banners', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                if (!result?.url) {
+                    throw new Error('Upload response missing url');
+                }
+
+                document.getElementById('imageUrl').value = result.url;
+                status.textContent = 'Файл загружен.';
+                updatePreview();
+            } catch (error) {
+                console.error('Banner image upload failed:', error);
+                status.textContent = 'Не удалось загрузить файл.';
+                Components.showToast('Ошибка', 'Не удалось загрузить изображение', 'error');
+            }
         });
     </script>
 
