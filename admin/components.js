@@ -215,9 +215,32 @@ const setupAdminSidebarToggle = () => {
     if (toggle.dataset.bound === 'true') return;
     toggle.dataset.bound = 'true';
 
-    toggle.addEventListener('click', () => {
-        sidebar.classList.toggle('sidebar-collapsed');
-        sidebar.classList.toggle('open');
+    const closeSidebar = () => {
+        sidebar.classList.remove('sidebar-collapsed');
+        sidebar.classList.remove('open');
+    };
+
+    const openSidebar = () => {
+        sidebar.classList.add('sidebar-collapsed');
+        sidebar.classList.add('open');
+    };
+
+    const isOpen = () => sidebar.classList.contains('sidebar-collapsed') || sidebar.classList.contains('open');
+
+    toggle.addEventListener('click', (event) => {
+        event.stopPropagation();
+        if (isOpen()) {
+            closeSidebar();
+        } else {
+            openSidebar();
+        }
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!isOpen()) return;
+        const target = event.target;
+        if (sidebar.contains(target) || toggle.contains(target)) return;
+        closeSidebar();
     });
 };
 
