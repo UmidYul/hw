@@ -38,6 +38,14 @@ router.post('/', async (req, res) => {
 
         const normalized = String(email).trim().toLowerCase();
 
+        const existing = await dbGet('SELECT * FROM subscribers WHERE email = ?', [normalized]);
+        if (existing && existing.status === 'active') {
+            return res.status(200).json({
+                message: 'Already subscribed',
+                subscriber: existing
+            });
+        }
+
         await dbRun(
             `INSERT INTO subscribers (email, status, source)
              VALUES (?, 'active', ?)
