@@ -351,6 +351,43 @@ const statsAPI = {
     }
 };
 
+// Newsletters API
+const newslettersAPI = {
+    async getAll() {
+        return await apiCall('/newsletters');
+    },
+
+    async getById(id) {
+        return await apiCall(`/newsletters/${id}`);
+    },
+
+    async create(payload) {
+        return await apiCall('/newsletters', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async update(id, payload) {
+        return await apiCall(`/newsletters/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async delete(id) {
+        return await apiCall(`/newsletters/${id}`, {
+            method: 'DELETE'
+        });
+    },
+
+    async send(id) {
+        return await apiCall(`/newsletters/${id}/send`, {
+            method: 'POST'
+        });
+    }
+};
+
 // Subscribers API
 const subscribersAPI = {
     async subscribe(email, source = 'website') {
@@ -374,6 +411,7 @@ const API = {
     content: contentAPI,
     settings: settingsAPI,
     stats: statsAPI,
+    newsletters: newslettersAPI,
     subscribers: subscribersAPI
 };
 

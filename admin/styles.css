@@ -741,6 +741,81 @@ a:hover {
     color: #9A7B4F;
 }
 
+/* Newsletter preview */
+.newsletter-preview {
+    background: #f7f4f0;
+    border: 1px solid #ece6dd;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.newsletter-preview-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid #f0e9df;
+    background: #faf7f2;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #c9a26c;
+}
+
+.newsletter-preview-hero img {
+    width: 100%;
+    display: block;
+    max-height: 240px;
+    object-fit: cover;
+}
+
+.newsletter-preview-body {
+    padding: 20px;
+}
+
+.newsletter-preview-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.newsletter-preview-title {
+    font-family: var(--font-headings);
+    font-size: 22px;
+    margin-bottom: 6px;
+}
+
+.newsletter-preview-subtitle {
+    color: #5c5c5c;
+    margin-bottom: 12px;
+}
+
+.newsletter-preview-text {
+    color: #2d2d2d;
+    line-height: 1.7;
+}
+
+.newsletter-preview-cta {
+    display: inline-block;
+    margin-top: 14px;
+    background: #2d2d2d;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 12px;
+    letter-spacing: 0.4px;
+}
+
+.newsletter-preview-footer {
+    padding: 14px 18px;
+    border-top: 1px solid #f0e9df;
+    background: #faf7f2;
+    font-size: 12px;
+    color: #6b6b6b;
+}
+
 /* Modal */
 .modal {
     position: fixed;

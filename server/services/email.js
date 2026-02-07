@@ -100,6 +100,30 @@ const getBaseUrl = () => {
 
 const getSupportEmail = () => smtpConfig.user || 'support@example.com';
 
+const escapeHtml = (value) => {
+    return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+};
+
+const formatParagraphs = (value) => {
+    const safe = escapeHtml(value || '');
+    return safe.replace(/\n/g, '<br>');
+};
+
+const getNewsletterCategory = (category) => {
+    const map = {
+        promo: { label: 'Акции', color: '#9a2f2f', bg: '#fde7e7' },
+        collection: { label: 'Коллекции', color: '#2d2d2d', bg: '#f2f2f2' },
+        news: { label: 'Новости', color: '#1d4f9a', bg: '#e8f0ff' }
+    };
+
+    return map[category] || { label: 'Новости', color: '#1d4f9a', bg: '#e8f0ff' };
+};
+
 export const sendNewsletterWelcomeEmail = async ({ to, storeName = 'AURA', unsubscribeId = '' }) => {
     const mailer = ensureTransporter();
     if (!mailer) return false;
@@ -240,6 +264,76 @@ export const sendTestEmail = async ({ to, storeName = 'AURA' }) => {
             <p>Подключение к SMTP серверу настроено корректно.</p>
         </div>
     `;
+
+    await mailer.sendMail({
+        from: smtpConfig.from,
+        to,
+        subject,
+        text,
+        html
+    });
+
+    return true;
+};
+
+export const sendNewsletterCampaignEmail = async ({
+    to,
+    unsubscribeId,
+    campaign,
+    storeName = 'AURA',
+    supportEmail
+}) => {
+    const mailer = ensureTransporter();
+    if (!mailer) return false;
+
+    const baseUrl = getBaseUrl();
+    const encodedId = encodeURIComponent(String(unsubscribeId || '').trim());
+    const unsubscribeUrl = `${baseUrl}/api/subscribers/unsubscribe?id=${encodedId}`;
+    const support = supportEmail || getSupportEmail();
+
+    const categoryMeta = getNewsletterCategory(campaign?.category);
+    const subject = campaign?.subject || `${storeName}: новости`;
+    const title = escapeHtml(campaign?.title || 'Новости');
+    const subtitle = escapeHtml(campaign?.subtitle || '');
+    const body = campaign?.body ? formatParagraphs(campaign.body) : '';
+    const ctaLabel = escapeHtml(campaign?.cta_label || 'Перейти');
+    const ctaUrl = campaign?.cta_url ? String(campaign.cta_url) : '';
+    const heroImage = campaign?.hero_image ? String(campaign.hero_image) : '';
+
+    const preheader = escapeHtml(campaign?.subtitle || campaign?.title || 'Новости магазина');
+
+    const html = `
+        <div style="background: #f7f4f0; padding: 28px 12px; font-family: Arial, sans-serif; color: #2d2d2d;">
+            <div style="max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #ece6dd; border-radius: 14px; overflow: hidden;">
+                <div style="display: none; max-height: 0; overflow: hidden; opacity: 0; color: transparent;">${preheader}</div>
+                <div style="padding: 18px 24px; border-bottom: 1px solid #f0e9df; background: #faf7f2;">
+                    <div style="font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #c9a26c;">${escapeHtml(storeName)}</div>
+                </div>
+                ${heroImage ? `
+                    <img src="${heroImage}" alt="${title}" style="width: 100%; display: block; object-fit: cover; max-height: 320px;">
+                ` : ''}
+                <div style="padding: 24px;">
+                    <div style="display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; background: ${categoryMeta.bg}; color: ${categoryMeta.color};">
+                        ${categoryMeta.label}
+                    </div>
+                    <h2 style="margin: 16px 0 8px; font-weight: 500; font-size: 26px;">${title}</h2>
+                    ${subtitle ? `<p style="margin: 0 0 16px; font-size: 15px; color: #5c5c5c;">${subtitle}</p>` : ''}
+                    ${body ? `<p style="margin: 0 0 20px; line-height: 1.7; font-size: 15px; color: #2d2d2d;">${body}</p>` : ''}
+                    ${ctaUrl ? `
+                        <a href="${ctaUrl}" style="display: inline-block; background: #2d2d2d; color: #ffffff; text-decoration: none; padding: 12px 22px; border-radius: 999px; font-size: 13px; letter-spacing: 0.5px;">
+                            ${ctaLabel}
+                        </a>
+                    ` : ''}
+                </div>
+                <div style="padding: 18px 24px; border-top: 1px solid #f0e9df; background: #faf7f2;">
+                    <p style="margin: 0 0 10px; font-size: 12px; color: #6b6b6b;">Есть вопросы? Напишите на <a href="mailto:${support}" style="color: #2d2d2d;">${support}</a>.</p>
+                    <a href="${unsubscribeUrl}" style="display: inline-block; font-size: 12px; color: #c9a26c; text-decoration: none; border: 1px solid #c9a26c; padding: 8px 14px; border-radius: 999px;">Отписаться</a>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const text = `${storeName}: ${campaign?.title || 'Новости'}\n\n${campaign?.subtitle || ''}\n\n${campaign?.body || ''}\n\n${campaign?.cta_url ? `Ссылка: ${campaign.cta_url}` : ''}\n\nОтписаться: ${unsubscribeUrl}`;
 
     await mailer.sendMail({
         from: smtpConfig.from,

@@ -19,6 +19,7 @@ const initSubscribersTable = async () => {
 
     await dbRun('ALTER TABLE subscribers ADD COLUMN IF NOT EXISTS status TEXT DEFAULT "active"');
     await dbRun('ALTER TABLE subscribers ADD COLUMN IF NOT EXISTS source TEXT');
+    await dbRun('CREATE UNIQUE INDEX IF NOT EXISTS subscribers_email_lower_uidx ON subscribers (LOWER(email))');
 };
 
 initSubscribersTable().catch((error) => {

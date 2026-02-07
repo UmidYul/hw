@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Рассылки — Higher Waist Admin</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="/admin/styles.css">
+</head>
+
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">A</div>
+                    <div class="sidebar-logo-text">Higher Waist Admin</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Основное</div>
+                    <a href="/admin" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Каталог</div>
+                    <a href="/admin/products" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Товары</span>
+                    </a>
+                    <a href="/admin/categories" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Категории</span>
+                    </a>
+                    <a href="/admin/collections" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Коллекции</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Маркетинг</div>
+                    <a href="/admin/discounts" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Скидки</span>
+                    </a>
+                    <a href="/admin/promocodes" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Промокоды</span>
+                    </a>
+                    <a href="/admin/banners" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Баннеры</span>
+                    </a>
+                    <a href="/admin/newsletters" class="sidebar-nav-link active">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Рассылки</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Продажи</div>
+                    <a href="/admin/orders" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Заказы</span>
+                    </a>
+                    <a href="/admin/customers" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Клиенты</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-title">Настройки</div>
+                    <a href="/admin/settings" class="sidebar-nav-link">
+                        <span class="sidebar-nav-icon"></span>
+                        <span>Настройки</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="topbar-btn" id="sidebar-toggle">Меню</button>
+                    <div class="topbar-search">
+                        <input type="text" class="topbar-search-input" id="global-search">
+                        <span class="topbar-search-icon">Поиск</span>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="topbar-profile">
+                        <div class="topbar-profile-avatar">A</div>
+                        <div class="topbar-profile-name">Администратор</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Рассылки</h1>
+                        <p class="page-subtitle">Создание тематических рассылок и управление отправкой</p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="btn btn-secondary" onclick="resetNewsletterForm()">Новый черновик</button>
+                        <button class="btn btn-primary" onclick="saveNewsletter()">Сохранить черновик</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Параметры рассылки</h3>
+                        </div>
+                        <div class="card-body">
+                            <form id="newsletterForm">
+                                <input type="hidden" id="newsletterId">
+
+                                <div class="form-group">
+                                    <label for="category">Категория *</label>
+                                    <select id="category" required>
+                                        <option value="promo">Акции</option>
+                                        <option value="collection">Коллекции</option>
+                                        <option value="news">Новости</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="subject">Тема письма *</label>
+                                    <input type="text" id="subject" placeholder="Летняя коллекция уже в продаже"
+                                        required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="title">Заголовок *</label>
+                                    <input type="text" id="title" placeholder="Новая летняя коллекция" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="subtitle">Подзаголовок</label>
+                                    <input type="text" id="subtitle" placeholder="Легкие ткани и фирменные силуэты">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="body">Описание</label>
+                                    <textarea id="body" rows="5"
+                                        placeholder="Расскажите о новых поступлениях и ключевых преимуществах."></textarea>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="ctaLabel">Текст кнопки</label>
+                                        <input type="text" id="ctaLabel" placeholder="Смотреть коллекцию">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ctaUrl">Ссылка кнопки</label>
+                                        <input type="text" id="ctaUrl" placeholder="/collection/summer">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="heroImage">URL изображения</label>
+                                    <input type="text" id="heroImage" placeholder="https://...">
+                                </div>
+
+                                <div class="form-row">
+                                    <button class="btn btn-secondary" type="button" onclick="sendNewsletter()">
+                                        Отправить рассылку
+                                    </button>
+                                    <button class="btn btn-primary" type="button" onclick="saveNewsletter()">
+                                        Сохранить черновик
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Предпросмотр</h3>
+                            <div class="text-muted" id="previewSubject">Тема: —</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="newsletter-preview" id="newsletterPreview"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-lg">
+                    <div class="card-header">
+                        <h3 class="card-title">Сохраненные рассылки</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Категория</th>
+                                        <th>Тема письма</th>
+                                        <th>Статус</th>
+                                        <th>Создано</th>
+                                        <th>Отправлено</th>
+                                        <th>Получатели</th>
+                                        <th class="text-right">Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="newslettersTable">
+                                    <tr>
+                                        <td colspan="7">
+                                            <div class="skeleton skeleton-text"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/js/api.js"></script>
+    <script src="/admin/components.js"></script>
+    <script>
+        let newsletters = [];
+        let activeNewsletterId = null;
+
+        const categoryMeta = {
+            promo: { label: 'Акции', color: '#9a2f2f', bg: '#fde7e7' },
+            collection: { label: 'Коллекции', color: '#2d2d2d', bg: '#f2f2f2' },
+            news: { label: 'Новости', color: '#1d4f9a', bg: '#e8f0ff' }
+        };
+
+        const statusMap = {
+            draft: { label: 'Черновик', badge: 'badge-warning' },
+            sent: { label: 'Отправлено', badge: 'badge-success' }
+        };
+
+        const escapeHtml = (value) => {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        };
+
+        const formatBody = (value) => escapeHtml(value).replace(/\n/g, '<br>');
+
+        const getField = (id) => document.getElementById(id);
+
+        const getFormData = () => {
+            return {
+                category: getField('category').value,
+                subject: getField('subject').value.trim(),
+                title: getField('title').value.trim(),
+                subtitle: getField('subtitle').value.trim(),
+                body: getField('body').value.trim(),
+                cta_label: getField('ctaLabel').value.trim(),
+                cta_url: getField('ctaUrl').value.trim(),
+                hero_image: getField('heroImage').value.trim()
+            };
+        };
+
+        const setFormData = (newsletter) => {
+            getField('newsletterId').value = newsletter?.id || '';
+            getField('category').value = newsletter?.category || 'promo';
+            getField('subject').value = newsletter?.subject || '';
+            getField('title').value = newsletter?.title || '';
+            getField('subtitle').value = newsletter?.subtitle || '';
+            getField('body').value = newsletter?.body || '';
+            getField('ctaLabel').value = newsletter?.cta_label || '';
+            getField('ctaUrl').value = newsletter?.cta_url || '';
+            getField('heroImage').value = newsletter?.hero_image || '';
+            activeNewsletterId = newsletter?.id || null;
+            updatePreview();
+        };
+
+        const updatePreview = () => {
+            const data = getFormData();
+            const preview = document.getElementById('newsletterPreview');
+            const subjectEl = document.getElementById('previewSubject');
+            const meta = categoryMeta[data.category] || categoryMeta.news;
+
+            subjectEl.textContent = `Тема: ${data.subject || '—'}`;
+
+            const heroHtml = data.hero_image
+                ? `<div class="newsletter-preview-hero"><img src="${escapeHtml(data.hero_image)}" alt="${escapeHtml(data.title)}"></div>`
+                : '';
+
+            const bodyHtml = data.body
+                ? `<div class="newsletter-preview-text">${formatBody(data.body)}</div>`
+                : '<div class="newsletter-preview-text text-muted">Добавьте описание рассылки.</div>';
+
+            const ctaHtml = data.cta_url && data.cta_label
+                ? `<a class="newsletter-preview-cta" href="${escapeHtml(data.cta_url)}">${escapeHtml(data.cta_label)}</a>`
+                : '';
+
+            preview.innerHTML = `
+                <div class="newsletter-preview-header">Higher Waist</div>
+                ${heroHtml}
+                <div class="newsletter-preview-body">
+                    <span class="newsletter-preview-badge" style="background:${meta.bg}; color:${meta.color};">${meta.label}</span>
+                    <div class="newsletter-preview-title">${escapeHtml(data.title || 'Заголовок рассылки')}</div>
+                    ${data.subtitle ? `<div class="newsletter-preview-subtitle">${escapeHtml(data.subtitle)}</div>` : ''}
+                    ${bodyHtml}
+                    ${ctaHtml}
+                </div>
+                <div class="newsletter-preview-footer">
+                    <div>Письмо будет отправлено активным подписчикам.</div>
+                </div>
+            `;
+        };
+
+        const loadNewsletters = async () => {
+            try {
+                newsletters = await API.newsletters.getAll();
+                renderNewsletters();
+            } catch (error) {
+                Components.showToast('Ошибка', 'Не удалось загрузить рассылки', 'error');
+            }
+        };
+
+        const renderNewsletters = () => {
+            const tbody = document.getElementById('newslettersTable');
+            if (!newsletters.length) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">Нет</div>
+                                <div class="empty-state-title">Рассылки пока не создавались</div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = newsletters.map((item) => {
+                const status = statusMap[item.status] || statusMap.draft;
+                const category = categoryMeta[item.category] || categoryMeta.news;
+                const sentAt = item.sent_at ? Components.formatDate(item.sent_at) : '—';
+
+                return `
+                    <tr>
+                        <td>${category.label}</td>
+                        <td>${escapeHtml(item.subject || '—')}</td>
+                        <td><span class="badge ${status.badge}">${status.label}</span></td>
+                        <td>${item.created_at ? Components.formatDate(item.created_at) : '—'}</td>
+                        <td>${sentAt}</td>
+                        <td>${item.sent_count || 0}</td>
+                        <td class="text-right">
+                            <div class="flex gap-md" style="justify-content: flex-end;">
+                                <button class="btn btn-sm btn-ghost" onclick="editNewsletter('${item.id}')">Редактировать</button>
+                                ${item.status === 'draft'
+                        ? `<button class="btn btn-sm btn-secondary" onclick="sendNewsletter('${item.id}')">Отправить</button>`
+                        : ''}
+                                <button class="btn btn-sm btn-error" onclick="deleteNewsletter('${item.id}')">Удалить</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        };
+
+        const saveNewsletter = async () => {
+            const data = getFormData();
+            if (!data.subject || !data.title) {
+                Components.showToast('Заполните поля', 'Тема и заголовок обязательны', 'warning');
+                return;
+            }
+
+            try {
+                let saved = null;
+                if (activeNewsletterId) {
+                    saved = await API.newsletters.update(activeNewsletterId, data);
+                } else {
+                    saved = await API.newsletters.create(data);
+                }
+
+                setFormData(saved);
+                await loadNewsletters();
+                Components.showToast('Готово', 'Черновик сохранен', 'success');
+            } catch (error) {
+                Components.showToast('Ошибка', 'Не удалось сохранить рассылку', 'error');
+            }
+        };
+
+        const sendNewsletter = async (id = null) => {
+            if (id) {
+                activeNewsletterId = id;
+            }
+
+            if (!activeNewsletterId) {
+                await saveNewsletter();
+                if (!activeNewsletterId) return;
+            }
+
+            Components.confirm('Отправить рассылку?', 'Письмо уйдет всем активным подписчикам.', async () => {
+                try {
+                    const result = await API.newsletters.send(activeNewsletterId);
+                    await loadNewsletters();
+                    Components.showToast('Отправлено', `Успешно: ${result.sent}, ошибок: ${result.failed}`, 'success');
+                } catch (error) {
+                    Components.showToast('Ошибка', 'Не удалось отправить рассылку', 'error');
+                }
+            });
+        };
+
+        const editNewsletter = async (id) => {
+            try {
+                const newsletter = await API.newsletters.getById(id);
+                setFormData(newsletter);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (error) {
+                Components.showToast('Ошибка', 'Не удалось загрузить рассылку', 'error');
+            }
+        };
+
+        const deleteNewsletter = (id) => {
+            Components.confirm('Удалить рассылку?', 'Это действие нельзя отменить.', async () => {
+                try {
+                    await API.newsletters.delete(id);
+                    if (activeNewsletterId === id) {
+                        resetNewsletterForm();
+                    }
+                    await loadNewsletters();
+                    Components.showToast('Удалено', 'Рассылка удалена', 'success');
+                } catch (error) {
+                    Components.showToast('Ошибка', 'Не удалось удалить рассылку', 'error');
+                }
+            });
+        };
+
+        const resetNewsletterForm = () => {
+            activeNewsletterId = null;
+            setFormData({
+                category: 'promo',
+                subject: '',
+                title: '',
+                subtitle: '',
+                body: '',
+                cta_label: '',
+                cta_url: '',
+                hero_image: ''
+            });
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('#newsletterForm input, #newsletterForm textarea, #newsletterForm select')
+                .forEach((el) => el.addEventListener('input', updatePreview));
+
+            resetNewsletterForm();
+            loadNewsletters();
+        });
+    </script>
+</body>
+
+</html>

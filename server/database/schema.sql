@@ -186,6 +186,26 @@ CREATE TABLE IF NOT EXISTS subscribers (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS subscribers_email_lower_uidx ON subscribers (LOWER(email));
+
+-- Newsletters
+CREATE TABLE IF NOT EXISTS newsletters (
+    id UUID PRIMARY KEY,
+    category TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    title TEXT NOT NULL,
+    subtitle TEXT,
+    body TEXT,
+    cta_label TEXT,
+    cta_url TEXT,
+    hero_image TEXT,
+    status TEXT DEFAULT 'draft',
+    sent_at TIMESTAMPTZ,
+    sent_count INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Settings
 CREATE TABLE IF NOT EXISTS settings (
     id UUID PRIMARY KEY,
