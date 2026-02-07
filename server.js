@@ -38,6 +38,38 @@ app.get('/cart.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'cart.html'));
 });
 
+app.get('/delivery', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'delivery.html'));
+});
+
+app.get('/payment', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'payment.html'));
+});
+
+app.get('/returns', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'returns.html'));
+});
+
+app.get('/faq', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'faq.html'));
+});
+
+app.get('/privacy', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'privacy.html'));
+});
+
+app.get('/terms', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'terms.html'));
+});
+
+app.get('/contacts', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'contacts.html'));
+});
+
+app.get('/about', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'about.html'));
+});
+
 // Admin panel routes
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin', 'index.html'));

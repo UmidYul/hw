@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Политика конфиденциальности · Higher Waist</title>
+    <meta name="description" content="Политика конфиденциальности Higher Waist.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:wght@300;400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="container header-container">
+            <div class="header-left">
+                <button class="menu-btn" id="mobileMenuBtn" aria-label="Меню">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <a href="/" class="logo">
+                <span class="logo-text">Higher Waist</span>
+                <span class="logo-dot">·</span>
+            </a>
+
+            <div class="header-right">
+                <button class="icon-btn search-btn" id="searchBtn" aria-label="Поиск">
+                    <i class="fas fa-search"></i>
+                </button>
+                <button class="icon-btn wishlist-btn" id="wishlistBtn" aria-label="Избранное">
+                    <i class="far fa-heart"></i>
+                    <span class="badge" id="wishlistBadge">0</span>
+                </button>
+                <button class="icon-btn cart-btn" id="cartBtn" aria-label="Корзина">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span class="badge" id="cartBadge">0</span>
+                </button>
+            </div>
+        </div>
+
+        <nav class="nav" id="mainNav">
+            <div class="container">
+                <ul class="nav-list">
+                    <li><a href="/catalog?category=all" class="nav-link">Все товары</a></li>
+                    <li><a href="/catalog?tag=Sale" class="nav-link nav-link-sale">Sale</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <div class="modal" id="searchModal">
+        <div class="modal-overlay" id="searchModalOverlay"></div>
+        <div class="modal-content search-modal-content">
+            <button class="modal-close" id="searchModalClose" aria-label="Закрыть">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="search-modal-body">
+                <input type="text" class="search-input-large" id="searchInput" placeholder="Поиск товаров...">
+                <div class="search-results" id="searchResults"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-page">
+        <div class="container">
+            <nav class="breadcrumbs" aria-label="breadcrumb">
+                <a href="/">Главная</a>
+                <span>/</span>
+                <span>Политика конфиденциальности</span>
+            </nav>
+
+            <div class="page-header">
+                <h1 class="page-title">Политика конфиденциальности</h1>
+            </div>
+
+            <div class="content-block">
+                <p>Последнее обновление: 07.02.2026</p>
+
+                <h3>Какие данные мы собираем</h3>
+                <p>Мы собираем данные, необходимые для оформления заказа, связи с вами и улучшения сервиса.</p>
+
+                <h3>Как мы используем данные</h3>
+                <p>Информация используется для обработки заказов, доставки и поддержки клиентов.</p>
+
+                <h3>Передача третьим лицам</h3>
+                <p>Мы передаем данные только партнерам, которые обеспечивают оплату и доставку.</p>
+
+                <h3>Ваши права</h3>
+                <p>Вы можете запросить изменение или удаление данных, обратившись через контакты.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="logo footer-logo">
+                        <span class="logo-text">Higher Waist</span>
+                        <span class="logo-dot">·</span>
+                    </div>
+                    <p class="footer-text">Минималистичная мода для современной жизни</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link" data-social="instagram" aria-label="Instagram"><i
+                                class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link" data-social="facebook" aria-label="Facebook"><i
+                                class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link" data-social="telegram" aria-label="Telegram"><i
+                                class="fab fa-telegram"></i></a>
+                        <a href="#" class="social-link" data-social="tiktok" aria-label="TikTok"><i
+                                class="fab fa-tiktok"></i></a>
+                        <a href="#" class="social-link" data-social="youtube" aria-label="YouTube"><i
+                                class="fab fa-youtube"></i></a>
+                        <a href="#" class="social-link" data-social="whatsapp" aria-label="WhatsApp"><i
+                                class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-heading">Покупателям</h4>
+                    <ul class="footer-links">
+                        <li><a href="/delivery">Доставка</a></li>
+                        <li><a href="/payment">Оплата</a></li>
+                        <li><a href="/returns">Возврат и обмен</a></li>
+                        <li><a href="/faq">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-heading">О компании</h4>
+                    <ul class="footer-links">
+                        <li><a href="/about">О нас</a></li>
+                        <li><a href="/contacts">Контакты</a></li>
+                        <li><a href="/terms">Публичная оферта</a></li>
+                        <li><a href="/privacy">Политика конфиденциальности</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-heading">Контакты</h4>
+                    <ul class="footer-contacts">
+                        <li><i class="fas fa-phone"></i> <a id="contactPhone" href="tel:">—</a></li>
+                        <li><i class="fas fa-envelope"></i> <a id="contactEmail" href="mailto:">—</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-heading">Помощь</h4>
+                    <ul class="footer-links">
+                        <li><a href="/faq">Частые вопросы</a></li>
+                        <li><a href="/delivery">Сроки доставки</a></li>
+                        <li><a href="/returns">Как оформить возврат</a></li>
+                        <li><a href="/contacts">Связаться с нами</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Higher Waist. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/utils.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+
+</html>

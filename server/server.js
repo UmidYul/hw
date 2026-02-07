@@ -72,6 +72,14 @@ app.get('/product', (req, res) => res.sendFile(path.join(__dirname, '../views/pr
 app.get('/cart', (req, res) => res.sendFile(path.join(__dirname, '../views/cart.html')));
 app.get('/collection', (req, res) => res.sendFile(path.join(__dirname, '../views/collection.html')));
 app.get('/wishlist', (req, res) => res.sendFile(path.join(__dirname, '../views/wishlist.html')));
+app.get('/delivery', (req, res) => res.sendFile(path.join(__dirname, '../views/delivery.html')));
+app.get('/payment', (req, res) => res.sendFile(path.join(__dirname, '../views/payment.html')));
+app.get('/returns', (req, res) => res.sendFile(path.join(__dirname, '../views/returns.html')));
+app.get('/faq', (req, res) => res.sendFile(path.join(__dirname, '../views/faq.html')));
+app.get('/privacy', (req, res) => res.sendFile(path.join(__dirname, '../views/privacy.html')));
+app.get('/terms', (req, res) => res.sendFile(path.join(__dirname, '../views/terms.html')));
+app.get('/contacts', (req, res) => res.sendFile(path.join(__dirname, '../views/contacts.html')));
+app.get('/about', (req, res) => res.sendFile(path.join(__dirname, '../views/about.html')));
 
 // Admin pages
 app.get('/admin/login', (req, res) => res.sendFile(path.join(__dirname, '../admin/login.html')));
