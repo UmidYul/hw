@@ -60,4 +60,30 @@ router.post('/', async (req, res) => {
     }
 });
 
+router.get('/unsubscribe', async (req, res) => {
+    try {
+        const email = req.query.email;
+        if (!isValidEmail(email)) {
+            return res.status(400).send('Некорректный email.');
+        }
+
+        const normalized = String(email).trim().toLowerCase();
+        await dbRun(
+            `UPDATE subscribers
+             SET status = 'unsubscribed', updated_at = CURRENT_TIMESTAMP
+             WHERE email = ?`,
+            [normalized]
+        );
+
+        res.send(`
+            <div style="font-family: Arial, sans-serif; color: #2d2d2d; padding: 24px;">
+                <h2 style="margin: 0 0 12px;">Вы отписались от рассылки</h2>
+                <p style="margin: 0;">Если это ошибка, вы всегда можете подписаться снова на сайте.</p>
+            </div>
+        `);
+    } catch (error) {
+        res.status(500).send('Не удалось обработать запрос.');
+    }
+});
+
 export default router;

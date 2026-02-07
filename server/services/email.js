@@ -90,16 +90,57 @@ const statusLabels = {
 
 const getStatusLabel = (status) => statusLabels[status] || status || 'Обновлен';
 
+const getBaseUrl = () => {
+    if (process.env.SERVER_URL) {
+        return String(process.env.SERVER_URL).replace(/\/$/, '');
+    }
+    const port = process.env.PORT || 3000;
+    return `http://localhost:${port}`;
+};
+
+const getSupportEmail = () => smtpConfig.user || 'support@example.com';
+
 export const sendNewsletterWelcomeEmail = async ({ to, storeName = 'AURA' }) => {
     const mailer = ensureTransporter();
     if (!mailer) return false;
 
+    const baseUrl = getBaseUrl();
+    const encodedEmail = encodeURIComponent(String(to || '').trim().toLowerCase());
+    const unsubscribeUrl = `${baseUrl}/api/subscribers/unsubscribe?email=${encodedEmail}`;
+    const supportEmail = getSupportEmail();
+
     const subject = `${storeName}: подписка на новости`;
-    const text = `Спасибо за подписку на рассылку ${storeName}!`;
+    const text = `Спасибо за подписку на рассылку ${storeName}!
+
+Вы будете получать:
+- новости коллекций и новинки
+- закрытые скидки и акции
+- напоминания о самых популярных товарах
+
+Если хотите отписаться: ${unsubscribeUrl}`;
     const html = `
-        <div style="font-family: Arial, sans-serif; color: #2d2d2d;">
-            <h2 style="margin: 0 0 12px;">Спасибо за подписку!</h2>
-            <p>Теперь вы будете первыми узнавать о новинках и акциях ${storeName}.</p>
+        <div style="background: #fafafa; padding: 24px 12px; font-family: Arial, sans-serif; color: #2d2d2d;">
+            <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 24px;">
+                <div style="font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #c9a26c;">${storeName}</div>
+                <h2 style="margin: 10px 0 12px; font-weight: 400;">Спасибо за подписку!</h2>
+                <p style="margin: 0 0 12px; line-height: 1.6;">
+                    Теперь вы будете первыми узнавать о новинках, специальных предложениях и закрытых скидках.
+                </p>
+                <div style="background: #f7f5f1; border-radius: 10px; padding: 14px 16px; margin: 16px 0;">
+                    <ul style="margin: 0; padding-left: 18px; line-height: 1.6;">
+                        <li>Новые коллекции и подборки недели</li>
+                        <li>Ранний доступ к распродажам</li>
+                        <li>Полезные советы по уходу и стилю</li>
+                    </ul>
+                </div>
+                <p style="margin: 0 0 16px;">Есть вопросы? Напишите нам на <a href="mailto:${supportEmail}" style="color: #2d2d2d;">${supportEmail}</a>.</p>
+                <a href="${baseUrl}" style="display: inline-block; background: #2d2d2d; color: #ffffff; text-decoration: none; padding: 12px 18px; border-radius: 999px; font-size: 14px;">Перейти в магазин</a>
+                <div style="border-top: 1px solid #eee; margin: 20px 0;"></div>
+                <p style="font-size: 12px; color: #6b6b6b; margin: 0 0 10px;">
+                    Вы получили это письмо, потому что подписались на рассылку.
+                </p>
+                <a href="${unsubscribeUrl}" style="display: inline-block; border: 1px solid #c9a26c; color: #c9a26c; text-decoration: none; padding: 10px 16px; border-radius: 999px; font-size: 12px;">Отписаться от рассылки</a>
+            </div>
         </div>
     `;
 
