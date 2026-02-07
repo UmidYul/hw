@@ -334,7 +334,10 @@
                                     <option value="banners">Только баннеры</option>
                                 </select>
                                 <button type="button" class="btn btn-secondary" id="cleanupUploadsBtn"
-                                    onclick="runUploadsCleanup()">Очистить неиспользуемые</button>
+                                    onclick="runUploadsCleanup()">
+                                    <span class="spinner" aria-hidden="true"></span>
+                                    <span class="btn-text">Очистить неиспользуемые</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -621,8 +624,13 @@
                 'Будут удалены изображения товаров и баннеров, не привязанные к базе данных.',
                 async () => {
                     const button = document.getElementById('cleanupUploadsBtn');
+                    const buttonText = button?.querySelector('.btn-text');
                     const type = document.getElementById('cleanupUploadsType')?.value || 'all';
-                    if (button) button.disabled = true;
+                    if (button) {
+                        button.disabled = true;
+                        button.classList.add('btn-loading');
+                    }
+                    if (buttonText) buttonText.textContent = 'Очистка...';
                     try {
                         const response = await fetch('/api/uploads/cleanup', {
                             method: 'POST',
@@ -648,14 +656,63 @@
                         const message = details ? `Удалено: ${details}` : 'Очистка завершена.';
 
                         Components.showToast('Успешно', message, 'success');
+                        showCleanupDetailsModal(payload.result || {});
                     } catch (error) {
                         console.error('Cleanup failed:', error);
                         Components.showToast('Ошибка', error.message || 'Не удалось выполнить очистку', 'error');
                     } finally {
-                        if (button) button.disabled = false;
+                        if (button) {
+                            button.disabled = false;
+                            button.classList.remove('btn-loading');
+                        }
+                        if (buttonText) buttonText.textContent = 'Очистить неиспользуемые';
                     }
                 }
             );
+        }
+
+        function showCleanupDetailsModal(result) {
+            const modal = document.createElement('div');
+            modal.className = 'modal show';
+
+            const renderSection = (title, data) => {
+                if (!data) return '';
+                const removedUrls = Array.isArray(data.removedUrls) ? data.removedUrls : [];
+                const removedItems = removedUrls.length
+                    ? `<ul class="cleanup-list">${removedUrls.map(url => `<li>${url}</li>`).join('')}</ul>`
+                    : '<div class="cleanup-empty">Ничего не удалено.</div>';
+
+                return `
+                    <div class="cleanup-section">
+                        <h4>${title}</h4>
+                        <div class="cleanup-meta">Удалено: ${data.removed ?? 0} из ${data.scanned ?? 0}</div>
+                        ${removedItems}
+                    </div>
+                `;
+            };
+
+            const bodyHtml = `
+                ${renderSection('Товары', result.products)}
+                ${renderSection('Баннеры', result.banners)}
+            `;
+
+            modal.innerHTML = `
+                <div class="modal-backdrop" onclick="this.parentElement.remove()"></div>
+                <div class="modal-dialog modal-dialog-lg">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Детали очистки</h3>
+                        <button class="modal-close" onclick="this.closest('.modal').remove()">Закрыть</button>
+                    </div>
+                    <div class="modal-body">
+                        ${bodyHtml}
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Закрыть</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
         }
 
         document.addEventListener('DOMContentLoaded', loadSettings);

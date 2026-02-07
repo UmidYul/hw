@@ -56,22 +56,22 @@ const collectUsedBannerFiles = async () => {
     return used;
 };
 
-const cleanupDirectory = (dir, usedFiles) => {
+const cleanupDirectory = (dir, usedFiles, baseUrl) => {
     const files = listFiles(dir);
-    let removed = 0;
+    const removedUrls = [];
 
     files.forEach(file => {
         if (!usedFiles.has(file)) {
             try {
                 fs.unlinkSync(path.join(dir, file));
-                removed += 1;
+                removedUrls.push(`${baseUrl}/${file}`);
             } catch (error) {
                 console.warn('Failed to remove file:', file, error.message);
             }
         }
     });
 
-    return { scanned: files.length, removed };
+    return { scanned: files.length, removed: removedUrls.length, removedUrls };
 };
 
 export const runUploadsCleanup = async ({ type = 'all' } = {}) => {
@@ -79,12 +79,12 @@ export const runUploadsCleanup = async ({ type = 'all' } = {}) => {
 
     if (type === 'all' || type === 'products') {
         const usedProductFiles = await collectUsedProductFiles();
-        result.products = cleanupDirectory(productDir, usedProductFiles);
+        result.products = cleanupDirectory(productDir, usedProductFiles, '/images/products');
     }
 
     if (type === 'all' || type === 'banners') {
         const usedBannerFiles = await collectUsedBannerFiles();
-        result.banners = cleanupDirectory(bannerDir, usedBannerFiles);
+        result.banners = cleanupDirectory(bannerDir, usedBannerFiles, '/images/banners');
     }
 
     return result;
