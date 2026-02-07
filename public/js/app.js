@@ -208,7 +208,15 @@ async function loadNavbarCategories() {
 
         let displayedCollections = [...visibleCollections];
         if (currentCollectionSlug) {
-            const currentCollection = visibleCollections.find(col => String(col.slug) === String(currentCollectionSlug));
+            let currentCollection = visibleCollections.find(col => String(col.slug) === String(currentCollectionSlug));
+            if (!currentCollection && API.collections.getBySlug) {
+                try {
+                    currentCollection = await API.collections.getBySlug(currentCollectionSlug);
+                } catch (fetchError) {
+                    currentCollection = null;
+                }
+            }
+
             if (currentCollection) {
                 displayedCollections = [
                     currentCollection,
