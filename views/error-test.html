@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тестирование страниц ошибок | Higher Waist</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #FAFAFA;
+            padding: 40px 20px;
+            color: #2D2D2D;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 36px;
+            margin-bottom: 8px;
+            color: #2D2D2D;
+        }
+
+        .subtitle {
+            color: #757575;
+            margin-bottom: 32px;
+            font-size: 14px;
+        }
+
+        .section {
+            margin-bottom: 32px;
+        }
+
+        .section h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #2D2D2D;
+        }
+
+        .links {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .link-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: #FAFAFA;
+            border: 1px solid #E0E0E0;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #2D2D2D;
+            transition: all 0.2s ease;
+        }
+
+        .link-card:hover {
+            border-color: #C9A26C;
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(201, 162, 108, 0.2);
+        }
+
+        .link-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            border: 1px solid #E0E0E0;
+        }
+
+        .link-content {
+            flex: 1;
+        }
+
+        .link-title {
+            font-weight: 500;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .link-code {
+            font-size: 12px;
+            color: #757575;
+        }
+
+        .note {
+            background: #FFF9F0;
+            border: 1px solid #FFE9D0;
+            padding: 16px;
+            border-radius: 4px;
+            margin-top: 32px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .note strong {
+            color: #C9A26C;
+            display: block;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Страницы ошибок Higher Waist</h1>
+        <p class="subtitle">Тестирование страниц ошибок и служебных страниц</p>
+
+        <div class="section">
+            <h2>404 - Страница не найдена</h2>
+            <div class="links">
+                <a href="/несуществующая-страница" class="link-card">
+                    <div class="link-icon">🔍</div>
+                    <div class="link-content">
+                        <div class="link-title">404 Error</div>
+                        <div class="link-code">Страница не найдена</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Ошибки сервера</h2>
+            <div class="links">
+                <a href="/error?code=500" class="link-card">
+                    <div class="link-icon">⚠️</div>
+                    <div class="link-content">
+                        <div class="link-title">500 Error</div>
+                        <div class="link-code">Внутренняя ошибка</div>
+                    </div>
+                </a>
+
+                <a href="/error?code=400" class="link-card">
+                    <div class="link-icon">❌</div>
+                    <div class="link-content">
+                        <div class="link-title">400 Error</div>
+                        <div class="link-code">Неверный запрос</div>
+                    </div>
+                </a>
+
+                <a href="/error?code=401" class="link-card">
+                    <div class="link-icon">🔒</div>
+                    <div class="link-content">
+                        <div class="link-title">401 Error</div>
+                        <div class="link-code">Не авторизован</div>
+                    </div>
+                </a>
+
+                <a href="/error?code=403" class="link-card">
+                    <div class="link-icon">🚫</div>
+                    <div class="link-content">
+                        <div class="link-title">403 Error</div>
+                        <div class="link-code">Доступ запрещён</div>
+                    </div>
+                </a>
+
+                <a href="/error?code=502" class="link-card">
+                    <div class="link-icon">🌐</div>
+                    <div class="link-content">
+                        <div class="link-title">502 Error</div>
+                        <div class="link-code">Ошибка шлюза</div>
+                    </div>
+                </a>
+
+                <a href="/error?code=503" class="link-card">
+                    <div class="link-icon">⏸️</div>
+                    <div class="link-content">
+                        <div class="link-title">503 Error</div>
+                        <div class="link-code">Недоступен</div>
+                    </div>
+                </a>
+
+                <a href="/error?code=504" class="link-card">
+                    <div class="link-icon">⏱️</div>
+                    <div class="link-content">
+                        <div class="link-title">504 Error</div>
+                        <div class="link-code">Тайм-аут</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Служебные страницы</h2>
+            <div class="links">
+                <a href="/maintenance" class="link-card">
+                    <div class="link-icon">🔧</div>
+                    <div class="link-content">
+                        <div class="link-title">Maintenance</div>
+                        <div class="link-code">Техобслуживание</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="note">
+            <strong>📝 Примечание:</strong>
+            Все страницы создаются в минималистичном стиле Higher Waist с адаптивным дизайном. 
+            Они автоматически подстраиваются под различные устройства и включают анимации для улучшения UX.
+            <br><br>
+            Для интеграции см. файл <code>ERROR_PAGES.md</code>
+        </div>
+    </div>
+</body>
+</html>
