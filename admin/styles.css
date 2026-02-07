@@ -449,37 +449,37 @@ a:hover {
     to {
         transform: rotate(360deg);
     }
+}
 
-    .topbar-btn-burger {
-        padding: 0;
-    }
+.topbar-btn-burger {
+    padding: 0;
+}
 
-    .topbar-btn-burger .burger {
-        width: 18px;
-        height: 2px;
-        background: currentColor;
-        position: relative;
-        display: block;
-        margin: 0 auto;
-    }
+.topbar-btn-burger .burger {
+    width: 18px;
+    height: 2px;
+    background: currentColor;
+    position: relative;
+    display: block;
+    margin: 0 auto;
+}
 
-    .topbar-btn-burger .burger::before,
-    .topbar-btn-burger .burger::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        width: 18px;
-        height: 2px;
-        background: currentColor;
-    }
+.topbar-btn-burger .burger::before,
+.topbar-btn-burger .burger::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 18px;
+    height: 2px;
+    background: currentColor;
+}
 
-    .topbar-btn-burger .burger::before {
-        top: -6px;
-    }
+.topbar-btn-burger .burger::before {
+    top: -6px;
+}
 
-    .topbar-btn-burger .burger::after {
-        top: 6px;
-    }
+.topbar-btn-burger .burger::after {
+    top: 6px;
 }
 
 .btn:disabled {
