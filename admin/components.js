@@ -216,8 +216,41 @@ const setupAdminSidebarToggle = () => {
     });
 };
 
+const setupResponsiveTables = () => {
+    const tables = document.querySelectorAll('table.table');
+    if (!tables.length) return;
+
+    const applyLabels = (table) => {
+        const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+        if (!headers.length) return;
+
+        table.querySelectorAll('tbody tr').forEach((row) => {
+            const cells = Array.from(row.querySelectorAll('td'));
+            cells.forEach((cell, index) => {
+                if (!cell.dataset.label && headers[index]) {
+                    cell.dataset.label = headers[index];
+                }
+            });
+        });
+    };
+
+    tables.forEach((table) => {
+        applyLabels(table);
+
+        const tbody = table.querySelector('tbody');
+        if (!tbody) return;
+
+        const observer = new MutationObserver(() => applyLabels(table));
+        observer.observe(tbody, { childList: true, subtree: true });
+    });
+};
+
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupAdminSidebarToggle);
+    document.addEventListener('DOMContentLoaded', () => {
+        setupAdminSidebarToggle();
+        setupResponsiveTables();
+    });
 } else {
     setupAdminSidebarToggle();
+    setupResponsiveTables();
 }
