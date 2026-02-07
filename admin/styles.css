@@ -1685,6 +1685,7 @@ a:hover {
         flex-wrap: nowrap;
         gap: var(--spacing-md);
         min-width: max-content;
+        flex-direction: column;
     }
 
     .filters-card .form-group {
@@ -1789,15 +1790,6 @@ a:hover {
     .products-table td::before {
         display: block;
         margin-bottom: 2px;
-    }
-
-    .card table.table td {
-        width: 100% !important;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        text-align: center;
     }
 
     .products-table .products-col-select,
