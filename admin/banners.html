@@ -292,6 +292,9 @@
     <script>
         let currentBannerId = null;
         let initialImageUrl = '';
+        let isBannerModalOpen = false;
+        let hasSavedBanner = false;
+        const sessionUploadedUrls = new Set();
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
@@ -412,6 +415,9 @@
             form.reset();
             resetFileUpload();
             initialImageUrl = '';
+            hasSavedBanner = false;
+            sessionUploadedUrls.clear();
+            isBannerModalOpen = true;
 
             try {
                 if (id) {
@@ -460,9 +466,10 @@
 
         // Close modal
         function closeBannerModal() {
-            cleanupUnsavedBannerImage();
+            cleanupSessionUploads();
             document.getElementById('bannerModal').classList.remove('active');
             currentBannerId = null;
+            isBannerModalOpen = false;
         }
 
         // Update preview
@@ -544,6 +551,8 @@
                     Components.showToast('Успех', 'Баннер создан', 'success');
                 }
 
+                hasSavedBanner = true;
+                cleanupSessionUploads(document.getElementById('imageUrl').value.trim());
                 closeBannerModal();
                 await loadBanners();
             } catch (error) {
@@ -668,12 +677,20 @@
                     throw new Error('Upload response missing url');
                 }
 
+                if (!isBannerModalOpen) {
+                    await deleteBannerImage(result.url);
+                    return;
+                }
+
                 document.getElementById('imageUrl').value = result.url;
                 status.textContent = 'Файл загружен.';
                 updatePreview();
 
+                sessionUploadedUrls.add(result.url);
+
                 if (previousUrl && previousUrl.startsWith('/images/banners/') && previousUrl !== result.url) {
                     await deleteBannerImage(previousUrl);
+                    sessionUploadedUrls.delete(previousUrl);
                 }
             } catch (error) {
                 console.error('Banner image upload failed:', error);
@@ -734,14 +751,14 @@
             }
         }
 
-        function cleanupUnsavedBannerImage() {
-            const url = document.getElementById('imageUrl')?.value?.trim();
-            if (!url || !url.startsWith('/images/banners/')) return;
-
-            const shouldDelete = !currentBannerId || (initialImageUrl && url !== initialImageUrl);
-            if (shouldDelete) {
-                deleteBannerImage(url);
-            }
+        function cleanupSessionUploads(keepUrl = '') {
+            const safeKeep = keepUrl || (hasSavedBanner ? document.getElementById('imageUrl')?.value?.trim() : '');
+            sessionUploadedUrls.forEach((url) => {
+                if (!safeKeep || url !== safeKeep) {
+                    deleteBannerImage(url);
+                    sessionUploadedUrls.delete(url);
+                }
+            });
         }
     </script>
 
