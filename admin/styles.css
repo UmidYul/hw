@@ -1749,7 +1749,7 @@ a:hover {
     .orders-table tr {
         text-align: left;
         display: grid;
-        gap: var(--spacing-sm);
+        gap: 6px;
     }
 
     .orders-table td {
@@ -1762,22 +1762,22 @@ a:hover {
     }
 
     .orders-table .orders-col-id {
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 600;
         letter-spacing: 0.02em;
     }
 
     .orders-table .orders-col-customer {
-        font-size: 13px;
+        font-size: 12px;
         color: var(--color-text-secondary);
     }
 
     .orders-table .orders-col-customer .text-muted {
-        font-size: 12px;
+        font-size: 11px;
     }
 
     .orders-table .orders-col-total {
-        font-size: 15px;
+        font-size: 13px;
         font-weight: 600;
         color: var(--color-text-primary);
     }
@@ -1791,12 +1791,13 @@ a:hover {
 
     .orders-table .orders-col-actions {
         display: grid;
-        gap: var(--spacing-sm);
+        gap: 6px;
     }
 
     .orders-table .orders-col-actions .btn {
         width: 100%;
         justify-content: center;
+        padding: 8px 12px;
     }
 
     .orders-table .orders-col-actions .dropdown {
