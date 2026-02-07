@@ -39,24 +39,34 @@ router.post('/', async (req, res) => {
 
         const normalized = String(email).trim().toLowerCase();
 
-        const existing = await dbGet('SELECT * FROM subscribers WHERE email = ?', [normalized]);
+        const existing = await dbGet('SELECT * FROM subscribers WHERE LOWER(email) = ?', [normalized]);
         if (existing && existing.status === 'active') {
             return res.status(200).json({
                 message: 'Already subscribed',
+                alreadySubscribed: true,
                 subscriber: existing
             });
         }
 
-        const subscriberId = crypto.randomUUID();
-        await dbRun(
-            `INSERT INTO subscribers (id, email, status, source)
-             VALUES (?, ?, 'active', ?)
-             ON CONFLICT (email)
-             DO UPDATE SET status = 'active', source = EXCLUDED.source, updated_at = CURRENT_TIMESTAMP`,
-            [subscriberId, normalized, source || 'website']
-        );
+        if (existing) {
+            await dbRun(
+                `UPDATE subscribers
+                 SET email = ?, status = 'active', source = ?, updated_at = CURRENT_TIMESTAMP
+                 WHERE id = ?`,
+                [normalized, source || 'website', existing.id]
+            );
+        } else {
+            const subscriberId = crypto.randomUUID();
+            await dbRun(
+                `INSERT INTO subscribers (id, email, status, source)
+                 VALUES (?, ?, 'active', ?)
+                 ON CONFLICT (email)
+                 DO UPDATE SET status = 'active', source = EXCLUDED.source, updated_at = CURRENT_TIMESTAMP`,
+                [subscriberId, normalized, source || 'website']
+            );
+        }
 
-        const subscriber = await dbGet('SELECT * FROM subscribers WHERE email = ?', [normalized]);
+        const subscriber = await dbGet('SELECT * FROM subscribers WHERE LOWER(email) = ?', [normalized]);
 
         try {
             await sendNewsletterWelcomeEmail({
@@ -67,7 +77,7 @@ router.post('/', async (req, res) => {
             console.error('Failed to send welcome email:', error);
         }
 
-        res.status(201).json({ message: 'Subscribed', subscriber });
+        res.status(201).json({ message: 'Subscribed', alreadySubscribed: false, subscriber });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

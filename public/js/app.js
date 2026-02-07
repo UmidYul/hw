@@ -55,18 +55,30 @@ function initializeNewsletterForms() {
             if (submitBtn) submitBtn.disabled = true;
 
             try {
+                let result = null;
+
                 if (typeof API !== 'undefined' && API.subscribers) {
-                    await API.subscribers.subscribe(email, 'newsletter');
+                    result = await API.subscribers.subscribe(email, 'newsletter');
                 } else {
-                    await fetch('/api/subscribers', {
+                    const response = await fetch('/api/subscribers', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ email, source: 'newsletter' })
                     });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    result = await response.json().catch(() => null);
                 }
 
                 if (typeof showToast === 'function') {
-                    showToast('Спасибо за подписку! Проверьте почту.', 'success');
+                    if (result?.alreadySubscribed) {
+                        showToast('Вы уже подписаны на рассылку.', 'info');
+                    } else {
+                        showToast('Спасибо за подписку! Проверьте почту.', 'success');
+                    }
                 }
                 form.reset();
             } catch (error) {
