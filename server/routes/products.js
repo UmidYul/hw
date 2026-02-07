@@ -54,6 +54,20 @@ const parseJsonField = (value, fallback) => {
     }
 };
 
+let hasLegacyProductIdColumnPromise = null;
+
+const hasLegacyProductIdColumn = async () => {
+    if (!hasLegacyProductIdColumnPromise) {
+        hasLegacyProductIdColumnPromise = dbGet(
+            "SELECT 1 AS exists FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'product_variants' AND column_name = 'legacy_product_id' LIMIT 1"
+        )
+            .then(row => !!row)
+            .catch(() => false);
+    }
+
+    return hasLegacyProductIdColumnPromise;
+};
+
 function normalizeVariants(variants) {
     if (!Array.isArray(variants)) return [];
     return variants
@@ -224,12 +238,20 @@ router.post('/', requireAdmin, async (req, res) => {
         ]);
 
         if (normalizedVariants.length > 0) {
+            const includeLegacy = await hasLegacyProductIdColumn();
             for (const variant of normalizedVariants) {
                 const variantId = crypto.randomUUID();
-                await dbRun(
-                    'INSERT INTO product_variants (id, product_id, color, size, stock) VALUES (?, ?, ?, ?, ?)',
-                    [variantId, result.id, variant.color, variant.size, variant.stock]
-                );
+                if (includeLegacy) {
+                    await dbRun(
+                        'INSERT INTO product_variants (id, product_id, legacy_product_id, color, size, stock) VALUES (?, ?, ?, ?, ?, ?)',
+                        [variantId, result.id, result.id, variant.color, variant.size, variant.stock]
+                    );
+                } else {
+                    await dbRun(
+                        'INSERT INTO product_variants (id, product_id, color, size, stock) VALUES (?, ?, ?, ?, ?)',
+                        [variantId, result.id, variant.color, variant.size, variant.stock]
+                    );
+                }
             }
         }
 
@@ -290,12 +312,20 @@ router.put('/:id', requireAdmin, async (req, res) => {
 
         if (hasVariants) {
             await dbRun('DELETE FROM product_variants WHERE product_id = ?', [req.params.id]);
+            const includeLegacy = await hasLegacyProductIdColumn();
             for (const variant of normalizedVariants) {
                 const variantId = crypto.randomUUID();
-                await dbRun(
-                    'INSERT INTO product_variants (id, product_id, color, size, stock) VALUES (?, ?, ?, ?, ?)',
-                    [variantId, req.params.id, variant.color, variant.size, variant.stock]
-                );
+                if (includeLegacy) {
+                    await dbRun(
+                        'INSERT INTO product_variants (id, product_id, legacy_product_id, color, size, stock) VALUES (?, ?, ?, ?, ?, ?)',
+                        [variantId, req.params.id, req.params.id, variant.color, variant.size, variant.stock]
+                    );
+                } else {
+                    await dbRun(
+                        'INSERT INTO product_variants (id, product_id, color, size, stock) VALUES (?, ?, ?, ?, ?)',
+                        [variantId, req.params.id, variant.color, variant.size, variant.stock]
+                    );
+                }
             }
         }
 
