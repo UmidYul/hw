@@ -30,20 +30,22 @@ const buildAccessToken = (user) => {
 
 const buildRefreshToken = () => crypto.randomBytes(64).toString('hex');
 
-const setAuthCookies = (res, accessToken, refreshToken) => {
+const setAuthCookies = (req, res, accessToken, refreshToken) => {
     const isProd = process.env.NODE_ENV === 'production';
+    const isSecureRequest = req.secure || req.headers['x-forwarded-proto'] === 'https';
+    const secureCookies = isProd && isSecureRequest;
 
     res.cookie('accessToken', accessToken, {
         httpOnly: true,
         sameSite: 'lax',
-        secure: isProd,
+        secure: secureCookies,
         maxAge: ACCESS_TTL_SECONDS * 1000
     });
 
     res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
         sameSite: 'lax',
-        secure: isProd,
+        secure: secureCookies,
         maxAge: REFRESH_TTL_SECONDS * 1000
     });
 };
@@ -226,7 +228,7 @@ const issueTokens = async (user, req, res, previousTokenHash = null) => {
         await revokeRefreshToken(previousTokenHash, newTokenHash);
     }
 
-    setAuthCookies(res, accessToken, refreshToken);
+    setAuthCookies(req, res, accessToken, refreshToken);
 };
 
 export const login = async (req, res) => {
