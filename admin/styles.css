@@ -453,6 +453,7 @@ a:hover {
 
 .topbar-btn-burger {
     padding: 0;
+    display: none;
 }
 
 .topbar-btn-burger .burger {
