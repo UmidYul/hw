@@ -283,7 +283,7 @@ a:hover {
     color: var(--color-text-secondary);
     cursor: pointer;
     border-radius: var(--border-radius);
-    display: none;
+    display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
@@ -453,6 +453,7 @@ a:hover {
 
 .topbar-btn-burger {
     padding: 0;
+    display: none;
 }
 
 .topbar-btn-burger .burger {
@@ -1620,6 +1621,10 @@ a:hover {
     .sidebar {
         transform: translateX(-100%);
         width: min(82vw, 320px);
+    }
+
+    .topbar-btn-burger {
+        display: inline-flex;
     }
 
     .sidebar.open,
