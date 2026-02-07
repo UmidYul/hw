@@ -54,6 +54,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -94,6 +95,7 @@
             from {
                 transform: rotate(0deg);
             }
+
             to {
                 transform: rotate(360deg);
             }
@@ -188,9 +190,12 @@
         }
 
         @keyframes blink {
-            0%, 100% {
+
+            0%,
+            100% {
                 opacity: 1;
             }
+
             50% {
                 opacity: 0.3;
             }
@@ -265,18 +270,18 @@
 <body>
     <div class="maintenance-container">
         <div class="logo">Higher Waist</div>
-        
+
         <div class="maintenance-icon">
             <div class="gear gear-1"></div>
             <div class="gear gear-2"></div>
         </div>
-        
+
         <h1 class="maintenance-title">Техническое обслуживание</h1>
-        
+
         <div class="divider"></div>
-        
+
         <p class="maintenance-description">
-            Мы проводим плановое техническое обслуживание для улучшения работы сайта. 
+            Мы проводим плановое техническое обслуживание для улучшения работы сайта.
             Приносим извинения за временные неудобства. Скоро мы вернёмся!
         </p>
 
@@ -321,7 +326,7 @@
             const statusValue = document.querySelector('.status-item:nth-child(2) .status-value');
             const estimates = ['~2 часа', '~1.5 часа', '~1 час', '~30 минут', 'Завершается...'];
             let currentIndex = 0;
-            
+
             setInterval(() => {
                 currentIndex = (currentIndex + 1) % estimates.length;
                 statusValue.textContent = estimates[currentIndex];
