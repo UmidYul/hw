@@ -345,7 +345,7 @@
 
                 html += `<tr>
                 <td class="products-col-select" data-label="Выбор"><input type="checkbox" class="product-checkbox" value="${p.id}" ${selectedProducts.has(p.id) ? 'checked' : ''} onchange="toggleProduct('${p.id}', this.checked)"></td>
-                <td class="products-col-title" data-label="Название"><strong>${p.title}</strong>${tags.length ? '<br><small>' + tags.map(t => Components.renderBadge(t, 'accent')).join(' ') + '</small>' : ''}</td>
+                <td class="products-col-title" data-label="Название"><strong>${p.title}</strong>${tags.length ? '<small>' + tags.map(t => Components.renderBadge(t, 'accent')).join(' ') + '</small>' : ''}</td>
                 <td class="products-col-sku" data-label="SKU"><code>${p.sku || '—'}</code></td>
                 <td class="products-col-category" data-label="Категория">${category ? category.name : p.category || '—'}</td>
                 <td class="products-col-price" data-label="Цена">${Components.formatPrice(p.price)}${oldPrice ? '<br><small style="text-decoration:line-through;color:#999">' + Components.formatPrice(oldPrice) + '</small>' : ''}</td>
