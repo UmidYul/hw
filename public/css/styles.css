@@ -1452,8 +1452,22 @@ textarea {
 }
 
 .accordion-body {
-    padding-top: var(--spacing-sm);
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 240ms ease;
     color: var(--color-secondary);
+}
+
+.accordion-body>* {
+    overflow: hidden;
+}
+
+.accordion-item[open] .accordion-body {
+    grid-template-rows: 1fr;
+}
+
+.accordion-body>*:first-child {
+    margin-top: var(--spacing-sm);
 }
 
 .page-title {
