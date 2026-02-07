@@ -213,6 +213,8 @@ const applyAdminBranding = async () => {
 
         const iconEl = document.querySelector('.sidebar-logo-icon');
         if (iconEl) {
+            console.log(iconEl);
+
             if (logoIcon) {
                 console.log("hi");
                 iconEl.textContent = '';
