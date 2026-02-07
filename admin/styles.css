@@ -1608,6 +1608,15 @@ a:hover {
 }
 
 @media (max-width: 768px) {
+    .card table.table td {
+        width: 100% !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        text-align: center;
+    }
+
     .page-content {
         padding: var(--spacing-lg);
     }
