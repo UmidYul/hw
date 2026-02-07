@@ -615,6 +615,9 @@
 
                 // Reload settings to update formatPrice
                 await loadSettings();
+                if (window.Components && typeof Components.applyAdminBranding === 'function') {
+                    Components.applyAdminBranding();
+                }
             } catch (error) {
                 console.error('Failed to save settings:', error);
                 Components.showToast('Ошибка', 'Не удалось сохранить настройки', 'error');

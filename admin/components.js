@@ -198,8 +198,54 @@ const Components = {
     }
 };
 
+const applyAdminBranding = async () => {
+    if (!window.API || !API.settings || !API.settings.get) return;
+
+    try {
+        const settings = await API.settings.get();
+        const logoText = settings?.logo_text || settings?.logoText || settings?.site_name || 'Higher Waist';
+        const logoIcon = settings?.logo_icon || settings?.logoIcon || '';
+
+        const textEl = document.querySelector('.sidebar-logo-text');
+        if (textEl) {
+            textEl.textContent = logoText;
+        }
+
+        const iconEl = document.querySelector('.sidebar-logo-icon');
+        if (iconEl) {
+            if (logoIcon) {
+                iconEl.textContent = '';
+                iconEl.style.background = 'none';
+                iconEl.style.padding = '0';
+                iconEl.innerHTML = `<img src="${logoIcon}" alt="${logoText}" style="width:100%;height:100%;object-fit:cover;border-radius:var(--border-radius);">`;
+            } else {
+                iconEl.innerHTML = '';
+                iconEl.style.background = '';
+                iconEl.textContent = logoText.trim().charAt(0).toUpperCase();
+            }
+        }
+
+        if (logoIcon) {
+            let iconLink = document.querySelector('link[rel="icon"], link[rel="shortcut icon"]');
+            if (!iconLink) {
+                iconLink = document.createElement('link');
+                iconLink.rel = 'icon';
+                document.head.appendChild(iconLink);
+            }
+            iconLink.href = logoIcon;
+        }
+    } catch (error) {
+        console.warn('Failed to apply admin branding:', error?.message || error);
+    }
+};
+
 // Make globally available
 window.Components = Components;
+Components.applyAdminBranding = applyAdminBranding;
+
+document.addEventListener('DOMContentLoaded', () => {
+    applyAdminBranding();
+});
 
 const setupAdminSidebarToggle = () => {
     const toggle = document.getElementById('sidebar-toggle');
