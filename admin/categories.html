@@ -204,7 +204,7 @@
                     const count = products.filter(p => p.category === cat.id).length;
                     const isVisible = cat.is_visible !== undefined ? cat.is_visible : cat.visibility;
                     html += `<tr>
-                    <td data-label="Название"><strong>${cat.name}</strong><br><small class="text-muted">${cat.description || ''}</small></td>
+                    <td data-label="Название"><strong>${cat.name}</strong><small class="text-muted">${cat.description || ''}</small></td>
                     <td data-label="Slug"><code>${cat.slug}</code></td>
                     <td data-label="Товаров">${count}</td>
                     <td data-label="Видимость">${isVisible ? Components.renderBadge('Видима', 'success') : Components.renderBadge('Скрыта', 'default')}</td>

@@ -237,7 +237,8 @@ function initializeFilters() {
 
     // Mobile filter toggle
     filterToggleBtn.addEventListener('click', () => {
-        filtersSidebar.classList.toggle('open');
+        const isOpen = filtersSidebar.classList.toggle('open');
+        document.body.classList.toggle('filters-open', isOpen);
     });
 
     // Category checkboxes
@@ -555,6 +556,7 @@ function renderCatalog() {
 
     // Close mobile filters
     document.getElementById('filtersSidebar').classList.remove('open');
+    document.body.classList.remove('filters-open');
 }
 
 function updateGridColumns() {

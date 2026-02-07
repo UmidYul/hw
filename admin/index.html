@@ -344,11 +344,6 @@
             window.location.href = `/admin/order-view?id=${id}`;
         }
 
-        // Sidebar toggle
-        document.getElementById('sidebar-toggle').addEventListener('click', () => {
-            document.getElementById('sidebar').classList.toggle('open');
-        });
-
         // Global search
         document.addEventListener('keydown', (e) => {
             const isTyping = ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) || e.target.isContentEditable;

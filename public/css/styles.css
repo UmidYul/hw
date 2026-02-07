@@ -62,6 +62,10 @@ body {
     font-weight: 300;
 }
 
+body.filters-open {
+    overflow: hidden;
+}
+
 a {
     color: inherit;
     text-decoration: none;
@@ -2796,6 +2800,8 @@ textarea.form-input {
         z-index: 1000;
         padding: var(--spacing-lg);
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
         transform: translateX(-100%);
         transition: transform var(--transition);
     }

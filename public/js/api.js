@@ -123,6 +123,13 @@ const customersAPI = {
         return await apiCall(`/customers/${id}`);
     },
 
+    async create(customerData) {
+        return await apiCall('/customers', {
+            method: 'POST',
+            body: JSON.stringify(customerData)
+        });
+    },
+
     async update(id, customerData) {
         return await apiCall(`/customers/${id}`, {
             method: 'PUT',
