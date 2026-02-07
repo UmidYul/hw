@@ -1796,10 +1796,11 @@ a:hover {
     .orders-table tr {
         text-align: left;
         display: flex;
-        gap: 6px;
+        gap: 4px;
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        padding: 10px;
     }
 
     .orders-table td {
@@ -1847,7 +1848,27 @@ a:hover {
     .orders-table .orders-col-actions .btn {
         width: 100%;
         justify-content: center;
-        padding: 8px 12px;
+        padding: 6px 10px;
+    }
+
+    .customers-table tr {
+        padding: 10px;
+    }
+
+    .customers-table td {
+        font-size: 12px;
+        padding: 4px 0;
+    }
+
+    .customers-table .action-buttons {
+        display: grid;
+        gap: 6px;
+    }
+
+    .customers-table .action-buttons .btn,
+    .customers-table .action-buttons .btn-icon {
+        font-size: 11px;
+        padding: 6px 10px;
     }
 
     .orders-table .orders-col-actions .dropdown {
