@@ -98,10 +98,18 @@ const ordersAPI = {
 // Auth API
 const authAPI = {
     async changePassword(currentPassword, newPassword, confirmPassword) {
-        return await apiCall('/auth/change-password', {
+        const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ currentPassword, newPassword, confirmPassword })
         });
+
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(payload?.message || `HTTP error! status: ${response.status}`);
+        }
+
+        return payload;
     }
 };
 

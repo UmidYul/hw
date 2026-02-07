@@ -521,7 +521,8 @@
                 document.getElementById('newPassword').value = '';
                 document.getElementById('confirmPassword').value = '';
             } catch (error) {
-                Components.showToast('Ошибка', 'Не удалось обновить пароль', 'error');
+                const message = error?.message || 'Не удалось обновить пароль';
+                Components.showToast('Ошибка', message, 'error');
             }
         }
 
