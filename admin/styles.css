@@ -1745,7 +1745,7 @@ a:hover {
     .orders-table .orders-col-items,
     .orders-table .orders-col-status,
     .orders-table .orders-col-date {
-        display: none;
+        display: none !important;
     }
 
     .card table.table td {
