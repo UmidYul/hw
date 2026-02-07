@@ -143,10 +143,6 @@
                         <div class="stat-card-content">
                             <div class="stat-card-label">Выручка</div>
                             <div class="stat-card-value" id="revenue">—</div>
-                            <div class="stat-card-change positive">
-                                <span>↑</span>
-                                <span>12.5%</span>
-                            </div>
                         </div>
                     </div>
 
@@ -154,10 +150,6 @@
                         <div class="stat-card-content">
                             <div class="stat-card-label">Заказы</div>
                             <div class="stat-card-value" id="orders-count">—</div>
-                            <div class="stat-card-change positive">
-                                <span>↑</span>
-                                <span>8.3%</span>
-                            </div>
                         </div>
                     </div>
 
@@ -165,10 +157,6 @@
                         <div class="stat-card-content">
                             <div class="stat-card-label">Средний чек</div>
                             <div class="stat-card-value" id="avg-order">—</div>
-                            <div class="stat-card-change negative">
-                                <span>↓</span>
-                                <span>2.1%</span>
-                            </div>
                         </div>
                     </div>
 
@@ -176,10 +164,6 @@
                         <div class="stat-card-content">
                             <div class="stat-card-label">Товары</div>
                             <div class="stat-card-value" id="products-count">—</div>
-                            <div class="stat-card-change positive">
-                                <span>↑</span>
-                                <span>5 новых</span>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -252,17 +236,6 @@
                 document.getElementById('orders-count').textContent = stats.orders.total;
                 document.getElementById('avg-order').textContent = Components.formatPrice(stats.avgOrder);
                 document.getElementById('products-count').textContent = stats.products;
-
-                // Update revenue change indicator
-                const revenueChange = stats.revenue.change;
-                const revenueChangeEl = document.querySelector('#revenue').parentElement.querySelector('.stat-card-change');
-                if (revenueChangeEl) {
-                    revenueChangeEl.className = `stat-card-change ${revenueChange >= 0 ? 'positive' : 'negative'}`;
-                    revenueChangeEl.innerHTML = `
-                        <span class="stat-card-arrow">${revenueChange >= 0 ? '↑' : '↓'}</span>
-                        <span>${Math.abs(revenueChange).toFixed(1)}% с прошлого периода</span>
-                    `;
-                }
 
                 // Recent Orders
                 document.getElementById('recent-orders').innerHTML = Components.renderTable({
