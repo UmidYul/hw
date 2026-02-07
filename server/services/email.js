@@ -238,6 +238,12 @@ export const sendOrderStatusEmail = async ({
     orderNumber,
     customerName,
     status,
+    items,
+    subtotal,
+    discount,
+    shipping,
+    total,
+    shippingAddress,
     storeName = 'Higher Waist'
 }) => {
     const mailer = ensureTransporter();
@@ -247,6 +253,11 @@ export const sendOrderStatusEmail = async ({
     const subject = `${storeName}: статус заказа ${orderNumber} обновлен`;
     const text = `Статус заказа ${orderNumber}: ${statusLabel}.`;
     const supportEmail = getSupportEmail();
+    const itemsTable = formatItemsTable(items);
+    const subtotalValue = Number(subtotal || 0);
+    const discountValue = Number(discount || 0);
+    const shippingValue = Number(shipping || 0);
+    const totalValue = Number(total || 0);
 
     const html = `
         <div style="background: #f7f4f0; padding: 28px 12px; font-family: Arial, sans-serif; color: #2d2d2d;">
@@ -261,6 +272,14 @@ export const sendOrderStatusEmail = async ({
                         Заказ № ${orderNumber}
                     </div>
                     <p style="margin: 0; font-size: 16px;">Текущий статус: <strong>${statusLabel}</strong>.</p>
+                    ${shippingAddress ? `<p style="margin: 12px 0 0;"><strong>Адрес доставки:</strong> ${shippingAddress}</p>` : ''}
+                    ${itemsTable}
+                    <div style="margin-top: 14px; font-size: 14px; color: #5c5c5c;">
+                        ${subtotalValue ? `<div>Подытог: ${formatPrice(subtotalValue)}</div>` : ''}
+                        ${discountValue ? `<div>Скидка: -${formatPrice(discountValue)}</div>` : ''}
+                        ${shippingValue ? `<div>Доставка: ${formatPrice(shippingValue)}</div>` : ''}
+                        ${totalValue ? `<div style="margin-top: 6px; font-size: 16px; color: #2d2d2d;"><strong>Итого:</strong> ${formatPrice(totalValue)}</div>` : ''}
+                    </div>
                 </div>
                 <div style="padding: 18px 24px; border-top: 1px solid #f0e9df; background: #faf7f2;">
                     <p style="margin: 0; font-size: 12px; color: #6b6b6b;">Если у вас есть вопросы, ответьте на это письмо или напишите на <a href="mailto:${supportEmail}" style="color: #2d2d2d;">${supportEmail}</a>.</p>

@@ -247,11 +247,18 @@ router.patch('/:id/status', requireAdmin, async (req, res) => {
 
         if (order.customer_email && status !== oldStatus) {
             try {
+                const parsedItems = typeof order.items === 'string' ? JSON.parse(order.items) : order.items;
                 await sendOrderStatusEmail({
                     to: order.customer_email,
                     orderNumber: order.order_number,
                     customerName: order.customer_name,
-                    status
+                    status,
+                    items: parsedItems,
+                    subtotal: order.subtotal,
+                    discount: order.discount,
+                    shipping: order.shipping,
+                    total: order.total,
+                    shippingAddress: order.shipping_address
                 });
             } catch (emailError) {
                 console.error('Failed to send order status email:', emailError);
