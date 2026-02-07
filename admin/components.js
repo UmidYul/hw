@@ -205,14 +205,19 @@ window.Components = Components;
 
 const setupAdminSidebarToggle = () => {
     const toggle = document.getElementById('sidebar-toggle');
-    const sidebar = document.querySelector('.sidebar');
+    const sidebar = document.getElementById('sidebar') || document.querySelector('.sidebar');
     if (!toggle || !sidebar) return;
+
+    if (!sidebar.id) {
+        sidebar.id = 'sidebar';
+    }
 
     if (toggle.dataset.bound === 'true') return;
     toggle.dataset.bound = 'true';
 
     toggle.addEventListener('click', () => {
         sidebar.classList.toggle('sidebar-collapsed');
+        sidebar.classList.toggle('open');
     });
 };
 
