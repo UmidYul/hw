@@ -351,6 +351,16 @@ const statsAPI = {
     }
 };
 
+// Subscribers API
+const subscribersAPI = {
+    async subscribe(email, source = 'website') {
+        return await apiCall('/subscribers', {
+            method: 'POST',
+            body: JSON.stringify({ email, source })
+        });
+    }
+};
+
 // Export unified API object
 const API = {
     products: productsAPI,
@@ -363,7 +373,8 @@ const API = {
     discounts: discountsAPI,
     content: contentAPI,
     settings: settingsAPI,
-    stats: statsAPI
+    stats: statsAPI,
+    subscribers: subscribersAPI
 };
 
 // Make API available globally

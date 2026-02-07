@@ -379,13 +379,6 @@
             }
         });
 
-        // Newsletter form
-        document.getElementById('newsletterForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            showToast('Спасибо за подписку! Проверьте почту.', 'success');
-            e.target.reset();
-        });
-
         // Load featured collections from API
         async function loadFeaturedCollections() {
             try {

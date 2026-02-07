@@ -18,10 +18,68 @@ document.addEventListener('DOMContentLoaded', () => {
     // Search modal
     initializeSearchModal();
 
+    // Newsletter forms
+    initializeNewsletterForms();
+
     // Update drawers
     updateCartDrawer();
     updateWishlistDrawer();
 });
+
+function initializeNewsletterForms() {
+    const forms = document.querySelectorAll('.newsletter-form');
+    if (!forms.length) return;
+
+    forms.forEach((form) => {
+        if (form.dataset.newsletterBound === 'true') return;
+        form.dataset.newsletterBound = 'true';
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const input = form.querySelector('input[type="email"]');
+            if (!input) return;
+
+            const email = input.value.trim();
+            const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            if (!isValid) {
+                if (typeof showToast === 'function') {
+                    showToast('Введите корректный email', 'error');
+                } else {
+                    alert('Введите корректный email');
+                }
+                return;
+            }
+
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.disabled = true;
+
+            try {
+                if (typeof API !== 'undefined' && API.subscribers) {
+                    await API.subscribers.subscribe(email, 'newsletter');
+                } else {
+                    await fetch('/api/subscribers', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, source: 'newsletter' })
+                    });
+                }
+
+                if (typeof showToast === 'function') {
+                    showToast('Спасибо за подписку! Проверьте почту.', 'success');
+                }
+                form.reset();
+            } catch (error) {
+                console.error('Newsletter subscribe failed:', error);
+                if (typeof showToast === 'function') {
+                    showToast('Не удалось подписаться. Попробуйте позже.', 'error');
+                }
+            } finally {
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        });
+    });
+}
 
 async function updateStoreTexts() {
     if (typeof loadSiteSettings === 'function') {

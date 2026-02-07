@@ -19,6 +19,7 @@ import settingsRouter from './routes/settings.js';
 import statsRouter from './routes/stats.js';
 import authRouter from './routes/auth.js';
 import uploadsRouter from './routes/uploads.js';
+import subscribersRouter from './routes/subscribers.js';
 import { initAuthTables, requireAdmin } from './services/auth.js';
 
 dotenv.config();
@@ -55,6 +56,7 @@ app.use('/api/promocodes', promocodesRouter);
 app.use('/api/discounts', discountsRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/stats', statsRouter);
+app.use('/api/subscribers', subscribersRouter);
 
 // Admin auth (UI gate)
 // Page routes (without .html extension)

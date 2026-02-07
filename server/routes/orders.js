@@ -1,6 +1,7 @@
 import express from 'express';
 import { dbAll, dbGet, dbRun } from '../database/db.js';
 import { notifyNewOrder, notifyStatusChange } from '../services/telegram.js';
+import { sendOrderConfirmationEmail, sendOrderStatusEmail } from '../services/email.js';
 import { requireAdmin } from '../services/auth.js';
 
 const router = express.Router();
@@ -175,6 +176,21 @@ router.post('/', async (req, res) => {
             // Don't fail the order if notification fails
         }
 
+        if (customerEmail) {
+            try {
+                await sendOrderConfirmationEmail({
+                    to: customerEmail,
+                    orderNumber,
+                    customerName,
+                    items,
+                    total,
+                    shippingAddress
+                });
+            } catch (emailError) {
+                console.error('Failed to send order confirmation email:', emailError);
+            }
+        }
+
         res.status(201).json({
             id: result.id,
             orderNumber,
@@ -224,6 +240,19 @@ router.patch('/:id/status', requireAdmin, async (req, res) => {
             );
         } catch (notifyError) {
             console.error('Failed to send Telegram notification:', notifyError);
+        }
+
+        if (order.customer_email && status !== oldStatus) {
+            try {
+                await sendOrderStatusEmail({
+                    to: order.customer_email,
+                    orderNumber: order.order_number,
+                    customerName: order.customer_name,
+                    status
+                });
+            } catch (emailError) {
+                console.error('Failed to send order status email:', emailError);
+            }
         }
 
         res.json({ message: 'Order status updated successfully' });
