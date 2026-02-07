@@ -249,7 +249,7 @@
                 return;
             }
 
-            let html = '<table class="table"><thead><tr>';
+            let html = '<table class="table orders-table"><thead><tr>';
             html += '<th>Номер</th>';
             html += '<th>Клиент</th>';
             html += '<th>Товаров</th>';
@@ -270,17 +270,17 @@
                 const orderDate = order.created_at || order.createdAt;
 
                 html += `<tr>
-                    <td><strong>${orderNumber}</strong></td>
-                    <td>
+                    <td class="orders-col-id"><strong>${orderNumber}</strong></td>
+                    <td class="orders-col-customer">
                         <div>${customerName}</div>
                         <small class="text-muted">${customerPhone}</small>
                         ${customerEmail ? `<br><small class="text-muted">${customerEmail}</small>` : ''}
                     </td>
-                    <td>${order.items.length}</td>
-                    <td><strong>${Components.formatPrice(order.total)}</strong></td>
-                    <td>${Components.renderBadge(badge.text, badge.type)}</td>
-                    <td><small>${Components.formatDate(orderDate)}</small></td>
-                    <td>
+                    <td class="orders-col-items">${order.items.length}</td>
+                    <td class="orders-col-total"><strong>${Components.formatPrice(order.total)}</strong></td>
+                    <td class="orders-col-status">${Components.renderBadge(badge.text, badge.type)}</td>
+                    <td class="orders-col-date"><small>${Components.formatDate(orderDate)}</small></td>
+                    <td class="orders-col-actions">
                         <button class="btn btn-sm btn-ghost" onclick="viewOrder('${order.id}')" title="Открыть">Открыть</button>
                         <div class="dropdown" style="display:inline-block">
                             <button class="btn btn-sm btn-ghost" onclick="toggleStatusMenu('${order.id}')" title="Статус">Статус</button>

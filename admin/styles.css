@@ -1740,6 +1740,36 @@ a:hover {
         justify-content: flex-start;
     }
 
+    .orders-table .orders-col-items,
+    .orders-table .orders-col-status,
+    .orders-table .orders-col-date {
+        display: none;
+    }
+
+    .orders-table .orders-col-id::before,
+    .orders-table .orders-col-customer::before,
+    .orders-table .orders-col-total::before,
+    .orders-table .orders-col-actions::before {
+        min-width: 92px;
+    }
+
+    .orders-table .orders-col-actions {
+        gap: var(--spacing-sm);
+    }
+
+    .orders-table .orders-col-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .orders-table .orders-col-actions .dropdown {
+        width: 100%;
+    }
+
+    .orders-table .orders-col-actions .dropdown>.btn {
+        width: 100%;
+    }
+
     .table th,
     .table td {
         padding: 12px 14px;
