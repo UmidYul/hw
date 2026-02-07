@@ -1747,15 +1747,39 @@ a:hover {
     }
 
     .orders-table tr {
-        text-align: center;
+        text-align: left;
+        display: grid;
+        gap: var(--spacing-sm);
     }
 
     .orders-table td {
-        justify-content: center;
+        display: block;
+        padding: 0;
     }
 
     .orders-table td::before {
         display: none;
+    }
+
+    .orders-table .orders-col-id {
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+    }
+
+    .orders-table .orders-col-customer {
+        font-size: 13px;
+        color: var(--color-text-secondary);
+    }
+
+    .orders-table .orders-col-customer .text-muted {
+        font-size: 12px;
+    }
+
+    .orders-table .orders-col-total {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--color-text-primary);
     }
 
     .orders-table .orders-col-id::before,
@@ -1766,8 +1790,8 @@ a:hover {
     }
 
     .orders-table .orders-col-actions {
+        display: grid;
         gap: var(--spacing-sm);
-        flex-direction: column;
     }
 
     .orders-table .orders-col-actions .btn {
