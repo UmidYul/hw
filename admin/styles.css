@@ -2305,7 +2305,12 @@ a:hover {
 }
 
 .card table.table td {
-    width: auto !important;
+    width: 100% !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
 }
 
 .card table.table th:nth-child(1),
