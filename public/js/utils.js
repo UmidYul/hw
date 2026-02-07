@@ -409,7 +409,7 @@ function renderProductCard(product) {
     const imageUrl = product.images ? product.images[0] : product.image;
 
     return `
-        <div class="product-card" data-product-id="${product.id}">
+        <div class="product-card" data-product-id="${product.id}" data-link="/product?id=${product.id}" role="link">
             <div class="product-card-image" data-link="/product?id=${product.id}" role="link" style="background-image: url('${imageUrl}'); background-size: cover; background-position: center;">
                 <div class="product-card-actions">
                     <button class="product-card-btn wishlist-toggle" data-id="${product.id}" aria-label="В избранное">
@@ -497,6 +497,19 @@ function renderProducts(products, containerId) {
 
 // Attach event listeners to product cards
 function attachProductCardListeners(container) {
+    // Card click -> product page
+    container.querySelectorAll('.product-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+            if (e.target.closest('button, a')) {
+                return;
+            }
+            const link = card.getAttribute('data-link');
+            if (link) {
+                window.location.href = link;
+            }
+        });
+    });
+
     // Image click -> product page
     container.querySelectorAll('.product-card-image').forEach(image => {
         image.addEventListener('click', () => {
@@ -536,6 +549,7 @@ function attachProductCardListeners(container) {
     container.querySelectorAll('.add-to-cart-quick').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             const productId = String(btn.dataset.id);
             const product = products.find(p => String(p.id) === productId);
 

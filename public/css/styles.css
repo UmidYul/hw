@@ -569,6 +569,7 @@ textarea {
 .product-card {
     background: var(--color-surface);
     transition: box-shadow var(--transition);
+    cursor: pointer;
 }
 
 .product-card:hover {
