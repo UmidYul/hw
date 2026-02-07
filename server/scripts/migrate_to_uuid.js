@@ -22,7 +22,7 @@ const addColumnIfMissing = async (client, table, column, type) => {
 };
 
 const dropConstraint = async (client, table, constraint) => {
-    await client.query(`ALTER TABLE ${table} DROP CONSTRAINT IF EXISTS ${constraint}`);
+    await client.query(`ALTER TABLE ${table} DROP CONSTRAINT IF EXISTS ${constraint} CASCADE`);
 };
 
 const renameColumn = async (client, table, from, to) => {
