@@ -191,6 +191,9 @@ async function loadNavbarCategories() {
     if (!navList || typeof API === 'undefined' || !API.categories || !API.collections) return;
 
     try {
+        const params = new URLSearchParams(window.location.search);
+        const isCollectionPage = window.location.pathname === '/collection';
+        const currentCollectionSlug = isCollectionPage ? params.get('slug') : null;
         const [categories, collections] = await Promise.all([
             API.categories.getVisible ? API.categories.getVisible() : API.categories.getAll(),
             API.collections.getAll({ visible: true })
@@ -203,9 +206,21 @@ async function loadNavbarCategories() {
             ? collections.filter(col => col && col.is_visible !== false && col.slug)
             : [];
 
-        const collectionLinks = visibleCollections.slice(0, 6).map(col => {
+        let displayedCollections = [...visibleCollections];
+        if (currentCollectionSlug) {
+            const currentCollection = visibleCollections.find(col => String(col.slug) === String(currentCollectionSlug));
+            if (currentCollection) {
+                displayedCollections = [
+                    currentCollection,
+                    ...visibleCollections.filter(col => String(col.slug) !== String(currentCollectionSlug))
+                ];
+            }
+        }
+
+        const collectionLinks = displayedCollections.slice(0, 6).map(col => {
             const slug = encodeURIComponent(col.slug);
-            return `<li><a href="/collection?slug=${slug}" class="nav-link">${col.name}</a></li>`;
+            const isActive = currentCollectionSlug && String(col.slug) === String(currentCollectionSlug);
+            return `<li><a href="/collection?slug=${slug}" class="nav-link ${isActive ? 'active' : ''}">${col.name}</a></li>`;
         }).join('');
 
         const categoryLinks = visibleCategories.map(cat => {
