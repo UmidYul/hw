@@ -228,7 +228,9 @@ const setupAdminSidebarToggle = () => {
     const isOpen = () => sidebar.classList.contains('sidebar-collapsed') || sidebar.classList.contains('open');
 
     toggle.addEventListener('click', (event) => {
+        event.preventDefault();
         event.stopPropagation();
+        event.stopImmediatePropagation();
         if (isOpen()) {
             closeSidebar();
         } else {

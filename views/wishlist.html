@@ -120,6 +120,51 @@
         </div>
     </div>
 
+    <!-- Cart Drawer -->
+    <div class="drawer" id="cartDrawer">
+        <div class="drawer-overlay" id="cartDrawerOverlay"></div>
+        <div class="drawer-content">
+            <div class="drawer-header">
+                <h3 class="drawer-title">Корзина (<span id="drawerCartCount">0</span>)</h3>
+                <button class="drawer-close" id="cartDrawerClose" aria-label="Закрыть">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="drawer-body" id="drawerCartItems">
+                <div class="empty-state">
+                    <i class="fas fa-shopping-bag empty-icon"></i>
+                    <p>Корзина пуста</p>
+                </div>
+            </div>
+            <div class="drawer-footer" id="drawerFooter" style="display: none;">
+                <div class="drawer-total">
+                    <span>Итого:</span>
+                    <span id="drawerTotal">0 Сумм</span>
+                </div>
+                <a href="/cart" class="btn btn-dark btn-block">Оформить заказ</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wishlist Drawer -->
+    <div class="drawer" id="wishlistDrawer">
+        <div class="drawer-overlay" id="wishlistDrawerOverlay"></div>
+        <div class="drawer-content">
+            <div class="drawer-header">
+                <h3 class="drawer-title">Избранное (<span id="drawerWishlistCount">0</span>)</h3>
+                <button class="drawer-close" id="wishlistDrawerClose" aria-label="Закрыть">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="drawer-body" id="drawerWishlistItems">
+                <div class="empty-state">
+                    <i class="far fa-heart empty-icon"></i>
+                    <p>Избранное пусто</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
