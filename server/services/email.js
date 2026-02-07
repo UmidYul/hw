@@ -10,6 +10,7 @@ const smtpConfig = {
     pass: process.env.SMTP_PASS,
     from: process.env.SMTP_FROM || process.env.SMTP_USER || 'no-reply@example.com'
 };
+console.log('SMTP Config:', smtpConfig);
 
 let transporter = null;
 
