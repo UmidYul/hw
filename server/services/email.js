@@ -178,3 +178,27 @@ export const sendOrderStatusEmail = async ({
 
     return true;
 };
+
+export const sendTestEmail = async ({ to, storeName = 'AURA' }) => {
+    const mailer = ensureTransporter();
+    if (!mailer) return false;
+
+    const subject = `${storeName}: тест SMTP подключения`;
+    const text = 'SMTP подключение успешно.';
+    const html = `
+        <div style="font-family: Arial, sans-serif; color: #2d2d2d;">
+            <h2 style="margin: 0 0 12px;">SMTP тест</h2>
+            <p>Подключение к SMTP серверу настроено корректно.</p>
+        </div>
+    `;
+
+    await mailer.sendMail({
+        from: smtpConfig.from,
+        to,
+        subject,
+        text,
+        html
+    });
+
+    return true;
+};
