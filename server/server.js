@@ -23,6 +23,7 @@ import subscribersRouter from './routes/subscribers.js';
 import emailRouter from './routes/email.js';
 import newslettersRouter from './routes/newsletters.js';
 import contentRouter from './routes/content.js';
+import { runUploadsCleanup } from './services/uploads-cleanup.js';
 import { initAuthTables, requireAdmin } from './services/auth.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -133,6 +134,13 @@ const startServer = async () => {
             console.log(`📊 API: http://localhost:${PORT}/api`);
             console.log(`🌐 Frontend: http://localhost:${PORT}/views/index.html`);
         });
+
+        const cleanupIntervalMs = 24 * 60 * 60 * 1000;
+        setInterval(() => {
+            runUploadsCleanup({ type: 'all' })
+                .then(result => console.log('🧹 Upload cleanup finished:', result))
+                .catch(error => console.warn('Upload cleanup failed:', error.message));
+        }, cleanupIntervalMs);
     } catch (error) {
         console.error('Failed to initialize auth tables:', error);
         process.exit(1);

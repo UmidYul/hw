@@ -284,6 +284,7 @@
         let editingId = null;
         let allCategories = [];
         let productImages = [];
+        const sessionUploadedImages = new Set();
         let paletteColors = [];
         let settingsSizes = [];
 
@@ -387,6 +388,9 @@
                 }
 
                 productImages.push(payload.url);
+                if (payload.url.startsWith('/images/products/')) {
+                    sessionUploadedImages.add(payload.url);
+                }
                 input.value = '';
                 renderImages();
                 Components.showToast('Успешно', 'Файл загружен', 'success');
@@ -398,10 +402,29 @@
 
         function removeImage(index) {
             Components.confirm('Удалить изображение?', 'Это действие нельзя отменить', () => {
+                const url = productImages[index];
                 productImages.splice(index, 1);
                 renderImages();
                 Components.showToast('Успешно', 'Изображение удалено', 'success');
+
+                if (url && sessionUploadedImages.has(url)) {
+                    deleteProductImage(url);
+                    sessionUploadedImages.delete(url);
+                }
             });
+        }
+
+        async function deleteProductImage(url) {
+            if (!url || !url.startsWith('/images/products/')) return;
+            try {
+                await fetch('/api/uploads/products/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+            } catch (error) {
+                console.warn('Failed to delete product image:', error);
+            }
         }
 
         // Drag and Drop handlers
@@ -595,6 +618,8 @@
             // Load images
             productImages = images.length > 0 ? images : [];
             renderImages();
+
+            sessionUploadedImages.clear();
 
             form.querySelector('[name="title"]').value = product.title;
             form.querySelector('[name="category"]').value = product.category;

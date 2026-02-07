@@ -4,6 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { requireAdmin } from '../services/auth.js';
+import { runUploadsCleanup } from '../services/uploads-cleanup.js';
 
 const router = express.Router();
 
@@ -53,6 +54,26 @@ router.post('/products', requireAdmin, createUploader(productUploadDir, 'product
     return res.json({ success: true, url });
 });
 
+router.post('/products/delete', requireAdmin, (req, res) => {
+    try {
+        const { url } = req.body || {};
+        if (!url || typeof url !== 'string' || !url.startsWith('/images/products/')) {
+            return res.status(400).json({ success: false, message: 'Некорректный URL' });
+        }
+
+        const filename = path.basename(url);
+        const filePath = path.join(productUploadDir, filename);
+        if (!fs.existsSync(filePath)) {
+            return res.json({ success: true, removed: false });
+        }
+
+        fs.unlinkSync(filePath);
+        return res.json({ success: true, removed: true });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 router.post('/banners', requireAdmin, createUploader(bannerUploadDir, 'banner').single('image'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({ success: false, message: 'Файл не загружен' });
@@ -79,6 +100,16 @@ router.post('/banners/delete', requireAdmin, (req, res) => {
         return res.json({ success: true, removed: true });
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+router.post('/cleanup', requireAdmin, async (req, res) => {
+    try {
+        const type = req.body?.type || req.query?.type || 'all';
+        const result = await runUploadsCleanup({ type });
+        res.json({ success: true, result });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
     }
 });
 

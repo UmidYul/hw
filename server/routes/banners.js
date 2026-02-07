@@ -20,9 +20,20 @@ const getBannerFilePath = (url) => {
     return path.join(bannerDir, filename);
 };
 
-const safeDeleteBannerImage = (url) => {
+const isBannerImageUsedElsewhere = async (url, excludeId) => {
+    if (!url || typeof url !== 'string') return false;
+    if (!excludeId) {
+        const row = await dbGet('SELECT id FROM banners WHERE image = ? LIMIT 1', [url]);
+        return !!row;
+    }
+    const row = await dbGet('SELECT id FROM banners WHERE id <> ? AND image = ? LIMIT 1', [excludeId, url]);
+    return !!row;
+};
+
+const safeDeleteBannerImage = async (url, excludeId) => {
     const filePath = getBannerFilePath(url);
     if (!filePath) return;
+    if (await isBannerImageUsedElsewhere(url, excludeId)) return;
     try {
         if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
@@ -160,7 +171,7 @@ router.put('/:id', requireAdmin, async (req, res) => {
         ]);
 
         if (existing.image && existing.image !== image) {
-            safeDeleteBannerImage(existing.image);
+            await safeDeleteBannerImage(existing.image, req.params.id);
         }
 
         res.json({ message: 'Banner updated successfully' });
@@ -175,7 +186,7 @@ router.delete('/:id', requireAdmin, async (req, res) => {
         const existing = await dbGet('SELECT * FROM banners WHERE id = ?', [req.params.id]);
         await dbRun('DELETE FROM banners WHERE id = ?', [req.params.id]);
         if (existing?.image) {
-            safeDeleteBannerImage(existing.image);
+            await safeDeleteBannerImage(existing.image, null);
         }
         res.json({ message: 'Banner deleted successfully' });
     } catch (error) {

@@ -1,9 +1,47 @@
 import express from 'express';
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { dbAll, dbGet, dbRun } from '../database/db.js';
 import { requireAdmin } from '../services/auth.js';
 
 const router = express.Router();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const productDir = path.join(__dirname, '../../public/images/products');
+
+const isLocalProductImage = (url) => typeof url === 'string' && url.startsWith('/images/products/');
+
+const getProductImagePath = (url) => {
+    if (!isLocalProductImage(url)) return null;
+    return path.join(productDir, path.basename(url));
+};
+
+const isProductImageUsedElsewhere = async (url, excludeId) => {
+    if (!isLocalProductImage(url)) return false;
+    const jsonValue = JSON.stringify([url]);
+    if (excludeId) {
+        const row = await dbGet('SELECT id FROM products WHERE id <> ? AND images @> ?::jsonb LIMIT 1', [excludeId, jsonValue]);
+        return !!row;
+    }
+    const row = await dbGet('SELECT id FROM products WHERE images @> ?::jsonb LIMIT 1', [jsonValue]);
+    return !!row;
+};
+
+const safeDeleteProductImage = async (url, excludeId) => {
+    const filePath = getProductImagePath(url);
+    if (!filePath) return;
+    if (await isProductImageUsedElsewhere(url, excludeId)) return;
+    try {
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+    } catch (error) {
+        console.warn('Failed to delete product image:', error.message);
+    }
+};
 
 const parseJsonField = (value, fallback) => {
     if (value === null || value === undefined) return fallback;
@@ -202,6 +240,11 @@ router.put('/:id', requireAdmin, async (req, res) => {
     try {
         const { title, category, price, oldPrice, stock, tags, colors, sizes, description, material, care, fit, deliveryInfo, images, isActive, variants } = req.body;
 
+        const existing = await dbGet('SELECT * FROM products WHERE id = ?', [req.params.id]);
+        if (!existing) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+
         const hasVariants = Array.isArray(variants);
         const normalizedVariants = normalizeVariants(variants);
         const totalStock = hasVariants
@@ -229,6 +272,14 @@ router.put('/:id', requireAdmin, async (req, res) => {
             req.params.id
         ]);
 
+        const previousImages = parseJsonField(existing.images, []);
+        const nextImages = Array.isArray(images) ? images : [];
+        const removedImages = previousImages.filter(url => !nextImages.includes(url));
+
+        for (const url of removedImages) {
+            await safeDeleteProductImage(url, req.params.id);
+        }
+
         if (hasVariants) {
             await dbRun('DELETE FROM product_variants WHERE product_id = ?', [req.params.id]);
             for (const variant of normalizedVariants) {
@@ -249,7 +300,12 @@ router.put('/:id', requireAdmin, async (req, res) => {
 // Delete product
 router.delete('/:id', requireAdmin, async (req, res) => {
     try {
+        const existing = await dbGet('SELECT * FROM products WHERE id = ?', [req.params.id]);
         await dbRun('DELETE FROM products WHERE id = ?', [req.params.id]);
+        const images = parseJsonField(existing?.images, []);
+        for (const url of images) {
+            await safeDeleteProductImage(url, null);
+        }
         res.json({ message: 'Product deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: error.message });
