@@ -214,6 +214,7 @@ CREATE TABLE IF NOT EXISTS settings (
     store_description TEXT,
     contact_email TEXT,
     contact_phone TEXT,
+    logo_icon TEXT,
     social_instagram TEXT,
     social_facebook TEXT,
     social_telegram TEXT,

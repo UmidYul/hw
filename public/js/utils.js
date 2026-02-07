@@ -10,6 +10,7 @@ let siteSettings = {
     contactPhone: '',
     storeName: '',
     logoText: '',
+    logoIcon: '',
     socialInstagram: '',
     socialFacebook: '',
     socialTelegram: '',
@@ -69,6 +70,7 @@ async function loadSiteSettings() {
             siteSettings.contactPhone = settings.contact_phone || '';
             siteSettings.storeName = settings.site_name || '';
             siteSettings.logoText = settings.logo_text || '';
+            siteSettings.logoIcon = settings.logo_icon || '';
             siteSettings.socialInstagram = settings.social_instagram || '';
             siteSettings.socialFacebook = settings.social_facebook || '';
             siteSettings.socialTelegram = settings.social_telegram || '';
@@ -76,10 +78,30 @@ async function loadSiteSettings() {
             siteSettings.socialYoutube = settings.social_youtube || '';
             siteSettings.socialWhatsapp = settings.social_whatsapp || '';
             siteSettings.colorPalette = normalizeColorPalette(settings.color_palette);
+            applyFavicon(siteSettings.logoIcon);
         }
     } catch (error) {
         console.log('Using default settings');
     }
+}
+
+function applyFavicon(url) {
+    if (!url) return;
+    const head = document.head || document.querySelector('head');
+    if (!head) return;
+
+    const links = Array.from(head.querySelectorAll('link[rel*="icon"]'));
+    if (links.length === 0) {
+        const link = document.createElement('link');
+        link.rel = 'icon';
+        link.href = url;
+        head.appendChild(link);
+        return;
+    }
+
+    links.forEach(link => {
+        link.href = url;
+    });
 }
 
 function getColorPalette() {

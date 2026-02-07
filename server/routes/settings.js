@@ -1,9 +1,15 @@
 import express from 'express';
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { dbGet, dbRun } from '../database/db.js';
 import { requireAdmin } from '../services/auth.js';
 
 const router = express.Router();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const logoUploadDir = path.join(__dirname, '../../public/images/logo');
 
 // Initialize settings table if not exists
 const initSettingsTable = async () => {
@@ -15,6 +21,7 @@ const initSettingsTable = async () => {
             store_description TEXT,
             contact_email TEXT,
             contact_phone TEXT,
+            logo_icon TEXT,
             social_instagram TEXT,
             social_facebook TEXT,
             social_telegram TEXT,
@@ -50,6 +57,7 @@ const initSettingsTable = async () => {
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS store_description TEXT');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS contact_email TEXT');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS contact_phone TEXT');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS logo_icon TEXT');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS social_instagram TEXT');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS social_facebook TEXT');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS social_telegram TEXT');
@@ -93,6 +101,7 @@ router.put('/', requireAdmin, async (req, res) => {
             storeDescription,
             contactEmail,
             contactPhone,
+            logoIcon,
             socialInstagram,
             socialFacebook,
             socialTelegram,
@@ -128,6 +137,8 @@ router.put('/', requireAdmin, async (req, res) => {
             settings = await dbGet('SELECT * FROM settings LIMIT 1');
         }
 
+        const previousLogo = settings?.logo_icon || '';
+
         await dbRun(`
             UPDATE settings SET
                 site_name = ?,
@@ -135,6 +146,7 @@ router.put('/', requireAdmin, async (req, res) => {
                 store_description = ?,
                 contact_email = ?,
                 contact_phone = ?,
+            logo_icon = ?,
                 social_instagram = ?,
                 social_facebook = ?,
                 social_telegram = ?,
@@ -159,6 +171,7 @@ router.put('/', requireAdmin, async (req, res) => {
             storeDescription || null,
             contactEmail || null,
             contactPhone || null,
+            logoIcon || null,
             socialInstagram || null,
             socialFacebook || null,
             socialTelegram || null,
@@ -177,6 +190,20 @@ router.put('/', requireAdmin, async (req, res) => {
             privacyPolicy || null,
             settings.id
         ]);
+
+        if (previousLogo
+            && previousLogo !== (logoIcon || '')
+            && previousLogo.startsWith('/images/logo/')) {
+            const filename = path.basename(previousLogo);
+            const filePath = path.join(logoUploadDir, filename);
+            if (fs.existsSync(filePath)) {
+                try {
+                    fs.unlinkSync(filePath);
+                } catch (error) {
+                    console.warn('Failed to delete old logo icon:', error.message);
+                }
+            }
+        }
 
         const updated = await dbGet('SELECT * FROM settings LIMIT 1');
         res.json({ message: 'Settings updated successfully', settings: updated });

@@ -144,6 +144,21 @@
                             </div>
 
                             <div class="form-group">
+                                <label class="form-label">Логотип сайта (favicon)</label>
+                                <input type="hidden" name="logoIcon" id="logoIcon">
+                                <div class="file-upload">
+                                    <input type="file" id="logoIconFile" accept="image/*">
+                                    <button type="button" class="file-upload-button" id="logoIconFileBtn">Выбрать
+                                        файл</button>
+                                    <span class="file-upload-name" id="logoIconFileName">Файл не выбран</span>
+                                </div>
+                                <div class="file-preview" id="logoIconPreview">
+                                    <div class="file-preview-empty">Превью favicon</div>
+                                </div>
+                                <small class="text-muted" id="logoIconUploadStatus">Рекомендуется PNG/ICO до 1MB</small>
+                            </div>
+
+                            <div class="form-group">
                                 <label class="form-label">Описание</label>
                                 <textarea class="form-textarea" name="storeDescription" rows="3"></textarea>
                             </div>
@@ -367,6 +382,7 @@
                 const fieldMap = {
                     'site_name': 'storeName',
                     'logo_text': 'logoText',
+                    'logo_icon': 'logoIcon',
                     'store_description': 'storeDescription',
                     'contact_email': 'contactEmail',
                     'contact_phone': 'contactPhone',
@@ -404,6 +420,7 @@
                 }
 
                 loadColorPalette(settings.color_palette);
+                updateLogoIconPreviewFromUrl();
             } catch (error) {
                 console.error('Failed to load settings:', error);
                 Components.showToast('Ошибка', 'Не удалось загрузить настройки', 'error');
@@ -517,6 +534,69 @@
             paletteState.push({ name: '', hex: '#CCCCCC' });
             renderPaletteList();
         });
+
+        document.getElementById('logoIconFileBtn')?.addEventListener('click', () => {
+            document.getElementById('logoIconFile')?.click();
+        });
+
+        document.getElementById('logoIconFile')?.addEventListener('change', async (event) => {
+            const file = event.target.files?.[0];
+            if (!file) return;
+
+            const status = document.getElementById('logoIconUploadStatus');
+            status.textContent = 'Загрузка файла...';
+            updateLogoIconPreviewFromFile(file);
+
+            try {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                const response = await fetch('/api/uploads/logo', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+
+                const payload = await response.json().catch(() => ({}));
+                if (!response.ok || !payload.url) {
+                    throw new Error(payload.message || 'Не удалось загрузить файл');
+                }
+
+                document.getElementById('logoIcon').value = payload.url;
+                status.textContent = 'Файл загружен.';
+                updateLogoIconPreviewFromUrl();
+            } catch (error) {
+                console.error('Logo upload failed:', error);
+                status.textContent = 'Не удалось загрузить файл.';
+                Components.showToast('Ошибка', 'Не удалось загрузить favicon', 'error');
+            }
+        });
+
+        function updateLogoIconPreviewFromFile(file) {
+            const name = document.getElementById('logoIconFileName');
+            const preview = document.getElementById('logoIconPreview');
+            if (name) name.textContent = file?.name || 'Файл не выбран';
+            if (!preview || !file) return;
+
+            const url = URL.createObjectURL(file);
+            preview.innerHTML = `<img src="${url}" alt="favicon preview">`;
+            preview.querySelector('img')?.addEventListener('load', () => URL.revokeObjectURL(url));
+        }
+
+        function updateLogoIconPreviewFromUrl() {
+            const url = document.getElementById('logoIcon')?.value?.trim();
+            const name = document.getElementById('logoIconFileName');
+            const preview = document.getElementById('logoIconPreview');
+            if (!preview) return;
+
+            if (url) {
+                if (name) name.textContent = 'Используется файл';
+                preview.innerHTML = `<img src="${url}" alt="favicon">`;
+            } else {
+                if (name) name.textContent = 'Файл не выбран';
+                preview.innerHTML = '<div class="file-preview-empty">Превью favicon</div>';
+            }
+        }
 
         async function saveSettings() {
             try {

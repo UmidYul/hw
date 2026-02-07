@@ -13,11 +13,15 @@ const __dirname = path.dirname(__filename);
 
 const productUploadDir = path.join(__dirname, '../../public/images/products');
 const bannerUploadDir = path.join(__dirname, '../../public/images/banners');
+const logoUploadDir = path.join(__dirname, '../../public/images/logo');
 if (!fs.existsSync(productUploadDir)) {
     fs.mkdirSync(productUploadDir, { recursive: true });
 }
 if (!fs.existsSync(bannerUploadDir)) {
     fs.mkdirSync(bannerUploadDir, { recursive: true });
+}
+if (!fs.existsSync(logoUploadDir)) {
+    fs.mkdirSync(logoUploadDir, { recursive: true });
 }
 
 const createStorage = (destination, prefix) => multer.diskStorage({
@@ -80,6 +84,15 @@ router.post('/banners', requireAdmin, createUploader(bannerUploadDir, 'banner').
     }
 
     const url = `/images/banners/${req.file.filename}`;
+    return res.json({ success: true, url });
+});
+
+router.post('/logo', requireAdmin, createUploader(logoUploadDir, 'logo').single('image'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ success: false, message: 'Файл не загружен' });
+    }
+
+    const url = `/images/logo/${req.file.filename}`;
     return res.json({ success: true, url });
 });
 
