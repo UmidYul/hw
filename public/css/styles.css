@@ -2127,6 +2127,7 @@ textarea {
     border: 2px solid transparent;
     cursor: pointer;
     transition: all var(--transition);
+    position: relative;
 }
 
 .color-swatch-large:hover,
@@ -2136,10 +2137,21 @@ textarea {
 }
 
 .color-swatch-large.disabled {
-    opacity: 0.3;
+    opacity: 0.45;
     cursor: not-allowed;
     transform: none;
-    border-color: transparent;
+    border-color: #2D2D2D;
+}
+
+.color-swatch-large.disabled::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: #2D2D2D;
+    transform: rotate(-45deg);
 }
 
 .size-chips {
