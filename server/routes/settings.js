@@ -22,6 +22,14 @@ const initSettingsTable = async () => {
             contact_email TEXT,
             contact_phone TEXT,
             logo_icon TEXT,
+            color_primary TEXT,
+            color_secondary TEXT,
+            color_accent TEXT,
+            color_bg TEXT,
+            color_surface TEXT,
+            color_border TEXT,
+            color_success TEXT,
+            color_error TEXT,
             social_instagram TEXT,
             social_facebook TEXT,
             social_telegram TEXT,
@@ -58,6 +66,14 @@ const initSettingsTable = async () => {
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS contact_email TEXT');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS contact_phone TEXT');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS logo_icon TEXT');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS color_primary TEXT');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS color_secondary TEXT');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS color_accent TEXT');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS color_bg TEXT');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS color_surface TEXT');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS color_border TEXT');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS color_success TEXT');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS color_error TEXT');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS social_instagram TEXT');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS social_facebook TEXT');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS social_telegram TEXT');
@@ -102,6 +118,14 @@ router.put('/', requireAdmin, async (req, res) => {
             contactEmail,
             contactPhone,
             logoIcon,
+            colorPrimary,
+            colorSecondary,
+            colorAccent,
+            colorBg,
+            colorSurface,
+            colorBorder,
+            colorSuccess,
+            colorError,
             socialInstagram,
             socialFacebook,
             socialTelegram,
@@ -146,7 +170,15 @@ router.put('/', requireAdmin, async (req, res) => {
                 store_description = ?,
                 contact_email = ?,
                 contact_phone = ?,
-            logo_icon = ?,
+                logo_icon = ?,
+                color_primary = ?,
+                color_secondary = ?,
+                color_accent = ?,
+                color_bg = ?,
+                color_surface = ?,
+                color_border = ?,
+                color_success = ?,
+                color_error = ?,
                 social_instagram = ?,
                 social_facebook = ?,
                 social_telegram = ?,
@@ -172,6 +204,14 @@ router.put('/', requireAdmin, async (req, res) => {
             contactEmail || null,
             contactPhone || null,
             logoIcon || null,
+            colorPrimary || null,
+            colorSecondary || null,
+            colorAccent || null,
+            colorBg || null,
+            colorSurface || null,
+            colorBorder || null,
+            colorSuccess || null,
+            colorError || null,
             socialInstagram || null,
             socialFacebook || null,
             socialTelegram || null,
