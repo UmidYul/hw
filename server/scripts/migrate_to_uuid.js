@@ -29,6 +29,20 @@ const columnExists = async (client, table, column) => {
     return result.rows.length > 0;
 };
 
+const getColumnType = async (client, table, column) => {
+    const result = await client.query(
+        `SELECT data_type FROM information_schema.columns WHERE table_name = $1 AND column_name = $2`,
+        [table, column]
+    );
+    return result.rows?.[0]?.data_type || null;
+};
+
+const getRowIdColumn = async (client, table) => {
+    if (await columnExists(client, table, 'id')) return 'id';
+    if (await columnExists(client, table, 'legacy_id')) return 'legacy_id';
+    return null;
+};
+
 const dropConstraint = async (client, table, constraint) => {
     await client.query(`ALTER TABLE ${table} DROP CONSTRAINT IF EXISTS ${constraint} CASCADE`);
 };
@@ -42,32 +56,98 @@ const renameColumn = async (client, table, from, to) => {
 };
 
 const addPrimaryKey = async (client, table, column = 'id') => {
+    const hasColumn = await columnExists(client, table, column);
+    if (!hasColumn) return;
     await client.query(`ALTER TABLE ${table} ADD PRIMARY KEY (${column})`);
 };
 
 const addForeignKey = async (client, table, column, refTable, refColumn = 'id', onDelete = 'NO ACTION') => {
+    const hasColumn = await columnExists(client, table, column);
+    const hasRef = await columnExists(client, refTable, refColumn);
+    if (!hasColumn || !hasRef) return;
     await client.query(
         `ALTER TABLE ${table} ADD CONSTRAINT ${table}_${column}_fkey FOREIGN KEY (${column}) REFERENCES ${refTable}(${refColumn}) ON DELETE ${onDelete}`
     );
 };
 
 const buildIdMap = async (client, table) => {
-    await addColumnIfMissing(client, table, 'id_uuid', 'UUID');
-    const { rows } = await client.query(`SELECT id FROM ${table}`);
-    const map = new Map();
+    const hasLegacy = await columnExists(client, table, 'legacy_id');
+    const hasId = await columnExists(client, table, 'id');
+    const hasIdUuid = await columnExists(client, table, 'id_uuid');
 
-    for (const row of rows) {
-        const newId = generateId();
-        map.set(String(row.id), newId);
-        await client.query(`UPDATE ${table} SET id_uuid = $1 WHERE id = $2`, [newId, row.id]);
+    if (!hasLegacy && !hasId && !hasIdUuid) {
+        return new Map();
     }
 
+    await addColumnIfMissing(client, table, 'id_uuid', 'UUID');
+
+    const map = new Map();
+
+    if (hasLegacy && hasId) {
+        const { rows } = await client.query(`SELECT legacy_id, id, id_uuid FROM ${table}`);
+        for (const row of rows) {
+            const oldId = row.legacy_id;
+            const newId = row.id || row.id_uuid || generateId();
+            map.set(String(oldId), newId);
+            if (!row.id_uuid) {
+                await client.query(`UPDATE ${table} SET id_uuid = $1 WHERE legacy_id = $2`, [newId, oldId]);
+            }
+        }
+        return map;
+    }
+
+    if (hasId && !hasLegacy) {
+        const idType = await getColumnType(client, table, 'id');
+        const { rows } = await client.query(`SELECT id, id_uuid FROM ${table}`);
+        for (const row of rows) {
+            const oldId = row.id;
+            const newId = idType === 'uuid' ? row.id : (row.id_uuid || generateId());
+            map.set(String(oldId), newId);
+            if (!row.id_uuid) {
+                await client.query(`UPDATE ${table} SET id_uuid = $1 WHERE id = $2`, [newId, oldId]);
+            }
+        }
+        return map;
+    }
+
+    if (hasLegacy && !hasId) {
+        const { rows } = await client.query(`SELECT legacy_id, id_uuid FROM ${table}`);
+        for (const row of rows) {
+            const oldId = row.legacy_id;
+            const newId = row.id_uuid || generateId();
+            map.set(String(oldId), newId);
+            if (!row.id_uuid) {
+                await client.query(`UPDATE ${table} SET id_uuid = $1 WHERE legacy_id = $2`, [newId, oldId]);
+            }
+        }
+        return map;
+    }
+
+    const fallbackRows = await client.query(`SELECT id_uuid FROM ${table}`);
+    for (const row of fallbackRows.rows) {
+        if (row.id_uuid) {
+            map.set(String(row.id_uuid), row.id_uuid);
+        }
+    }
     return map;
 };
 
 const updateJsonArray = (list, map) => {
     if (!Array.isArray(list)) return [];
     return list.map((value) => map.get(String(value)) || value).filter(Boolean);
+};
+
+const updateMappedColumn = async (client, table, targetColumn, sourceColumn, map) => {
+    const hasTarget = await columnExists(client, table, targetColumn);
+    const hasSource = await columnExists(client, table, sourceColumn);
+    if (!hasTarget || !hasSource) return;
+
+    for (const [oldId, newId] of map.entries()) {
+        await client.query(
+            `UPDATE ${table} SET ${targetColumn} = $1 WHERE ${sourceColumn} = $2`,
+            [newId, oldId]
+        );
+    }
 };
 
 const migrate = async () => {
@@ -98,59 +178,66 @@ const migrate = async () => {
         await addColumnIfMissing(client, 'reviews', 'product_id_uuid', 'UUID');
         await addColumnIfMissing(client, 'refresh_tokens', 'user_id_uuid', 'UUID');
 
-        for (const [oldId, newId] of productMap.entries()) {
-            await client.query('UPDATE product_variants SET product_id_uuid = $1 WHERE product_id = $2', [newId, oldId]);
-            await client.query('UPDATE reviews SET product_id_uuid = $1 WHERE product_id = $2', [newId, oldId]);
-        }
+        await updateMappedColumn(client, 'product_variants', 'product_id_uuid', 'product_id', productMap);
+        await updateMappedColumn(client, 'product_variants', 'product_id_uuid', 'legacy_product_id', productMap);
+        await updateMappedColumn(client, 'reviews', 'product_id_uuid', 'product_id', productMap);
+        await updateMappedColumn(client, 'reviews', 'product_id_uuid', 'legacy_product_id', productMap);
 
-        for (const [oldId, newId] of categoryMap.entries()) {
-            await client.query('UPDATE categories SET parent_id_uuid = $1 WHERE parent_id = $2', [newId, oldId]);
-            await client.query('UPDATE discounts SET category_id_uuid = $1 WHERE category_id = $2', [newId, oldId]);
-        }
+        await updateMappedColumn(client, 'categories', 'parent_id_uuid', 'parent_id', categoryMap);
+        await updateMappedColumn(client, 'categories', 'parent_id_uuid', 'legacy_parent_id', categoryMap);
+        await updateMappedColumn(client, 'discounts', 'category_id_uuid', 'category_id', categoryMap);
+        await updateMappedColumn(client, 'discounts', 'category_id_uuid', 'legacy_category_id', categoryMap);
 
-        for (const [oldId, newId] of collectionMap.entries()) {
-            await client.query('UPDATE discounts SET collection_id_uuid = $1 WHERE collection_id = $2', [newId, oldId]);
-        }
+        await updateMappedColumn(client, 'discounts', 'collection_id_uuid', 'collection_id', collectionMap);
+        await updateMappedColumn(client, 'discounts', 'collection_id_uuid', 'legacy_collection_id', collectionMap);
 
-        for (const [oldId, newId] of customerMap.entries()) {
-            await client.query('UPDATE orders SET customer_id_uuid = $1 WHERE customer_id = $2', [newId, oldId]);
-        }
+        await updateMappedColumn(client, 'orders', 'customer_id_uuid', 'customer_id', customerMap);
+        await updateMappedColumn(client, 'orders', 'customer_id_uuid', 'legacy_customer_id', customerMap);
 
-        for (const [oldId, newId] of promoMap.entries()) {
-            await client.query('UPDATE promocode_usage SET promocode_id_uuid = $1 WHERE promocode_id = $2', [newId, oldId]);
-        }
+        await updateMappedColumn(client, 'promocode_usage', 'promocode_id_uuid', 'promocode_id', promoMap);
+        await updateMappedColumn(client, 'promocode_usage', 'promocode_id_uuid', 'legacy_promocode_id', promoMap);
 
-        for (const [oldId, newId] of orderMap.entries()) {
-            await client.query('UPDATE promocode_usage SET order_id_uuid = $1 WHERE order_id = $2', [newId, oldId]);
-        }
+        await updateMappedColumn(client, 'promocode_usage', 'order_id_uuid', 'order_id', orderMap);
+        await updateMappedColumn(client, 'promocode_usage', 'order_id_uuid', 'legacy_order_id', orderMap);
 
-        for (const [oldId, newId] of adminUserMap.entries()) {
-            await client.query('UPDATE refresh_tokens SET user_id_uuid = $1 WHERE user_id = $2', [newId, oldId]);
-        }
+        await updateMappedColumn(client, 'refresh_tokens', 'user_id_uuid', 'user_id', adminUserMap);
+        await updateMappedColumn(client, 'refresh_tokens', 'user_id_uuid', 'legacy_user_id', adminUserMap);
 
-        const collections = await client.query('SELECT id, product_ids FROM collections');
+        const collectionsIdCol = await getRowIdColumn(client, 'collections');
+        const collections = collectionsIdCol
+            ? await client.query(`SELECT ${collectionsIdCol} as row_id, product_ids FROM collections`)
+            : { rows: [] };
         for (const row of collections.rows) {
             const list = typeof row.product_ids === 'string' ? JSON.parse(row.product_ids) : row.product_ids;
             const updated = updateJsonArray(list, productMap);
-            await client.query('UPDATE collections SET product_ids = $1 WHERE id = $2', [JSON.stringify(updated), row.id]);
+            await client.query('UPDATE collections SET product_ids = $1 WHERE ' + collectionsIdCol + ' = $2', [JSON.stringify(updated), row.row_id]);
         }
 
-        const discounts = await client.query('SELECT id, product_ids FROM discounts');
+        const discountsIdCol = await getRowIdColumn(client, 'discounts');
+        const discounts = discountsIdCol
+            ? await client.query(`SELECT ${discountsIdCol} as row_id, product_ids FROM discounts`)
+            : { rows: [] };
         for (const row of discounts.rows) {
             if (!row.product_ids) continue;
             const list = typeof row.product_ids === 'string' ? JSON.parse(row.product_ids) : row.product_ids;
             const updated = updateJsonArray(list, productMap);
-            await client.query('UPDATE discounts SET product_ids = $1 WHERE id = $2', [JSON.stringify(updated), row.id]);
+            await client.query('UPDATE discounts SET product_ids = $1 WHERE ' + discountsIdCol + ' = $2', [JSON.stringify(updated), row.row_id]);
         }
 
-        const contentSettings = await client.query("SELECT id, key, value FROM content_settings WHERE key = 'featuredCollections'");
+        const contentIdCol = await getRowIdColumn(client, 'content_settings');
+        const contentSettings = contentIdCol
+            ? await client.query("SELECT " + contentIdCol + " as row_id, key, value FROM content_settings WHERE key = 'featuredCollections'")
+            : { rows: [] };
         for (const row of contentSettings.rows) {
             const list = typeof row.value === 'string' ? JSON.parse(row.value) : row.value;
             const updated = updateJsonArray(list, collectionMap);
-            await client.query('UPDATE content_settings SET value = $1 WHERE id = $2', [JSON.stringify(updated), row.id]);
+            await client.query('UPDATE content_settings SET value = $1 WHERE ' + contentIdCol + ' = $2', [JSON.stringify(updated), row.row_id]);
         }
 
-        const orders = await client.query('SELECT id, items FROM orders');
+        const ordersIdCol = await getRowIdColumn(client, 'orders');
+        const orders = ordersIdCol
+            ? await client.query(`SELECT ${ordersIdCol} as row_id, items FROM orders`)
+            : { rows: [] };
         for (const row of orders.rows) {
             const items = typeof row.items === 'string' ? JSON.parse(row.items) : row.items;
             const updatedItems = Array.isArray(items)
@@ -171,7 +258,7 @@ const migrate = async () => {
                     return next;
                 })
                 : [];
-            await client.query('UPDATE orders SET items = $1 WHERE id = $2', [JSON.stringify(updatedItems), row.id]);
+            await client.query('UPDATE orders SET items = $1 WHERE ' + ordersIdCol + ' = $2', [JSON.stringify(updatedItems), row.row_id]);
         }
 
         await dropConstraint(client, 'product_variants', 'product_variants_pkey');
