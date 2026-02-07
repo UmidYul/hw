@@ -1,5 +1,5 @@
 // ========================================
-// Higher Waist Admin Panel - Validators
+// Higher Waist Panel - Validators
 // Form validation utilities
 // ========================================
 

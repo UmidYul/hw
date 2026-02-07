@@ -1,5 +1,5 @@
 // ========================================
-// Higher Waist Admin Panel - Components
+// Higher Waist Panel - Components
 // Reusable UI Components
 // ========================================
 
