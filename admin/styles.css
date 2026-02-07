@@ -1685,9 +1685,7 @@ a:hover {
     .table-container {
         overflow-x: auto;
     }
-}
 
-@media (max-width: 640px) {
     .table {
         display: block;
         border: none;
@@ -2283,15 +2281,6 @@ a:hover {
 .card table.table {
     table-layout: auto;
     width: 100%;
-}
-
-.card table.table td {
-    width: 100% !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    text-align: center;
 }
 
 .card table.table th:nth-child(1),
