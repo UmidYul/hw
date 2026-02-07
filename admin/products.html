@@ -324,7 +324,7 @@
                 return;
             }
 
-            let html = '<table class="table"><thead><tr>';
+            let html = '<table class="table products-table"><thead><tr>';
             html += '<th><input type="checkbox" id="select-all" onchange="selectAll(this.checked)"></th>';
             html += '<th>Название</th>';
             html += '<th>SKU</th>';
@@ -344,14 +344,14 @@
                 const oldPrice = p.oldPrice || p.old_price;
 
                 html += `<tr>
-                <td><input type="checkbox" class="product-checkbox" value="${p.id}" ${selectedProducts.has(p.id) ? 'checked' : ''} onchange="toggleProduct('${p.id}', this.checked)"></td>
-                <td><strong>${p.title}</strong>${tags.length ? '<br><small>' + tags.map(t => Components.renderBadge(t, 'accent')).join(' ') + '</small>' : ''}</td>
-                <td><code>${p.sku || '—'}</code></td>
-                <td>${category ? category.name : p.category || '—'}</td>
-                <td>${Components.formatPrice(p.price)}${oldPrice ? '<br><small style="text-decoration:line-through;color:#999">' + Components.formatPrice(oldPrice) + '</small>' : ''}</td>
-                <td><span class="${p.stock <= (p.lowStockThreshold || p.low_stock_threshold || 10) ? 'text-error' : ''}">${p.stock}</span></td>
-                <td>${Components.renderBadge(status.text, status.type)}</td>
-                <td>
+                <td class="products-col-select" data-label="Выбор"><input type="checkbox" class="product-checkbox" value="${p.id}" ${selectedProducts.has(p.id) ? 'checked' : ''} onchange="toggleProduct('${p.id}', this.checked)"></td>
+                <td class="products-col-title" data-label="Название"><strong>${p.title}</strong>${tags.length ? '<br><small>' + tags.map(t => Components.renderBadge(t, 'accent')).join(' ') + '</small>' : ''}</td>
+                <td class="products-col-sku" data-label="SKU"><code>${p.sku || '—'}</code></td>
+                <td class="products-col-category" data-label="Категория">${category ? category.name : p.category || '—'}</td>
+                <td class="products-col-price" data-label="Цена">${Components.formatPrice(p.price)}${oldPrice ? '<br><small style="text-decoration:line-through;color:#999">' + Components.formatPrice(oldPrice) + '</small>' : ''}</td>
+                <td class="products-col-stock" data-label="Остаток"><span class="${p.stock <= (p.lowStockThreshold || p.low_stock_threshold || 10) ? 'text-error' : ''}">${p.stock}</span></td>
+                <td class="products-col-status" data-label="Статус">${Components.renderBadge(status.text, status.type)}</td>
+                <td class="products-col-actions" data-label="Действия">
                     <button class="btn btn-sm btn-ghost" onclick="editProduct('${p.id}')" title="Редактировать">Редактировать</button>
                     <button class="btn btn-sm btn-ghost" onclick="duplicateProduct('${p.id}')" title="Дублировать">Дублировать</button>
                     <button class="btn btn-sm btn-ghost" onclick="deleteProduct('${p.id}')" title="Удалить">Удалить</button>

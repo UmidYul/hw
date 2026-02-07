@@ -227,7 +227,7 @@
                     return;
                 }
 
-                let html = '<table class="table"><thead><tr>';
+                let html = '<table class="table promos-table"><thead><tr>';
                 html += '<th>Код</th>';
                 html += '<th>Тип</th>';
                 html += '<th>Значение</th>';
@@ -261,13 +261,13 @@
                     }
 
                     html += `<tr>
-                    <td><strong><code>${promo.code}</code></strong></td>
-                    <td>${promo.type === 'percent' ? 'Процент' : 'Фикс. сумма'}</td>
-                    <td><strong>${typeText}</strong></td>
-                    <td>${promo.min_amount ? Components.formatPrice(promo.min_amount) : '—'}</td>
-                    <td style="min-width: 180px;">${usedText}</td>
-                    <td>${promo.is_active ? Components.renderBadge('Активен', 'success') : Components.renderBadge('Неактивен', 'default')}</td>
-                    <td>
+                    <td data-label="Код"><strong><code>${promo.code}</code></strong></td>
+                    <td data-label="Тип">${promo.type === 'percent' ? 'Процент' : 'Фикс. сумма'}</td>
+                    <td data-label="Значение"><strong>${typeText}</strong></td>
+                    <td data-label="Мин. сумма">${promo.min_amount ? Components.formatPrice(promo.min_amount) : '—'}</td>
+                    <td data-label="Использовано" style="min-width: 180px;">${usedText}</td>
+                    <td data-label="Статус">${promo.is_active ? Components.renderBadge('Активен', 'success') : Components.renderBadge('Неактивен', 'default')}</td>
+                    <td data-label="Действия">
                         <button class="btn btn-sm btn-ghost" onclick="editPromo('${promo.id}')">Редактировать</button>
                         <button class="btn btn-sm btn-ghost" onclick="viewStats('${promo.id}')">Статистика</button>
                         <button class="btn btn-sm btn-ghost" onclick="deletePromo('${promo.id}')">Удалить</button>

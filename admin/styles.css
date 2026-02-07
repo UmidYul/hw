@@ -1724,6 +1724,51 @@ a:hover {
         justify-content: flex-start;
     }
 
+    .promos-table td,
+    .categories-table td {
+        font-size: 12px;
+    }
+
+    .promos-table .btn,
+    .categories-table .btn {
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+
+    .products-table tr {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 16px;
+        row-gap: 8px;
+        text-align: left;
+    }
+
+    .products-table td {
+        display: block;
+        padding: 0;
+    }
+
+    .products-table td::before {
+        display: block;
+        margin-bottom: 2px;
+    }
+
+    .products-table .products-col-select,
+    .products-table .products-col-actions {
+        grid-column: 1 / -1;
+    }
+
+    .products-table .products-col-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .products-table .products-col-actions .btn {
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+
     .orders-table .orders-col-items,
     .orders-table .orders-col-status,
     .orders-table .orders-col-date {
