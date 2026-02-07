@@ -76,11 +76,9 @@ const Components = {
 
     // Format price
     formatPrice(price) {
-        const rawSymbol = (typeof REPO !== 'undefined' && REPO.getSettings)
-            ? REPO.getSettings().currencySymbol
-            : 'Сумм';
-        const currencySymbol = normalizeCurrencySymbol(rawSymbol);
-        return price.toLocaleString('ru-RU') + ' ' + currencySymbol;
+        const currencySymbol = normalizeCurrencySymbol('Сумм');
+        const value = Number(price) || 0;
+        return value.toLocaleString('ru-RU') + ' ' + currencySymbol;
     },
 
     // Format date

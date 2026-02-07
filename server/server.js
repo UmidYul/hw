@@ -78,10 +78,6 @@ app.get('/maintenance', (req, res) => {
     res.status(503).sendFile(path.join(__dirname, '../views', 'maintenance.html'));
 });
 
-app.get('/error-test', (req, res) => {
-    res.sendFile(path.join(__dirname, '../views', 'error-test.html'));
-});
-
 
 
 // Error Handler - обработка серверных ошибок

@@ -210,8 +210,6 @@
     <div class="toast-container" id="toast-container"></div>
 
     <script src="/js/api.js"></script>
-    <script src="/admin/repo.js"></script>
-    <script src="/admin/seed.js"></script>
     <script src="/admin/components.js"></script>
     <script>
         let currentPage = 1;
@@ -231,15 +229,8 @@
                 });
             } catch (error) {
                 console.error('Failed to load categories:', error);
-                // Fallback to REPO
-                allCategories = REPO.getCategories();
-                const select = document.getElementById('filter-category');
-                allCategories.forEach(cat => {
-                    const option = document.createElement('option');
-                    option.value = cat.id;
-                    option.textContent = cat.name;
-                    select.appendChild(option);
-                });
+                allCategories = [];
+                Components.showToast('Ошибка', 'Не удалось загрузить категории', 'error');
             }
         }
 

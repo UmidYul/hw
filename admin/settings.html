@@ -115,14 +115,6 @@
                         <h1 class="page-title">Настройки</h1>
                         <p class="page-subtitle">Конфигурация магазина</p>
                     </div>
-                    <div class="page-actions">
-                        <button class="btn btn-secondary" onclick="exportData()">Экспорт данных</button>
-                        <button class="btn btn-secondary"
-                            onclick="document.getElementById('import-file').click()">Импорт данных</button>
-                        <input type="file" id="import-file" accept=".json" style="display:none"
-                            onchange="importData(event)">
-                        <button class="btn btn-error" onclick="resetData()">Сбросить данные</button>
-                    </div>
                 </div>
 
                 <form id="settings-form">
@@ -370,7 +362,6 @@
     <div class="toast-container" id="toast-container"></div>
 
     <script src="/js/api.js"></script>
-    <script src="/admin/repo.js"></script>
     <script src="/admin/components.js"></script>
     <script>
         async function loadSettings() {
@@ -657,47 +648,6 @@
             }
         }
 
-        function exportData() {
-            const data = REPO.exportData();
-            const dataStr = JSON.stringify(data, null, 2);
-            const blob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Higher Waist-backup-${Date.now()}.json`;
-            a.click();
-            Components.showToast('Успешно', 'Данные экспортированы', 'success');
-        }
-
-        function importData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    REPO.importData(data);
-                    Components.showToast('Успешно', 'Данные импортированы', 'success');
-                    setTimeout(() => window.location.reload(), 1000);
-                } catch (err) {
-                    Components.showToast('Ошибка', 'Неверный формат файла', 'error');
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        function resetData() {
-            Components.confirm(
-                'Сбросить все данные?',
-                'Это удалит все товары, заказы и настройки. Демо-данные будут восстановлены.',
-                () => {
-                    REPO.resetData();
-                    Components.showToast('Успешно', 'Данные сброшены', 'success');
-                    setTimeout(() => window.location.reload(), 1000);
-                }
-            );
-        }
 
         let latestCleanupResult = null;
 
