@@ -1,6 +1,12 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
-dotenv.config();
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 const smtpConfig = {
     host: process.env.SMTP_HOST,
@@ -10,7 +16,6 @@ const smtpConfig = {
     pass: process.env.SMTP_PASS,
     from: process.env.SMTP_FROM || process.env.SMTP_USER || 'no-reply@example.com'
 };
-console.log('SMTP Config:', smtpConfig);
 
 let transporter = null;
 
