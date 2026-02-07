@@ -18,6 +18,9 @@ const initSettingsTable = async () => {
             social_instagram TEXT,
             social_facebook TEXT,
             social_telegram TEXT,
+            social_tiktok TEXT,
+            social_youtube TEXT,
+            social_whatsapp TEXT,
             color_palette JSONB,
             sizes_list JSONB,
             currency TEXT DEFAULT 'UZS',
@@ -50,6 +53,9 @@ const initSettingsTable = async () => {
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS social_instagram TEXT');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS social_facebook TEXT');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS social_telegram TEXT');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS social_tiktok TEXT');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS social_youtube TEXT');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS social_whatsapp TEXT');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS color_palette JSONB');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS sizes_list JSONB');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS enable_taxes INTEGER DEFAULT 0');
@@ -90,6 +96,9 @@ router.put('/', requireAdmin, async (req, res) => {
             socialInstagram,
             socialFacebook,
             socialTelegram,
+            socialTiktok,
+            socialYoutube,
+            socialWhatsapp,
             colorPalette,
             sizesList,
             currency,
@@ -129,6 +138,9 @@ router.put('/', requireAdmin, async (req, res) => {
                 social_instagram = ?,
                 social_facebook = ?,
                 social_telegram = ?,
+                social_tiktok = ?,
+                social_youtube = ?,
+                social_whatsapp = ?,
                 color_palette = ?,
                 sizes_list = ?,
                 currency = ?,
@@ -150,6 +162,9 @@ router.put('/', requireAdmin, async (req, res) => {
             socialInstagram || null,
             socialFacebook || null,
             socialTelegram || null,
+            socialTiktok || null,
+            socialYoutube || null,
+            socialWhatsapp || null,
             colorPalette || null,
             sizesList || null,
             currency || 'UZS',

@@ -13,6 +13,9 @@ let siteSettings = {
     socialInstagram: '',
     socialFacebook: '',
     socialTelegram: '',
+    socialTiktok: '',
+    socialYoutube: '',
+    socialWhatsapp: '',
     colorPalette: []
 };
 
@@ -69,6 +72,9 @@ async function loadSiteSettings() {
             siteSettings.socialInstagram = settings.social_instagram || '';
             siteSettings.socialFacebook = settings.social_facebook || '';
             siteSettings.socialTelegram = settings.social_telegram || '';
+            siteSettings.socialTiktok = settings.social_tiktok || '';
+            siteSettings.socialYoutube = settings.social_youtube || '';
+            siteSettings.socialWhatsapp = settings.social_whatsapp || '';
             siteSettings.colorPalette = normalizeColorPalette(settings.color_palette);
         }
     } catch (error) {

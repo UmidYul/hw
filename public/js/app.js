@@ -144,7 +144,10 @@ async function updateStoreTexts() {
     const socials = {
         instagram: siteSettings?.socialInstagram || '',
         facebook: siteSettings?.socialFacebook || '',
-        telegram: siteSettings?.socialTelegram || ''
+        telegram: siteSettings?.socialTelegram || '',
+        tiktok: siteSettings?.socialTiktok || '',
+        youtube: siteSettings?.socialYoutube || '',
+        whatsapp: siteSettings?.socialWhatsapp || ''
     };
 
     document.querySelectorAll('[data-social]').forEach((link) => {
