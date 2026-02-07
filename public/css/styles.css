@@ -2140,17 +2140,17 @@ textarea {
     opacity: 0.45;
     cursor: not-allowed;
     transform: none;
-    border-color: #2D2D2D;
+    border-color: #1A1A1A;
 }
 
 .color-swatch-large.disabled::after {
     content: '';
     position: absolute;
     top: 50%;
-    left: 10%;
-    right: 10%;
-    height: 2px;
-    background: #2D2D2D;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #1A1A1A;
     transform: rotate(-45deg);
 }
 
