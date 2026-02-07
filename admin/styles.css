@@ -1654,6 +1654,23 @@ a:hover {
         width: 100%;
     }
 
+    .filters-card .card-body {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .filters-card .grid {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: var(--spacing-md);
+        min-width: max-content;
+    }
+
+    .filters-card .form-group {
+        min-width: 220px;
+        margin-bottom: 0;
+    }
+
     .tabs {
         flex-wrap: wrap;
     }
