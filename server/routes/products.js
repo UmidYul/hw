@@ -54,18 +54,55 @@ const parseJsonField = (value, fallback) => {
     }
 };
 
-let hasLegacyProductIdColumnPromise = null;
+let legacyProductIdColumnInfoPromise = null;
 
-const hasLegacyProductIdColumn = async () => {
-    if (!hasLegacyProductIdColumnPromise) {
-        hasLegacyProductIdColumnPromise = dbGet(
-            "SELECT 1 AS exists FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'product_variants' AND column_name = 'legacy_product_id' LIMIT 1"
+const getLegacyProductIdColumnInfo = async () => {
+    if (!legacyProductIdColumnInfoPromise) {
+        legacyProductIdColumnInfoPromise = dbGet(
+            "SELECT data_type AS dataType, is_nullable AS isNullable FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'product_variants' AND column_name = 'legacy_product_id' LIMIT 1"
         )
-            .then(row => !!row)
-            .catch(() => false);
+            .then(row => (row ? { exists: true, dataType: row.datatype || row.dataType, isNullable: row.isnullable || row.isNullable } : { exists: false }))
+            .catch(() => ({ exists: false }));
     }
 
-    return hasLegacyProductIdColumnPromise;
+    return legacyProductIdColumnInfoPromise;
+};
+
+const resolveLegacyProductIdValue = (info, productId, legacyProductId) => {
+    if (!info || !info.exists) {
+        return { include: false };
+    }
+
+    const dataType = String(info.dataType || '').toLowerCase();
+    const isNullable = String(info.isNullable || '').toUpperCase() === 'YES';
+    const hasProvided = legacyProductId !== undefined && legacyProductId !== null && legacyProductId !== '';
+
+    if (hasProvided) {
+        if (['integer', 'bigint', 'smallint', 'numeric', 'decimal'].includes(dataType)) {
+            const numericValue = Number(legacyProductId);
+            if (Number.isFinite(numericValue)) {
+                return { include: true, value: Math.trunc(numericValue) };
+            }
+
+            return { include: true, value: isNullable ? null : 0 };
+        }
+
+        return { include: true, value: String(legacyProductId) };
+    }
+
+    if (dataType === 'uuid') {
+        return { include: true, value: productId };
+    }
+
+    if (isNullable) {
+        return { include: true, value: null };
+    }
+
+    if (['integer', 'bigint', 'smallint', 'numeric', 'decimal'].includes(dataType)) {
+        return { include: true, value: 0 };
+    }
+
+    return { include: true, value: String(productId) };
 };
 
 function normalizeVariants(variants) {
@@ -238,18 +275,19 @@ router.post('/', requireAdmin, async (req, res) => {
         ]);
 
         if (normalizedVariants.length > 0) {
-            const includeLegacy = await hasLegacyProductIdColumn();
+            const legacyInfo = await getLegacyProductIdColumnInfo();
+            const legacySelection = resolveLegacyProductIdValue(legacyInfo, productId, req.body?.legacyProductId ?? req.body?.legacy_product_id);
             for (const variant of normalizedVariants) {
                 const variantId = crypto.randomUUID();
-                if (includeLegacy) {
+                if (legacySelection.include) {
                     await dbRun(
                         'INSERT INTO product_variants (id, product_id, legacy_product_id, color, size, stock) VALUES (?, ?, ?, ?, ?, ?)',
-                        [variantId, result.id, result.id, variant.color, variant.size, variant.stock]
+                        [variantId, productId, legacySelection.value, variant.color, variant.size, variant.stock]
                     );
                 } else {
                     await dbRun(
                         'INSERT INTO product_variants (id, product_id, color, size, stock) VALUES (?, ?, ?, ?, ?)',
-                        [variantId, result.id, variant.color, variant.size, variant.stock]
+                        [variantId, productId, variant.color, variant.size, variant.stock]
                     );
                 }
             }
@@ -312,13 +350,14 @@ router.put('/:id', requireAdmin, async (req, res) => {
 
         if (hasVariants) {
             await dbRun('DELETE FROM product_variants WHERE product_id = ?', [req.params.id]);
-            const includeLegacy = await hasLegacyProductIdColumn();
+            const legacyInfo = await getLegacyProductIdColumnInfo();
+            const legacySelection = resolveLegacyProductIdValue(legacyInfo, req.params.id, req.body?.legacyProductId ?? req.body?.legacy_product_id);
             for (const variant of normalizedVariants) {
                 const variantId = crypto.randomUUID();
-                if (includeLegacy) {
+                if (legacySelection.include) {
                     await dbRun(
                         'INSERT INTO product_variants (id, product_id, legacy_product_id, color, size, stock) VALUES (?, ?, ?, ?, ?, ?)',
-                        [variantId, req.params.id, req.params.id, variant.color, variant.size, variant.stock]
+                        [variantId, req.params.id, legacySelection.value, variant.color, variant.size, variant.stock]
                     );
                 } else {
                     await dbRun(
