@@ -209,9 +209,6 @@
                                     <button class="btn btn-primary" type="button" onclick="saveNewsletter()">
                                         Сохранить черновик
                                     </button>
-                                    <button class="btn btn-secondary" type="button" onclick="sendNewsletter()">
-                                        Отправить рассылку
-                                    </button>
                                 </div>
                             </form>
                         </div>
@@ -403,9 +400,6 @@
                         <td class="text-right">
                             <div class="flex gap-md" style="justify-content: flex-end;">
                                 <button class="btn btn-sm btn-ghost" onclick="editNewsletter('${item.id}')">Редактировать</button>
-                                ${item.status === 'draft'
-                        ? `<button class="btn btn-sm btn-secondary" onclick="sendNewsletter('${item.id}')">Отправить</button>`
-                        : ''}
                                 <button class="btn btn-sm btn-error" onclick="deleteNewsletter('${item.id}')">Удалить</button>
                             </div>
                         </td>
