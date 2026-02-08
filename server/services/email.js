@@ -400,6 +400,7 @@ export const sendNewsletterCampaignEmail = async ({
     const ctaLabel = escapeHtml(campaign?.cta_label || 'Перейти');
     const ctaUrl = campaign?.cta_url ? String(campaign.cta_url) : '';
     const heroImage = campaign?.hero_image ? normalizePublicUrl(campaign.hero_image, baseUrl) : '';
+    console.log(heroImage);
 
     const preheader = escapeHtml(campaign?.subtitle || campaign?.title || 'Новости магазина');
 
