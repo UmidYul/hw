@@ -515,7 +515,9 @@ const newslettersAPI = {
     },
 
     async send(id, payload = null) {
-        return await apiCall(`/newsletters/${id}/send`, {
+        const hasForce = payload && payload.force === true;
+        const endpoint = hasForce ? `/newsletters/${id}/send?force=1` : `/newsletters/${id}/send`;
+        return await apiCall(endpoint, {
             method: 'POST',
             body: payload ? JSON.stringify(payload) : undefined
         });
