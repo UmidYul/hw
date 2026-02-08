@@ -14,7 +14,6 @@ const filters = {
     sizes: [],
     colors: [],
     tags: [],
-    rating: null,
     discountOnly: false,
     search: '',
     sort: 'default'
@@ -324,29 +323,6 @@ function initializeFilters() {
         });
     });
 
-    // Rating filter (new star-based UI)
-    document.querySelectorAll('#ratingFilterGroup .rating-option').forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Toggle active state
-            const currentlyActive = btn.classList.contains('active');
-
-            // Remove active from all
-            document.querySelectorAll('#ratingFilterGroup .rating-option').forEach(b => {
-                b.classList.remove('active');
-            });
-
-            // If it wasn't active, activate it
-            if (!currentlyActive) {
-                btn.classList.add('active');
-                filters.rating = parseInt(btn.dataset.rating);
-            } else {
-                filters.rating = null;
-            }
-
-            applyFilters();
-        });
-    });
-
     // Discount filter
     document.getElementById('discountFilter').addEventListener('change', (e) => {
         filters.discountOnly = e.target.checked;
@@ -389,7 +365,6 @@ function resetFilters() {
     filters.sizes = [];
     filters.colors = [];
     filters.tags = [];
-    filters.rating = null;
     filters.discountOnly = false;
     filters.search = '';
     filters.sort = 'default';
@@ -400,7 +375,6 @@ function resetFilters() {
     document.getElementById('priceMax').value = '';
     document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
     document.querySelectorAll('.color-swatch').forEach(swatch => swatch.classList.remove('active'));
-    document.querySelectorAll('.rating-option').forEach(btn => btn.classList.remove('active'));
     document.getElementById('catalogSearch').value = '';
     document.getElementById('sortSelect').value = 'default';
 
@@ -460,11 +434,6 @@ function applyFilters() {
         );
     }
 
-    // Apply rating filter
-    if (filters.rating) {
-        filteredProducts = filteredProducts.filter(p => p.rating >= filters.rating);
-    }
-
     // Apply discount filter
     if (filters.discountOnly) {
         filteredProducts = filteredProducts.filter(p => p.appliedDiscount || p.discountPercent);
@@ -504,9 +473,6 @@ function sortProducts() {
             break;
         case 'price-desc':
             filteredProducts.sort((a, b) => (b.finalPrice ?? b.price) - (a.finalPrice ?? a.price));
-            break;
-        case 'rating':
-            filteredProducts.sort((a, b) => b.rating - a.rating);
             break;
         case 'new':
             filteredProducts.sort((a, b) => {

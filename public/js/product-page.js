@@ -268,11 +268,6 @@ function renderProduct() {
     // Title
     document.getElementById('productTitle').textContent = product.title;
 
-    // Rating
-    const reviewsCount = product.reviewsCount || product.reviews_count || 0;
-    document.getElementById('productRating').innerHTML = generateStars(product.rating);
-    document.getElementById('productRatingText').textContent = `${product.rating} (${reviewsCount} отзывов)`;
-
     // Price
     document.getElementById('productPrice').textContent = formatPrice(finalPrice);
     if (originalPrice && originalPrice > finalPrice) {

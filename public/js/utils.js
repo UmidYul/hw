@@ -465,12 +465,6 @@ function renderProductCard(product) {
             </div>
             <div class="product-card-body">
                 <a href="/product?id=${product.id}" class="product-card-title">${product.title || product.name}</a>
-                <div class="product-card-rating">
-                    <div class="rating-stars">
-                        ${generateStars(product.rating || 0)}
-                    </div>
-                    <span class="rating-count">(${product.reviewsCount || product.reviews_count || 0})</span>
-                </div>
                 <div class="product-card-price">
                     <span class="price-current">${formatPrice(finalPrice)}</span>
                     ${originalPrice && originalPrice > finalPrice ? `<span class="price-old">${formatPrice(originalPrice)}</span>` : ''}
@@ -490,28 +484,6 @@ function adjustColor(color, amount) {
     const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amount));
     const b = Math.min(255, Math.max(0, (num & 0x0000FF) + amount));
     return '#' + (r << 16 | g << 8 | b).toString(16).padStart(6, '0');
-}
-
-// Generate star rating HTML
-function generateStars(rating) {
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-    let html = '';
-
-    for (let i = 0; i < fullStars; i++) {
-        html += '<i class="fas fa-star"></i>';
-    }
-
-    if (hasHalfStar) {
-        html += '<i class="fas fa-star-half-alt"></i>';
-    }
-
-    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-    for (let i = 0; i < emptyStars; i++) {
-        html += '<i class="far fa-star"></i>';
-    }
-
-    return html;
 }
 
 // Render products to container

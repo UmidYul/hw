@@ -614,10 +614,6 @@ function openQuickView(productId) {
             </div>
             <div class="quick-view-info">
                 <h3 class="quick-view-title">${product.title}</h3>
-                <div class="product-rating">
-                    <div class="rating-stars">${generateStars(product.rating)}</div>
-                    <span class="rating-text">${product.rating} (${product.reviewsCount} отзывов)</span>
-                </div>
                 <div class="product-price">
                     <span class="price-current">${formatPrice(product.price)}</span>
                     ${product.oldPrice ? `<span class="price-old">${formatPrice(product.oldPrice)}</span>` : ''}
