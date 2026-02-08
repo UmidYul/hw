@@ -189,6 +189,22 @@
                                     <input class="form-input" type="text" id="heroImage" placeholder="https://...">
                                 </div>
 
+                                <div class="form-group">
+                                    <label class="form-label" for="heroImageFile">Или загрузить файл</label>
+                                    <div class="file-upload">
+                                        <input type="file" id="heroImageFile" accept="image/*">
+                                        <button type="button" class="file-upload-button" id="heroImageFileBtn">
+                                            Выбрать файл
+                                        </button>
+                                        <span class="file-upload-name" id="heroImageFileName">Файл не выбран</span>
+                                    </div>
+                                    <div class="file-preview" id="heroImagePreview">
+                                        <div class="file-preview-empty">Превью изображения</div>
+                                    </div>
+                                    <small class="text-muted" id="heroImageUploadStatus">Поддерживаются JPG/PNG до
+                                        5MB</small>
+                                </div>
+
                                 <div class="form-row">
                                     <button class="btn btn-secondary" type="button" onclick="sendNewsletter()">
                                         Отправить рассылку
@@ -249,6 +265,9 @@
     <script>
         let newsletters = [];
         let activeNewsletterId = null;
+        let hasSavedNewsletter = false;
+        let lastHeroImageValue = '';
+        const sessionUploadedHeroImages = new Set();
 
         const categoryMeta = {
             promo: { label: 'Акции', color: '#9a2f2f', bg: '#fde7e7' },
@@ -298,6 +317,8 @@
             getField('ctaUrl').value = newsletter?.cta_url || '';
             getField('heroImage').value = newsletter?.hero_image || '';
             activeNewsletterId = newsletter?.id || null;
+            lastHeroImageValue = getField('heroImage').value.trim();
+            syncHeroImagePreviewFromUrl();
             updatePreview();
         };
 
@@ -404,7 +425,9 @@
                     saved = await API.newsletters.create(data);
                 }
 
+                hasSavedNewsletter = true;
                 setFormData(saved);
+                cleanupSessionUploads(getField('heroImage').value.trim());
                 await loadNewsletters();
                 Components.showToast('Готово', 'Черновик сохранен', 'success');
             } catch (error) {
@@ -435,6 +458,7 @@
 
         const editNewsletter = async (id) => {
             try {
+                cleanupSessionUploads();
                 const newsletter = await API.newsletters.getById(id);
                 setFormData(newsletter);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -460,6 +484,8 @@
 
         const resetNewsletterForm = () => {
             activeNewsletterId = null;
+            hasSavedNewsletter = false;
+            cleanupSessionUploads();
             setFormData({
                 category: 'promo',
                 subject: '',
@@ -470,11 +496,150 @@
                 cta_url: '',
                 hero_image: ''
             });
+            resetHeroImageUpload();
+        };
+
+        const resetHeroImageUpload = () => {
+            const input = document.getElementById('heroImageFile');
+            const name = document.getElementById('heroImageFileName');
+            const preview = document.getElementById('heroImagePreview');
+            const status = document.getElementById('heroImageUploadStatus');
+
+            if (input) input.value = '';
+            if (name) name.textContent = 'Файл не выбран';
+            if (preview) {
+                preview.innerHTML = '<div class="file-preview-empty">Превью изображения</div>';
+            }
+            if (status) status.textContent = 'Поддерживаются JPG/PNG до 5MB';
+        };
+
+        const updateHeroImagePreviewFromFile = (file) => {
+            const name = document.getElementById('heroImageFileName');
+            const preview = document.getElementById('heroImagePreview');
+            if (name) name.textContent = file?.name || 'Файл не выбран';
+            if (!preview || !file) return;
+
+            const url = URL.createObjectURL(file);
+            preview.innerHTML = `<img src="${url}" alt="${file.name}">`;
+            preview.querySelector('img')?.addEventListener('load', () => URL.revokeObjectURL(url));
+        };
+
+        const syncHeroImagePreviewFromUrl = () => {
+            const url = getField('heroImage')?.value?.trim();
+            const name = document.getElementById('heroImageFileName');
+            const preview = document.getElementById('heroImagePreview');
+            if (!preview) return;
+
+            if (url) {
+                if (name) name.textContent = 'Используется URL';
+                preview.innerHTML = `<img src="${url}" alt="Preview">`;
+            } else {
+                if (name) name.textContent = 'Файл не выбран';
+                preview.innerHTML = '<div class="file-preview-empty">Превью изображения</div>';
+            }
+        };
+
+        const deleteNewsletterImage = async (url) => {
+            if (!url || !url.startsWith('/images/newsletters/')) return;
+            try {
+                await fetch('/api/uploads/newsletters/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': API.getCsrfToken()
+                    },
+                    body: JSON.stringify({ url })
+                });
+            } catch (error) {
+                console.warn('Failed to delete newsletter image:', error);
+            }
+        };
+
+        const cleanupSessionUploads = (keepUrl = '') => {
+            const safeKeep = keepUrl || (hasSavedNewsletter ? getField('heroImage')?.value?.trim() : '');
+            sessionUploadedHeroImages.forEach((url) => {
+                if (!safeKeep || url !== safeKeep) {
+                    deleteNewsletterImage(url);
+                    sessionUploadedHeroImages.delete(url);
+                }
+            });
+        };
+
+        const handleHeroImageInput = () => {
+            const current = getField('heroImage').value.trim();
+            syncHeroImagePreviewFromUrl();
+            updatePreview();
+
+            if (lastHeroImageValue && lastHeroImageValue !== current && sessionUploadedHeroImages.has(lastHeroImageValue)) {
+                deleteNewsletterImage(lastHeroImageValue);
+                sessionUploadedHeroImages.delete(lastHeroImageValue);
+            }
+
+            lastHeroImageValue = current;
         };
 
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('#newsletterForm input, #newsletterForm textarea, #newsletterForm select')
-                .forEach((el) => el.addEventListener('input', updatePreview));
+                .forEach((el) => {
+                    if (el.id === 'heroImage') {
+                        el.addEventListener('input', handleHeroImageInput);
+                    } else {
+                        el.addEventListener('input', updatePreview);
+                    }
+                });
+
+            document.getElementById('heroImageFileBtn')?.addEventListener('click', () => {
+                document.getElementById('heroImageFile')?.click();
+            });
+
+            document.getElementById('heroImageFile')?.addEventListener('change', async (event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+
+                const previousUrl = getField('heroImage').value.trim();
+                const status = document.getElementById('heroImageUploadStatus');
+                if (status) status.textContent = 'Загрузка файла...';
+                updateHeroImagePreviewFromFile(file);
+
+                try {
+                    const formData = new FormData();
+                    formData.append('image', file);
+
+                    const response = await fetch('/api/uploads/newsletters', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-Token': API.getCsrfToken()
+                        },
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    if (!result?.url) {
+                        throw new Error('Upload response missing url');
+                    }
+
+                    getField('heroImage').value = result.url;
+                    lastHeroImageValue = result.url;
+                    if (status) status.textContent = 'Файл загружен.';
+                    updatePreview();
+                    syncHeroImagePreviewFromUrl();
+
+                    sessionUploadedHeroImages.add(result.url);
+
+                    if (previousUrl && previousUrl.startsWith('/images/newsletters/') && previousUrl !== result.url) {
+                        await deleteNewsletterImage(previousUrl);
+                        sessionUploadedHeroImages.delete(previousUrl);
+                    }
+                } catch (error) {
+                    console.error('Newsletter image upload failed:', error);
+                    if (status) status.textContent = 'Не удалось загрузить файл.';
+                    Components.showToast('Ошибка', 'Не удалось загрузить изображение', 'error');
+                }
+            });
 
             resetNewsletterForm();
             loadNewsletters();

@@ -14,6 +14,7 @@ const __dirname = path.dirname(__filename);
 const productUploadDir = path.join(__dirname, '../../public/images/products');
 const bannerUploadDir = path.join(__dirname, '../../public/images/banners');
 const logoUploadDir = path.join(__dirname, '../../public/images/logo');
+const newsletterUploadDir = path.join(__dirname, '../../public/images/newsletters');
 if (!fs.existsSync(productUploadDir)) {
     fs.mkdirSync(productUploadDir, { recursive: true });
 }
@@ -22,6 +23,9 @@ if (!fs.existsSync(bannerUploadDir)) {
 }
 if (!fs.existsSync(logoUploadDir)) {
     fs.mkdirSync(logoUploadDir, { recursive: true });
+}
+if (!fs.existsSync(newsletterUploadDir)) {
+    fs.mkdirSync(newsletterUploadDir, { recursive: true });
 }
 
 const createStorage = (destination, prefix) => multer.diskStorage({
@@ -87,6 +91,15 @@ router.post('/banners', requireAdmin, createUploader(bannerUploadDir, 'banner').
     return res.json({ success: true, url });
 });
 
+router.post('/newsletters', requireAdmin, createUploader(newsletterUploadDir, 'newsletter').single('image'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ success: false, message: 'Файл не загружен' });
+    }
+
+    const url = `/images/newsletters/${req.file.filename}`;
+    return res.json({ success: true, url });
+});
+
 router.post('/logo', requireAdmin, createUploader(logoUploadDir, 'logo').single('image'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({ success: false, message: 'Файл не загружен' });
@@ -105,6 +118,26 @@ router.post('/banners/delete', requireAdmin, (req, res) => {
 
         const filename = path.basename(url);
         const filePath = path.join(bannerUploadDir, filename);
+        if (!fs.existsSync(filePath)) {
+            return res.json({ success: true, removed: false });
+        }
+
+        fs.unlinkSync(filePath);
+        return res.json({ success: true, removed: true });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+router.post('/newsletters/delete', requireAdmin, (req, res) => {
+    try {
+        const { url } = req.body || {};
+        if (!url || typeof url !== 'string' || !url.startsWith('/images/newsletters/')) {
+            return res.status(400).json({ success: false, message: 'Некорректный URL' });
+        }
+
+        const filename = path.basename(url);
+        const filePath = path.join(newsletterUploadDir, filename);
         if (!fs.existsSync(filePath)) {
             return res.json({ success: true, removed: false });
         }

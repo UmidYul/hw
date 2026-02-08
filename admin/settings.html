@@ -371,12 +371,14 @@
                             <h3 class="card-title">Очистка файлов</h3>
                         </div>
                         <div class="card-body">
-                            <p class="form-hint">Удаляет изображения товаров и баннеров, которые не используются.</p>
+                            <p class="form-hint">Удаляет изображения товаров, баннеров и рассылок, которые не
+                                используются.</p>
                             <div class="flex gap-md" style="align-items: center; flex-wrap: wrap;">
                                 <select class="form-select" id="cleanupUploadsType" style="min-width: 220px;">
-                                    <option value="all">Товары + баннеры</option>
+                                    <option value="all">Товары + баннеры + рассылки</option>
                                     <option value="products">Только товары</option>
                                     <option value="banners">Только баннеры</option>
+                                    <option value="newsletters">Только рассылки</option>
                                 </select>
                                 <button type="button" class="btn btn-secondary" id="cleanupUploadsBtn"
                                     onclick="runUploadsCleanup()">
@@ -821,7 +823,7 @@
         async function runUploadsCleanup() {
             Components.confirm(
                 'Очистить неиспользуемые файлы?',
-                'Будут удалены изображения товаров и баннеров, не привязанные к базе данных.',
+                'Будут удалены изображения товаров, баннеров и рассылок, не привязанные к базе данных.',
                 async () => {
                     const button = document.getElementById('cleanupUploadsBtn');
                     const buttonText = button?.querySelector('.btn-text');
@@ -849,13 +851,17 @@
 
                         const products = payload.result?.products;
                         const banners = payload.result?.banners;
+                        const newsletters = payload.result?.newsletters;
                         const productsText = products
                             ? `товары ${products.removed ?? 0}/${products.scanned ?? 0}`
                             : null;
                         const bannersText = banners
                             ? `баннеры ${banners.removed ?? 0}/${banners.scanned ?? 0}`
                             : null;
-                        const details = [productsText, bannersText].filter(Boolean).join(', ');
+                        const newslettersText = newsletters
+                            ? `рассылки ${newsletters.removed ?? 0}/${newsletters.scanned ?? 0}`
+                            : null;
+                        const details = [productsText, bannersText, newslettersText].filter(Boolean).join(', ');
                         const message = details ? `Удалено: ${details}` : 'Очистка завершена.';
 
                         Components.showToast('Успешно', message, 'success');
@@ -906,6 +912,7 @@
             const bodyHtml = `
                 ${renderSection('Товары', result.products)}
                 ${renderSection('Баннеры', result.banners)}
+                ${renderSection('Рассылки', result.newsletters)}
             `;
 
             modal.innerHTML = `
@@ -935,9 +942,11 @@
             const items = [];
             const products = Array.isArray(result?.products?.removedUrls) ? result.products.removedUrls : [];
             const banners = Array.isArray(result?.banners?.removedUrls) ? result.banners.removedUrls : [];
+            const newsletters = Array.isArray(result?.newsletters?.removedUrls) ? result.newsletters.removedUrls : [];
 
             products.forEach(url => items.push({ type: 'products', url }));
             banners.forEach(url => items.push({ type: 'banners', url }));
+            newsletters.forEach(url => items.push({ type: 'newsletters', url }));
 
             return items;
         }

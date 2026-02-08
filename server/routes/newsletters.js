@@ -1,10 +1,17 @@
 import express from 'express';
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { dbAll, dbGet, dbRun } from '../database/db.js';
 import { requireAdmin } from '../services/auth.js';
 import { sendNewsletterCampaignEmail } from '../services/email.js';
 
 const router = express.Router();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const newsletterDir = path.join(__dirname, '../../public/images/newsletters');
 
 const allowedCategories = new Set(['promo', 'collection', 'news']);
 
@@ -58,6 +65,36 @@ const normalizeUrl = (value) => {
 const sanitizeCategory = (value) => {
     const normalized = String(value || '').trim().toLowerCase();
     return allowedCategories.has(normalized) ? normalized : null;
+};
+
+const isLocalNewsletterImage = (url) => typeof url === 'string' && url.startsWith('/images/newsletters/');
+
+const getNewsletterImagePath = (url) => {
+    if (!isLocalNewsletterImage(url)) return null;
+    return path.join(newsletterDir, path.basename(url));
+};
+
+const isNewsletterImageUsedElsewhere = async (url, excludeId) => {
+    if (!isLocalNewsletterImage(url)) return false;
+    if (excludeId) {
+        const row = await dbGet('SELECT id FROM newsletters WHERE id <> ? AND hero_image = ? LIMIT 1', [excludeId, url]);
+        return !!row;
+    }
+    const row = await dbGet('SELECT id FROM newsletters WHERE hero_image = ? LIMIT 1', [url]);
+    return !!row;
+};
+
+const safeDeleteNewsletterImage = async (url, excludeId) => {
+    const filePath = getNewsletterImagePath(url);
+    if (!filePath) return;
+    if (await isNewsletterImageUsedElsewhere(url, excludeId)) return;
+    try {
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+    } catch (error) {
+        console.warn('Failed to delete newsletter image:', error.message);
+    }
 };
 
 const getStoreMeta = async () => {
@@ -151,6 +188,8 @@ router.put('/:id', requireAdmin, async (req, res) => {
         const subject = normalizeText(req.body?.subject) || existing.subject;
         const title = normalizeText(req.body?.title) || existing.title;
 
+        const newHeroImage = normalizeUrl(req.body?.hero_image);
+
         await dbRun(
             `UPDATE newsletters SET
                 category = ?,
@@ -171,10 +210,14 @@ router.put('/:id', requireAdmin, async (req, res) => {
                 normalizeText(req.body?.body),
                 normalizeText(req.body?.cta_label),
                 normalizeUrl(req.body?.cta_url),
-                normalizeUrl(req.body?.hero_image),
+                newHeroImage,
                 req.params.id
             ]
         );
+
+        if (existing.hero_image && existing.hero_image !== newHeroImage) {
+            await safeDeleteNewsletterImage(existing.hero_image, req.params.id);
+        }
 
         const updated = await dbGet('SELECT * FROM newsletters WHERE id = ?', [req.params.id]);
         res.json(updated);
@@ -185,7 +228,11 @@ router.put('/:id', requireAdmin, async (req, res) => {
 
 router.delete('/:id', requireAdmin, async (req, res) => {
     try {
+        const existing = await dbGet('SELECT * FROM newsletters WHERE id = ?', [req.params.id]);
         await dbRun('DELETE FROM newsletters WHERE id = ?', [req.params.id]);
+        if (existing?.hero_image) {
+            await safeDeleteNewsletterImage(existing.hero_image, null);
+        }
         res.json({ success: true });
     } catch (error) {
         res.status(500).json({ error: error.message });

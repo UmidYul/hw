@@ -8,6 +8,7 @@ const __dirname = path.dirname(__filename);
 
 const productDir = path.join(__dirname, '../../public/images/products');
 const bannerDir = path.join(__dirname, '../../public/images/banners');
+const newsletterDir = path.join(__dirname, '../../public/images/newsletters');
 
 const listFiles = (dir) => {
     if (!fs.existsSync(dir)) return [];
@@ -56,6 +57,25 @@ const collectUsedBannerFiles = async () => {
     return used;
 };
 
+const collectUsedNewsletterFiles = async () => {
+    try {
+        const rows = await dbAll('SELECT hero_image FROM newsletters');
+        const used = new Set();
+
+        rows.forEach(row => {
+            const url = row.hero_image;
+            if (typeof url === 'string' && url.startsWith('/images/newsletters/')) {
+                used.add(path.basename(url));
+            }
+        });
+
+        return used;
+    } catch (error) {
+        console.warn('Failed to collect newsletter images:', error.message);
+        return new Set();
+    }
+};
+
 const cleanupDirectory = (dir, usedFiles, baseUrl) => {
     const files = listFiles(dir);
     const removedUrls = [];
@@ -85,6 +105,11 @@ export const runUploadsCleanup = async ({ type = 'all' } = {}) => {
     if (type === 'all' || type === 'banners') {
         const usedBannerFiles = await collectUsedBannerFiles();
         result.banners = cleanupDirectory(bannerDir, usedBannerFiles, '/images/banners');
+    }
+
+    if (type === 'all' || type === 'newsletters') {
+        const usedNewsletterFiles = await collectUsedNewsletterFiles();
+        result.newsletters = cleanupDirectory(newsletterDir, usedNewsletterFiles, '/images/newsletters');
     }
 
     return result;
