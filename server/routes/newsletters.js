@@ -254,17 +254,7 @@ router.post('/:id/send', requireAdmin, async (req, res) => {
             return res.status(404).json({ error: 'Not found' });
         }
 
-        const forceSend = req.body?.force === true
-            || req.body?.force === 'true'
-            || req.body?.force === 1
-            || req.body?.force === '1'
-            || req.query?.force === 'true'
-            || req.query?.force === '1'
-            || req.headers['x-force-send'] === 'true'
-            || req.headers['x-force-send'] === '1';
-        if (newsletter.status === 'sent' && !forceSend) {
-            return res.status(400).json({ error: 'Newsletter already sent' });
-        }
+        // Allow re-sending even if already sent; UI handles confirmation.
 
         if (!process.env.SMTP_HOST) {
             return res.status(503).json({ error: 'Email service is not configured' });
