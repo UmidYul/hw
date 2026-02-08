@@ -180,15 +180,17 @@ router.put('/:id', requireAdmin, async (req, res) => {
             return res.status(404).json({ error: 'Not found' });
         }
 
-        if (existing.status === 'sent') {
-            return res.status(400).json({ error: 'Sent newsletters cannot be edited' });
-        }
+        const resetSentStatus = existing.status === 'sent';
 
         const category = sanitizeCategory(req.body?.category) || existing.category;
         const subject = normalizeText(req.body?.subject) || existing.subject;
         const title = normalizeText(req.body?.title) || existing.title;
 
         const newHeroImage = normalizeUrl(req.body?.hero_image);
+
+        const statusValue = resetSentStatus ? 'draft' : existing.status || 'draft';
+        const sentAtValue = resetSentStatus ? null : existing.sent_at || null;
+        const sentCountValue = resetSentStatus ? 0 : (existing.sent_count || 0);
 
         await dbRun(
             `UPDATE newsletters SET
@@ -200,6 +202,9 @@ router.put('/:id', requireAdmin, async (req, res) => {
                 cta_label = ?,
                 cta_url = ?,
                 hero_image = ?,
+                status = ?,
+                sent_at = ?,
+                sent_count = ?,
                 updated_at = CURRENT_TIMESTAMP
              WHERE id = ?`,
             [
@@ -211,6 +216,9 @@ router.put('/:id', requireAdmin, async (req, res) => {
                 normalizeText(req.body?.cta_label),
                 normalizeUrl(req.body?.cta_url),
                 newHeroImage,
+                statusValue,
+                sentAtValue,
+                sentCountValue,
                 req.params.id
             ]
         );
