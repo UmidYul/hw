@@ -21,7 +21,7 @@ console.log({
     user: process.env.PGUSER,
     password: process.env.PGPASSWORD,
     ssl: process.env.PGSSL === 'true' ? { rejectUnauthorized: false } : undefined
-}1);
+});
 
 
 const run = async () => {
