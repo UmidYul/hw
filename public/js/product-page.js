@@ -103,6 +103,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Load products from API
     await loadProducts();
 
+    if (typeof loadSiteSettings === 'function') {
+        await loadSiteSettings();
+    }
+
     const productId = getUrlParam('id');
 
     if (!productId) {
@@ -128,12 +132,84 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initialize interactions
     initializeProductPage();
 
+    // Size guide
+    initializeSizeGuide();
+
     // Initialize lightbox
     initializeLightbox();
 
     // Load related products
     loadRelatedProducts();
 });
+
+function parseSizeTable(value) {
+    const text = String(value || '').trim();
+    if (!text) return null;
+    const rows = text.split('\n').map(row => row.split(',').map(cell => cell.trim()).filter(Boolean));
+    const cleaned = rows.filter(row => row.length > 0);
+    if (cleaned.length < 2) return null;
+    return cleaned;
+}
+
+function renderSizeTable(rows) {
+    const [header, ...body] = rows;
+    const headerHtml = header.map(cell => `<th>${cell}</th>`).join('');
+    const bodyHtml = body.map(row => `
+        <tr>
+            ${row.map(cell => `<td>${cell}</td>`).join('')}
+        </tr>
+    `).join('');
+
+    return `
+        <table class="size-guide-table">
+            <thead><tr>${headerHtml}</tr></thead>
+            <tbody>${bodyHtml}</tbody>
+        </table>
+    `;
+}
+
+function initializeSizeGuide() {
+    const buttons = document.querySelectorAll('.size-guide-btn');
+    if (!buttons.length) return;
+
+    const modal = document.getElementById('sizeGuideModal');
+    const overlay = document.getElementById('sizeGuideOverlay');
+    const closeBtn = document.getElementById('sizeGuideClose');
+    const body = document.getElementById('sizeGuideBody');
+    if (!modal || !overlay || !closeBtn || !body) return;
+
+    const openModal = () => {
+        const rows = parseSizeTable(siteSettings?.sizeTable || '');
+        if (!rows) {
+            body.innerHTML = '<div class="size-guide-empty">Таблица размеров пока не заполнена.</div>';
+        } else {
+            body.innerHTML = renderSizeTable(rows);
+        }
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    };
+
+    const closeModal = () => {
+        modal.classList.remove('open');
+        document.body.style.overflow = '';
+    };
+
+    buttons.forEach(btn => {
+        btn.addEventListener('click', (event) => {
+            event.preventDefault();
+            openModal();
+        });
+    });
+
+    overlay.addEventListener('click', closeModal);
+    closeBtn.addEventListener('click', closeModal);
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && modal.classList.contains('open')) {
+            closeModal();
+        }
+    });
+}
 
 function renderProduct() {
     const product = currentProduct;

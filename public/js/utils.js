@@ -17,7 +17,8 @@ let siteSettings = {
     socialTiktok: '',
     socialYoutube: '',
     socialWhatsapp: '',
-    colorPalette: []
+    colorPalette: [],
+    sizeTable: ''
 };
 
 const defaultColorPalette = [
@@ -78,6 +79,7 @@ async function loadSiteSettings() {
             siteSettings.socialYoutube = settings.social_youtube || '';
             siteSettings.socialWhatsapp = settings.social_whatsapp || '';
             siteSettings.colorPalette = normalizeColorPalette(settings.color_palette);
+            siteSettings.sizeTable = settings.size_table || '';
             applyFavicon(siteSettings.logoIcon);
         }
     } catch (error) {

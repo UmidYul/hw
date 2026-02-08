@@ -2189,6 +2189,37 @@ textarea {
     color: var(--color-primary);
 }
 
+.size-guide-modal .modal-content {
+    max-width: 720px;
+}
+
+.size-guide-modal .modal-body {
+    padding: 24px;
+}
+
+.size-guide-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.size-guide-table th,
+.size-guide-table td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.size-guide-table th {
+    font-weight: 500;
+    color: var(--color-primary);
+    background: #f6f4f1;
+}
+
+.size-guide-empty {
+    color: var(--color-secondary);
+}
+
 .color-swatches-large {
     display: flex;
     gap: var(--spacing-sm);
