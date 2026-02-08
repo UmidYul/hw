@@ -13,6 +13,16 @@ const pool = new Pool({
     password: process.env.PGPASSWORD,
     ssl: process.env.PGSSL === 'true' ? { rejectUnauthorized: false } : undefined
 });
+console.log({
+    connectionString: process.env.DATABASE_URL,
+    host: process.env.PGHOST,
+    port: process.env.PGPORT ? parseInt(process.env.PGPORT, 10) : 5432,
+    database: process.env.PGDATABASE,
+    user: process.env.PGUSER,
+    password: process.env.PGPASSWORD,
+    ssl: process.env.PGSSL === 'true' ? { rejectUnauthorized: false } : undefined
+}1);
+
 
 const run = async () => {
     const targetOwner = 'higherwa';
