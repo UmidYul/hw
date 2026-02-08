@@ -150,7 +150,8 @@ app.use('/api', (req, res, next) => {
         '/auth/login',
         '/auth/refresh',
         '/auth/2fa/verify-login',
-        '/auth/2fa/resend-login'
+        '/auth/2fa/resend-login',
+        '/subscribers'
     ]);
 
     if (openPaths.has(req.path)) return next();
