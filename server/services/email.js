@@ -100,6 +100,14 @@ const getBaseUrl = () => {
 
 const getSupportEmail = () => smtpConfig.user || 'support@example.com';
 
+const normalizePublicUrl = (value, baseUrl) => {
+    const trimmed = String(value || '').trim();
+    if (!trimmed) return '';
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+    if (trimmed.startsWith('/')) return `${baseUrl}${trimmed}`;
+    return trimmed;
+};
+
 const escapeHtml = (value) => {
     return String(value || '')
         .replace(/&/g, '&amp;')
@@ -391,7 +399,7 @@ export const sendNewsletterCampaignEmail = async ({
     const body = campaign?.body ? formatParagraphs(campaign.body) : '';
     const ctaLabel = escapeHtml(campaign?.cta_label || 'Перейти');
     const ctaUrl = campaign?.cta_url ? String(campaign.cta_url) : '';
-    const heroImage = campaign?.hero_image ? String(campaign.hero_image) : '';
+    const heroImage = campaign?.hero_image ? normalizePublicUrl(campaign.hero_image, baseUrl) : '';
 
     const preheader = escapeHtml(campaign?.subtitle || campaign?.title || 'Новости магазина');
 
