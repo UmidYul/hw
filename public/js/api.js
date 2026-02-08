@@ -514,9 +514,10 @@ const newslettersAPI = {
         });
     },
 
-    async send(id) {
+    async send(id, payload = null) {
         return await apiCall(`/newsletters/${id}/send`, {
-            method: 'POST'
+            method: 'POST',
+            body: payload ? JSON.stringify(payload) : undefined
         });
     }
 };

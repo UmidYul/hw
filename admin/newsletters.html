@@ -268,6 +268,7 @@
     <script>
         let newsletters = [];
         let activeNewsletterId = null;
+        let activeNewsletterStatus = 'draft';
         let hasSavedNewsletter = false;
         let lastHeroImageValue = '';
         const sessionUploadedHeroImages = new Set();
@@ -441,6 +442,10 @@
         const sendNewsletter = async (id = null) => {
             if (id) {
                 activeNewsletterId = id;
+                const found = newsletters.find(item => item.id === id);
+                if (found) {
+                    activeNewsletterStatus = found.status || 'draft';
+                }
             }
 
             if (!activeNewsletterId) {
@@ -448,9 +453,16 @@
                 if (!activeNewsletterId) return;
             }
 
-            Components.confirm('Отправить рассылку?', 'Письмо уйдет всем активным подписчикам.', async () => {
+            const isResend = activeNewsletterStatus === 'sent';
+            const title = isResend ? 'Рассылка уже отправлена' : 'Отправить рассылку?';
+            const message = isResend
+                ? 'Эта рассылка уже отправлена. Если продолжить, письмо будет продублировано для всех активных подписчиков.'
+                : 'Письмо уйдет всем активным подписчикам.';
+
+            Components.confirm(title, message, async () => {
                 try {
-                    const result = await API.newsletters.send(activeNewsletterId);
+                    const payload = isResend ? { force: true } : null;
+                    const result = await API.newsletters.send(activeNewsletterId, payload);
                     await loadNewsletters();
                     Components.showToast('Отправлено', `Успешно: ${result.sent}, ошибок: ${result.failed}`, 'success');
                 } catch (error) {

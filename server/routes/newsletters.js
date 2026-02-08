@@ -254,7 +254,8 @@ router.post('/:id/send', requireAdmin, async (req, res) => {
             return res.status(404).json({ error: 'Not found' });
         }
 
-        if (newsletter.status === 'sent') {
+        const forceSend = req.body?.force === true || req.body?.force === 'true' || req.body?.force === 1 || req.body?.force === '1';
+        if (newsletter.status === 'sent' && !forceSend) {
             return res.status(400).json({ error: 'Newsletter already sent' });
         }
 
