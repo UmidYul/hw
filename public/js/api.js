@@ -110,6 +110,24 @@ const ordersAPI = {
 
 // Auth API
 const authAPI = {
+    async logout() {
+        const csrfToken = getCsrfToken();
+        const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {})
+            },
+            credentials: 'include'
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(payload?.message || `HTTP error! status: ${response.status}`);
+        }
+
+        return payload;
+    },
     async changePassword(currentPassword, newPassword, confirmPassword) {
         const csrfToken = getCsrfToken();
         const response = await fetch(`${API_BASE_URL}/auth/change-password`, {

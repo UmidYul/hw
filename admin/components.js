@@ -364,12 +364,38 @@ const setupResponsiveTables = () => {
     });
 };
 
+const setupAdminLogout = () => {
+    const container = document.querySelector('.topbar-right');
+    if (!container || container.querySelector('.topbar-logout')) return;
+
+    const button = document.createElement('button');
+    button.className = 'btn btn-secondary btn-sm topbar-logout';
+    button.type = 'button';
+    button.textContent = 'Выйти';
+
+    button.addEventListener('click', async () => {
+        try {
+            if (window.API?.auth?.logout) {
+                await API.auth.logout();
+            }
+        } catch (error) {
+            console.warn('Logout failed:', error?.message || error);
+        } finally {
+            window.location.href = '/admin/login';
+        }
+    });
+
+    container.prepend(button);
+};
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         setupAdminSidebarToggle();
         setupResponsiveTables();
+        setupAdminLogout();
     });
 } else {
     setupAdminSidebarToggle();
     setupResponsiveTables();
+    setupAdminLogout();
 }

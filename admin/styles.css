@@ -338,6 +338,10 @@ a:hover {
     font-size: 14px;
 }
 
+.topbar-logout {
+    padding: 6px 12px;
+}
+
 /* Page Content */
 .page-content {
     flex: 1;
@@ -1301,6 +1305,52 @@ a:hover {
     display: flex;
     gap: var(--spacing-md);
     justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+    .modal {
+        align-items: flex-start;
+        padding: 0;
+    }
+
+    .modal-dialog,
+    .modal-content {
+        width: 100%;
+        max-width: none;
+        height: 100vh;
+        max-height: 100vh;
+        border-radius: 0;
+    }
+
+    .modal-header {
+        padding: var(--spacing-md);
+        gap: var(--spacing-md);
+    }
+
+    .modal-title {
+        font-size: 18px;
+    }
+
+    .modal-body {
+        padding: var(--spacing-md);
+    }
+
+    .modal-footer {
+        padding: var(--spacing-md);
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .modal-footer .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .cleanup-actions {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
 }
 
 /* Toast */
