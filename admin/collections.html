@@ -366,6 +366,8 @@
                 );
                 allCategories = categories;
 
+                populateCategorySelector();
+
                 if (id) {
                     title.textContent = 'Редактировать коллекцию';
                     const collection = await API.collections.getById(id);
@@ -384,7 +386,19 @@
 
                     if (ruleType === 'auto' || ruleType === 'rule') {
                         const conditions = collection.conditions ? (typeof collection.conditions === 'string' ? JSON.parse(collection.conditions) : collection.conditions) : {};
-                        document.getElementById('ruleCategory').value = conditions.category || conditions.categoryId || '';
+                        const ruleCategoryValue = conditions.category || conditions.categoryId || '';
+                        if (ruleCategoryValue) {
+                            const categoryOption = Array.from(document.getElementById('ruleCategory').options)
+                                .find(option => option.value === String(ruleCategoryValue));
+                            if (categoryOption) {
+                                document.getElementById('ruleCategory').value = String(ruleCategoryValue);
+                            } else {
+                                const matched = allCategories.find(cat => String(cat.id) === String(ruleCategoryValue));
+                                if (matched?.slug) {
+                                    document.getElementById('ruleCategory').value = matched.slug;
+                                }
+                            }
+                        }
                         document.getElementById('ruleTags').value = conditions.tags ? conditions.tags.join(', ') : '';
                         document.getElementById('ruleMinPrice').value = conditions.min_price || conditions.minPrice || '';
                         document.getElementById('ruleMaxPrice').value = conditions.max_price || conditions.maxPrice || '';
@@ -395,7 +409,6 @@
                 }
 
                 await populateProductSelector();
-                populateCategorySelector();
                 toggleRuleType();
                 updatePreview();
 
