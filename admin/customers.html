@@ -319,7 +319,7 @@
                 if (customerOrders.length > 0) {
                     totalOrders += customerOrders.length;
                     customerOrders.forEach(order => {
-                        totalRevenue += order.total || 0;
+                        totalRevenue += Number(order.total) || 0;
                     });
                     if (customerOrders.length > 1) {
                         repeatCustomers++;
@@ -344,7 +344,7 @@
 
         function getCustomerStats(customer) {
             const customerOrders = getCustomerOrders(customer.id);
-            const totalSpent = customerOrders.reduce((sum, order) => sum + (order.total || 0), 0);
+            const totalSpent = customerOrders.reduce((sum, order) => sum + (Number(order.total) || 0), 0);
             const lastOrder = customerOrders.sort((a, b) =>
                 new Date(b.createdAt) - new Date(a.createdAt)
             )[0];

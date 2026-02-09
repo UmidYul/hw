@@ -414,21 +414,20 @@ async function updateCartSummary() {
 
     // Show discount savings if any
     const discountRow = document.getElementById('discountRow');
-    const totalDiscount = productDiscountSavings + promoDiscount;
+    const promoDiscountRow = document.getElementById('promoDiscountRow');
 
-    if (totalDiscount > 0) {
+    if (productDiscountSavings > 0) {
         discountRow.style.display = 'flex';
-        let discountText = '';
-        if (productDiscountSavings > 0 && promoDiscount > 0) {
-            discountText = `-${formatPrice(productDiscountSavings)} (скидки) + -${formatPrice(promoDiscount)} (промокод)`;
-        } else if (productDiscountSavings > 0) {
-            discountText = `-${formatPrice(productDiscountSavings)}`;
-        } else if (promoDiscount > 0) {
-            discountText = `-${formatPrice(promoDiscount)}`;
-        }
-        document.getElementById('summaryDiscount').textContent = discountText;
+        document.getElementById('summaryDiscount').textContent = `-${formatPrice(productDiscountSavings)}`;
     } else {
         discountRow.style.display = 'none';
+    }
+
+    if (promoDiscount > 0 && promoDiscountRow) {
+        promoDiscountRow.style.display = 'flex';
+        document.getElementById('summaryPromoDiscount').textContent = `-${formatPrice(promoDiscount)}`;
+    } else if (promoDiscountRow) {
+        promoDiscountRow.style.display = 'none';
     }
 
     // Delivery
