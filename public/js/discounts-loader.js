@@ -3,6 +3,9 @@ class DiscountSystem {
     constructor() {
         this.activeDiscounts = [];
         this.loaded = false;
+        this.collections = [];
+        this.collectionsLoaded = false;
+        this.collectionProductMap = new Map();
     }
 
     // Load active discounts from API
@@ -14,6 +17,9 @@ class DiscountSystem {
             if (!response.ok) throw new Error('Failed to load discounts');
 
             this.activeDiscounts = await response.json();
+            if (this.activeDiscounts.some(discount => discount.target === 'collection')) {
+                await this.loadCollections();
+            }
             this.loaded = true;
             return this.activeDiscounts;
         } catch (error) {
@@ -22,6 +28,22 @@ class DiscountSystem {
             this.loaded = true;
             return [];
         }
+    }
+
+    async loadCollections() {
+        if (this.collectionsLoaded) return this.collections;
+
+        try {
+            const response = await fetch('/api/collections');
+            if (!response.ok) throw new Error('Failed to load collections');
+            this.collections = await response.json();
+        } catch (error) {
+            console.error('Error loading collections:', error);
+            this.collections = [];
+        }
+
+        this.collectionsLoaded = true;
+        return this.collections;
     }
 
     // Apply discounts to a product
@@ -84,9 +106,11 @@ class DiscountSystem {
         }
 
         if (target === 'collection') {
-            // Collection check would require additional data
             const collectionId = discount.collection_id;
-            return false; // TODO: Implement collection check
+            if (!collectionId) return false;
+            const productSet = this.collectionProductMap.get(String(collectionId));
+            if (!productSet) return false;
+            return productSet.has(String(product.id));
         }
 
         if (target === 'products') {
@@ -120,6 +144,9 @@ class DiscountSystem {
 
     // Apply discounts to multiple products
     applyDiscountsToProducts(products) {
+        if (this.activeDiscounts.some(discount => discount.target === 'collection')) {
+            this.buildCollectionProductMap(products);
+        }
         return products.map(product => this.applyDiscounts(product));
     }
 
@@ -146,6 +173,72 @@ class DiscountSystem {
     // Format price
     formatPrice(price) {
         return price.toLocaleString('ru-RU') + ' Сумм';
+    }
+
+    parseJsonField(value, fallback) {
+        if (value === null || value === undefined) return fallback;
+        if (Array.isArray(value)) return value;
+        if (typeof value === 'object') return value;
+        try {
+            return JSON.parse(value);
+        } catch (error) {
+            return fallback;
+        }
+    }
+
+    buildCollectionProductMap(products) {
+        this.collectionProductMap = new Map();
+        if (!Array.isArray(products) || !Array.isArray(this.collections)) return;
+
+        const normalizedProducts = products.map(product => ({
+            ...product,
+            tags: this.parseJsonField(product.tags, [])
+        }));
+
+        this.collections.forEach(collection => {
+            const collectionId = String(collection.id);
+            const type = collection.type || collection.collection_type || 'manual';
+            const conditions = this.parseJsonField(collection.conditions, null);
+            const productIds = this.parseJsonField(collection.product_ids, []);
+
+            if (type === 'manual') {
+                const set = new Set((productIds || []).map(id => String(id)));
+                this.collectionProductMap.set(collectionId, set);
+                return;
+            }
+
+            if (!conditions) {
+                this.collectionProductMap.set(collectionId, new Set());
+                return;
+            }
+
+            const conditionTags = Array.isArray(conditions.tags) ? conditions.tags : [];
+            const categoryValue = conditions.category || conditions.categoryId || '';
+            const minPrice = Number(conditions.min_price ?? conditions.minPrice ?? 0);
+            const maxPrice = Number(conditions.max_price ?? conditions.maxPrice ?? Infinity);
+            const limit = Number(conditions.limit ?? 0);
+
+            let matched = normalizedProducts.filter(product => {
+                const productCategory = product.category || product.category_slug || product.category_id || product.categoryId;
+                if (categoryValue && String(productCategory) !== String(categoryValue)) return false;
+                const price = product.price || 0;
+                if (price < minPrice || price > maxPrice) return false;
+                if (conditionTags.length > 0) {
+                    const productTags = Array.isArray(product.tags) ? product.tags.map(tag => String(tag)) : [];
+                    const normalizedTags = productTags.map(tag => tag.toLowerCase());
+                    const normalizedConditions = conditionTags.map(tag => String(tag).toLowerCase());
+                    if (!normalizedConditions.some(tag => normalizedTags.includes(tag))) return false;
+                }
+                return true;
+            });
+
+            if (Number.isFinite(limit) && limit > 0) {
+                matched = matched.slice(0, limit);
+            }
+
+            const set = new Set(matched.map(product => String(product.id)));
+            this.collectionProductMap.set(collectionId, set);
+        });
     }
 }
 

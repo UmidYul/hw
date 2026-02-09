@@ -414,7 +414,12 @@
                 allCategories = await API.categories.getAll();
                 allCollections = await API.collections.getAll();
                 const products = await API.products.getAll();
-                allProducts = products.filter(p => p.status === 'active');
+                allProducts = products.filter(p =>
+                    p.status === 'active' ||
+                    p.status === undefined ||
+                    p.is_active === 1 ||
+                    p.is_active === true
+                );
 
                 populateCategorySelector();
                 populateCollectionSelector();
