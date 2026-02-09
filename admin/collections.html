@@ -458,7 +458,10 @@
         function populateCategorySelector() {
             const select = document.getElementById('ruleCategory');
             select.innerHTML = '<option value="">Все категории</option>' +
-                allCategories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+                allCategories.map(cat => {
+                    const value = cat.slug || cat.id;
+                    return `<option value="${value}">${cat.name}</option>`;
+                }).join('');
         }
 
         // Toggle rule type
@@ -490,24 +493,21 @@
                 products = allProducts.filter(p => selectedIds.includes(String(p.id)));
             } else {
                 // Apply rules
-                const categoryId = document.getElementById('ruleCategory').value;
-                const tags = document.getElementById('ruleTags').value.split(',').map(t => t.trim().toLowerCase()).filter(t => t);
+                const categoryValue = document.getElementById('ruleCategory').value;
+                const tags = parseRuleTagsInput(document.getElementById('ruleTags').value);
                 const minPrice = parseFloat(document.getElementById('ruleMinPrice').value) || 0;
                 const maxPrice = parseFloat(document.getElementById('ruleMaxPrice').value) || Infinity;
                 const limit = parseInt(document.getElementById('ruleLimit').value) || 20;
 
                 products = allProducts.filter(p => {
-                    const catId = p.category_id || p.categoryId;
-                    if (categoryId && String(catId) !== categoryId) return false;
+                    const productCategory = p.category || p.category_slug || p.categoryId || p.category_id;
+                    if (categoryValue && String(productCategory) !== categoryValue) return false;
                     const price = p.price || p.regular_price || 0;
                     if (price < minPrice || price > maxPrice) return false;
                     if (tags.length > 0) {
-                        const productTags = [
-                            p.tags?.isNew || p.is_new ? 'новинка' : null,
-                            p.tags?.isSale || p.is_sale ? 'sale' : null,
-                            p.tags?.isLimited || p.is_limited ? 'лимитед' : null
-                        ].filter(Boolean);
-                        if (!tags.some(tag => productTags.includes(tag))) return false;
+                        const productTags = getProductTags(p).map(tag => tag.toLowerCase());
+                        const ruleTags = tags.map(tag => tag.toLowerCase());
+                        if (!ruleTags.some(tag => productTags.includes(tag))) return false;
                     }
                     return true;
                 }).slice(0, limit);
@@ -539,6 +539,47 @@
                     <small class="text-muted">Показано: ${products.length} товаров</small>
                 </div>
             `;
+        }
+
+        function normalizeRuleTag(tag) {
+            const value = String(tag || '').trim().toLowerCase();
+            if (!value) return null;
+
+            const map = {
+                new: 'New',
+                новинка: 'New',
+                новинки: 'New',
+                sale: 'Sale',
+                скидка: 'Sale',
+                скидки: 'Sale',
+                limited: 'Limited',
+                лимитед: 'Limited',
+                лимит: 'Limited',
+                лимитированный: 'Limited'
+            };
+
+            return map[value] || null;
+        }
+
+        function parseRuleTagsInput(input) {
+            return String(input || '')
+                .split(',')
+                .map(normalizeRuleTag)
+                .filter(tag => tag);
+        }
+
+        function getProductTags(product) {
+            const raw = product?.tags ?? [];
+            if (Array.isArray(raw)) return raw.map(tag => String(tag));
+            if (typeof raw === 'string') {
+                try {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) return parsed.map(tag => String(tag));
+                } catch (error) {
+                    return raw.split(',').map(tag => tag.trim()).filter(tag => tag);
+                }
+            }
+            return [];
         }
 
         function generateSlug(text) {
@@ -589,7 +630,7 @@
                     .filter(id => Number.isFinite(id));
                 data.conditions = null;
             } else {
-                const tags = document.getElementById('ruleTags').value.split(',').map(t => t.trim().toLowerCase()).filter(t => t);
+                const tags = parseRuleTagsInput(document.getElementById('ruleTags').value);
                 data.conditions = {
                     category: document.getElementById('ruleCategory').value || null,
                     tags: tags.length > 0 ? tags : null,
