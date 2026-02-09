@@ -227,7 +227,7 @@
 
                             <div class="form-group">
                                 <label for="ruleTags">Теги (через запятую)</label>
-                                <input type="text" id="ruleTags" name="ruleTags" placeholder="новинка, sale, лимитед">
+                                <input type="text" id="ruleTags" name="ruleTags" placeholder="new, sale, limited">
                             </div>
 
                             <div class="form-row">
@@ -285,7 +285,11 @@
         // Load collections
         async function loadCollections() {
             try {
-                const collections = await API.collections.getAll();
+                const [collections, products] = await Promise.all([
+                    API.collections.getAll(),
+                    API.products.getAll()
+                ]);
+                const productsForAuto = Array.isArray(products) ? products : [];
                 const tbody = document.getElementById('collectionsTable');
 
                 if (collections.length === 0) {
@@ -312,8 +316,14 @@
                     const statusBadge = isVisible
                         ? '<span class="badge badge-success">Активна</span>'
                         : '<span class="badge badge-secondary">Скрыта</span>';
-                    const typeLabel = (collection.collection_type || collection.type) === 'manual' ? 'Ручная' : 'Авто';
-                    const productCount = productIds.length || 0;
+                    const collectionType = collection.collection_type || collection.type || 'manual';
+                    const typeLabel = collectionType === 'manual' ? 'Ручная' : 'Авто';
+                    const autoProducts = collectionType === 'manual' || !conditions
+                        ? []
+                        : getAutoCollectionProducts(conditions, productsForAuto);
+                    const productCount = collectionType === 'manual'
+                        ? (productIds.length || 0)
+                        : autoProducts.length;
 
                     return `
                     <tr>
@@ -512,18 +522,13 @@
                 const maxPrice = parseFloat(document.getElementById('ruleMaxPrice').value) || Infinity;
                 const limit = parseInt(document.getElementById('ruleLimit').value) || 20;
 
-                products = allProducts.filter(p => {
-                    const productCategory = p.category || p.category_slug || p.categoryId || p.category_id;
-                    if (categoryValue && String(productCategory) !== categoryValue) return false;
-                    const price = p.price || p.regular_price || 0;
-                    if (price < minPrice || price > maxPrice) return false;
-                    if (tags.length > 0) {
-                        const productTags = getProductTags(p).map(tag => tag.toLowerCase());
-                        const ruleTags = tags.map(tag => tag.toLowerCase());
-                        if (!ruleTags.some(tag => productTags.includes(tag))) return false;
-                    }
-                    return true;
-                }).slice(0, limit);
+                products = getAutoCollectionProducts({
+                    category: categoryValue,
+                    tags,
+                    min_price: minPrice,
+                    max_price: maxPrice,
+                    limit
+                }, allProducts);
             }
 
             if (products.length === 0) {
@@ -593,6 +598,37 @@
                 }
             }
             return [];
+        }
+
+        function getAutoCollectionProducts(conditions, products) {
+            if (!conditions || !Array.isArray(products)) return [];
+
+            const categoryValue = conditions.category || conditions.categoryId || '';
+            const tags = Array.isArray(conditions.tags)
+                ? conditions.tags.map(normalizeRuleTag).filter(tag => tag)
+                : [];
+            const minPrice = Number(conditions.min_price ?? conditions.minPrice ?? 0);
+            const maxPrice = Number(conditions.max_price ?? conditions.maxPrice ?? Infinity);
+            const limit = Number(conditions.limit ?? 0);
+
+            let filtered = products.filter(p => {
+                const productCategory = p.category || p.category_slug || p.categoryId || p.category_id;
+                if (categoryValue && String(productCategory) !== String(categoryValue)) return false;
+                const price = p.price || p.regular_price || 0;
+                if (price < minPrice || price > maxPrice) return false;
+                if (tags.length > 0) {
+                    const productTags = getProductTags(p).map(tag => tag.toLowerCase());
+                    const ruleTags = tags.map(tag => tag.toLowerCase());
+                    if (!ruleTags.some(tag => productTags.includes(tag))) return false;
+                }
+                return true;
+            });
+
+            if (Number.isFinite(limit) && limit > 0) {
+                filtered = filtered.slice(0, limit);
+            }
+
+            return filtered;
         }
 
         function generateSlug(text) {
