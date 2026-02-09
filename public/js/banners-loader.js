@@ -80,10 +80,73 @@ function renderHeroSlider() {
     renderHeroBanner();
 }
 
+// Render home strip banner (narrow band on homepage)
+function renderStripBanner() {
+    const stripSection = document.querySelector('.home-strip');
+    if (!stripSection) return;
+
+    const stripBanners = activeBanners.filter(b => b.placement === 'home_strip');
+    if (stripBanners.length === 0) {
+        stripSection.style.display = 'none';
+        return;
+    }
+
+    const banner = stripBanners[0];
+    stripSection.style.display = '';
+    const imageStyle = banner.image ? `background-image: url(${banner.image}); background-size: cover; background-position: center;` : '';
+
+    stripSection.innerHTML = `
+        <div class="home-strip-inner" style="${imageStyle}; background-color: ${banner.background_color || '#FAFAFA'}; color: ${banner.text_color || '#2D2D2D'}; padding: 24px 0;">
+            <div class="container">
+                <div class="strip-content">
+                    ${banner.subtitle ? `<div class="strip-subtitle">${banner.subtitle}</div>` : ''}
+                    <h2 class="strip-title">${banner.title}</h2>
+                    ${banner.button_text && banner.button_link ? `<a href="${banner.button_link}" class="btn btn-primary">${banner.button_text}</a>` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Render catalog-top banner
+function renderCatalogTop() {
+    const container = document.querySelector('.catalog-top');
+    if (!container) return;
+
+    const banners = activeBanners.filter(b => b.placement === 'catalog_top');
+    if (banners.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+
+    const banner = banners[0];
+    container.style.display = '';
+    const imageStyle = banner.image ? `background-image: url(${banner.image}); background-size: cover; background-position: center;` : '';
+
+    container.innerHTML = `
+        <div class="catalog-top-inner" style="${imageStyle}; background-color: ${banner.background_color || '#FFF'}; color: ${banner.text_color || '#2D2D2D'}; padding: 20px 0;">
+            <div class="container">
+                <div class="catalog-top-content">
+                    ${banner.subtitle ? `<div class="catalog-subtitle">${banner.subtitle}</div>` : ''}
+                    <h3 class="catalog-title">${banner.title}</h3>
+                    ${banner.description ? `<p class="catalog-desc">${banner.description}</p>` : ''}
+                    ${banner.button_text && banner.button_link ? `<a href="${banner.button_link}" class="btn btn-primary">${banner.button_text}</a>` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Get banners by placement (helper)
+function getBannersByPlacement(placement) {
+    return activeBanners.filter(b => b.placement === placement);
+}
+
 // Initialize hero on page load
 async function initHero() {
     await loadBanners();
     renderHeroBanner();
+    renderStripBanner();
 }
 
 // Make functions available globally
@@ -91,4 +154,7 @@ if (typeof window !== 'undefined') {
     window.loadBanners = loadBanners;
     window.renderHeroBanner = renderHeroBanner;
     window.initHero = initHero;
+    window.renderStripBanner = renderStripBanner;
+    window.renderCatalogTop = renderCatalogTop;
+    window.getBannersByPlacement = getBannersByPlacement;
 }

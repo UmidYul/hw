@@ -340,8 +340,10 @@
                     };
 
                     const now = new Date();
-                    const start = banner.startDate ? new Date(banner.startDate) : null;
-                    const end = banner.endDate ? new Date(banner.endDate) : null;
+                    const startRaw = banner.start_date || banner.startDate || null;
+                    const endRaw = banner.end_date || banner.endDate || null;
+                    const start = startRaw ? new Date(startRaw) : null;
+                    const end = endRaw ? new Date(endRaw) : null;
 
                     let period = 'Без ограничений';
                     if (start && end) {
@@ -358,11 +360,13 @@
                         ? ' <small class="text-muted">(не в расписании)</small>'
                         : '';
 
+                    const thumbUrl = banner.image || banner.imageUrl || '';
+
                     return `
                     <tr>
                         <td>
                             <div class="banner-thumb" style="background: ${banner.theme === 'dark' ? '#2D2D2D' : banner.theme === 'accent' ? '#C9A26C' : '#FAFAFA'};">
-                                ${banner.imageUrl ? `<img src="${banner.imageUrl}" alt="${banner.title}">` : 'Нет'}
+                                ${thumbUrl ? `<img src="${thumbUrl}" alt="${banner.title}">` : 'Нет'}
                             </div>
                         </td>
                         <td>
@@ -443,11 +447,15 @@
 
                     const startDate = banner.start_date || banner.startDate;
                     if (startDate) {
-                        document.getElementById('startDate').value = new Date(startDate).toISOString().slice(0, 16);
+                        const sd = new Date(startDate);
+                        const localStart = new Date(sd.getTime() - sd.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                        document.getElementById('startDate').value = localStart;
                     }
                     const endDate = banner.end_date || banner.endDate;
                     if (endDate) {
-                        document.getElementById('endDate').value = new Date(endDate).toISOString().slice(0, 16);
+                        const ed = new Date(endDate);
+                        const localEnd = new Date(ed.getTime() - ed.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                        document.getElementById('endDate').value = localEnd;
                     }
                 } else {
                     title.textContent = 'Новый баннер';

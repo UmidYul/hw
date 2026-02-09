@@ -69,6 +69,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Load products from API
     await loadProducts();
 
+    // Load banners for this page and render catalog-top if available
+    if (typeof loadBanners === 'function') {
+        await loadBanners();
+        if (typeof renderCatalogTop === 'function') renderCatalogTop();
+    }
+
     // Apply discounts to loaded products
     if (window.discountSystem && window.discountSystem.loaded) {
         products = window.discountSystem.applyDiscountsToProducts(products);
