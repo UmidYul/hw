@@ -137,6 +137,35 @@ function renderCatalogTop() {
     `;
 }
 
+// Render collection-page banner
+function renderCollectionBanner() {
+    const container = document.querySelector('.collection-banner');
+    if (!container) return;
+
+    const banners = activeBanners.filter(b => b.placement === 'collection_page');
+    if (banners.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+
+    const banner = banners[0];
+    container.style.display = '';
+    const imageStyle = banner.image ? `background-image: url(${banner.image}); background-size: cover; background-position: center;` : '';
+
+    container.innerHTML = `
+        <div class="collection-banner-inner" style="${imageStyle}; background-color: ${banner.background_color || '#FFF'}; color: ${banner.text_color || '#2D2D2D'}; padding: 24px 0;">
+            <div class="container">
+                <div class="collection-banner-content">
+                    ${banner.subtitle ? `<div class="collection-banner-subtitle">${banner.subtitle}</div>` : ''}
+                    <h3 class="collection-banner-title">${banner.title}</h3>
+                    ${banner.description ? `<p class="collection-banner-desc">${banner.description}</p>` : ''}
+                    ${banner.button_text && banner.button_link ? `<a href="${banner.button_link}" class="btn btn-primary">${banner.button_text}</a>` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 // Get banners by placement (helper)
 function getBannersByPlacement(placement) {
     return activeBanners.filter(b => b.placement === placement);
@@ -156,5 +185,6 @@ if (typeof window !== 'undefined') {
     window.initHero = initHero;
     window.renderStripBanner = renderStripBanner;
     window.renderCatalogTop = renderCatalogTop;
+    window.renderCollectionBanner = renderCollectionBanner;
     window.getBannersByPlacement = getBannersByPlacement;
 }

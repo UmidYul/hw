@@ -90,6 +90,9 @@
                 <p class="collection-description" id="collectionDescription"></p>
             </div>
 
+            <!-- Collection page banner (admin placement: collection_page) -->
+            <section class="collection-banner" style="display:none;"></section>
+
             <!-- Products Grid -->
             <div class="products-section">
                 <div class="products-count" id="productsCount">
@@ -195,6 +198,7 @@
     </footer>
 
     <script src="/js/api.js"></script>
+    <script src="/js/banners-loader.js"></script>
     <script src="/js/utils.js"></script>
     <script src="/js/app.js"></script>
     <script>
@@ -227,6 +231,12 @@
                 errorState.style.display = 'none';
                 emptyState.style.display = 'none';
                 productsGrid.innerHTML = '';
+
+                // Load banners for collection page
+                if (typeof loadBanners === 'function') {
+                    await loadBanners();
+                    if (typeof renderCollectionBanner === 'function') renderCollectionBanner();
+                }
 
                 // Fetch collection with products
                 const response = await fetch(`/api/collections/slug/${collectionSlug}`);
