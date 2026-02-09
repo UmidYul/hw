@@ -2242,6 +2242,67 @@ a:hover {
     align-items: flex-end;
 }
 
+/* Customer View Page */
+.customer-view-page .page-header {
+    align-items: flex-start;
+}
+
+.customer-view-page .page-header .btn {
+    margin-bottom: var(--spacing-sm);
+}
+
+.customer-view-page .order-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacing-md) var(--spacing-lg);
+}
+
+.customer-view-page .order-info-grid>div {
+    padding: var(--spacing-md);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--border-radius);
+    background: var(--color-bg);
+}
+
+.customer-view-page .label {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    margin-bottom: 6px;
+}
+
+.customer-view-page .value {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    word-break: break-word;
+}
+
+.customer-view-page #customerNotes {
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    white-space: pre-line;
+}
+
+.customer-view-page .card-header h3 {
+    margin-bottom: 0;
+}
+
+@media (max-width: 1024px) {
+    .customer-view-page .grid-3 {
+        grid-template-columns: 1fr;
+    }
+
+    .customer-view-page .col-span-2 {
+        grid-column: auto;
+    }
+
+    .customer-view-page .order-info-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 .customer-info {
     display: flex;
     align-items: center;
