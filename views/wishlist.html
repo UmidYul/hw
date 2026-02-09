@@ -120,6 +120,24 @@
         </div>
     </div>
 
+    <!-- Clear Wishlist Modal -->
+    <div class="modal" id="clearWishlistModal">
+        <div class="modal-overlay" id="clearWishlistOverlay"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="clearWishlistClose" aria-label="Закрыть">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-body">
+                <h3 class="modal-title">Очистить избранное?</h3>
+                <p class="text-muted" style="margin-top: 8px;">Все товары будут удалены из избранного.</p>
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+                    <button class="btn btn-secondary" id="clearWishlistCancel">Отмена</button>
+                    <button class="btn btn-primary" id="clearWishlistConfirm">Очистить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Cart Drawer -->
     <div class="drawer" id="cartDrawer">
         <div class="drawer-overlay" id="cartDrawerOverlay"></div>
@@ -336,11 +354,38 @@
 
         // Initialize event listeners
         function initializeEventListeners() {
-            document.getElementById('clearWishlistBtn').addEventListener('click', () => {
-                if (confirm('Вы уверены, что хотите очистить избранное?')) {
-                    localStorage.setItem('wishlist', '[]');
-                    loadWishlist();
-                    showNotification('Избранное очищено');
+            const clearBtn = document.getElementById('clearWishlistBtn');
+            const modal = document.getElementById('clearWishlistModal');
+            const overlay = document.getElementById('clearWishlistOverlay');
+            const closeBtn = document.getElementById('clearWishlistClose');
+            const cancelBtn = document.getElementById('clearWishlistCancel');
+            const confirmBtn = document.getElementById('clearWishlistConfirm');
+
+            const openModal = () => {
+                modal.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            };
+
+            const closeModal = () => {
+                modal.classList.remove('open');
+                document.body.style.overflow = '';
+            };
+
+            clearBtn?.addEventListener('click', openModal);
+            overlay?.addEventListener('click', closeModal);
+            closeBtn?.addEventListener('click', closeModal);
+            cancelBtn?.addEventListener('click', closeModal);
+
+            confirmBtn?.addEventListener('click', () => {
+                localStorage.setItem('wishlist', '[]');
+                loadWishlist();
+                showNotification('Избранное очищено');
+                closeModal();
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && modal.classList.contains('open')) {
+                    closeModal();
                 }
             });
         }
