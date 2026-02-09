@@ -516,23 +516,19 @@
         }
 
         function getStatusClass(status) {
-            const statusClasses = {
-                'pending': 'warning',
-                'processing': 'info',
-                'completed': 'success',
-                'cancelled': 'danger'
+            const meta = Components.getOrderStatusMeta(status);
+            const map = {
+                warning: 'warning',
+                info: 'info',
+                success: 'success',
+                error: 'danger',
+                default: 'secondary'
             };
-            return statusClasses[status] || 'secondary';
+            return map[meta.badge] || 'secondary';
         }
 
         function getStatusText(status) {
-            const statusTexts = {
-                'pending': 'Ожидает',
-                'processing': 'В обработке',
-                'completed': 'Выполнен',
-                'cancelled': 'Отменён'
-            };
-            return statusTexts[status] || status;
+            return Components.getOrderStatusMeta(status).label;
         }
 
         function closeModal() {

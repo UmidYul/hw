@@ -66,9 +66,15 @@ router.get('/:id', requireAdmin, async (req, res) => {
             return res.status(404).json({ error: 'Order not found' });
         }
 
+        const statusHistory = await dbAll(
+            'SELECT status, created_at FROM order_status_history WHERE order_id = ? ORDER BY created_at ASC',
+            [req.params.id]
+        );
+
         const parsedOrder = {
             ...order,
-            items: parseJsonField(order.items, [])
+            items: parseJsonField(order.items, []),
+            status_history: statusHistory
         };
 
         res.json(parsedOrder);
@@ -158,6 +164,11 @@ router.post('/', async (req, res) => {
             'pending', paymentMethod || 'card', notes || null, promoCode || null
         ]);
 
+        await dbRun(
+            'INSERT INTO order_status_history (id, order_id, status) VALUES (?, ?, ?)',
+            [crypto.randomUUID(), orderId, 'pending']
+        );
+
         // Send Telegram notification
         try {
             await notifyNewOrder({
@@ -222,6 +233,13 @@ router.patch('/:id/status', requireAdmin, async (req, res) => {
             'UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
             [status, req.params.id]
         );
+
+        if (status !== oldStatus) {
+            await dbRun(
+                'INSERT INTO order_status_history (id, order_id, status) VALUES (?, ?, ?)',
+                [crypto.randomUUID(), req.params.id, status]
+            );
+        }
 
         // Send Telegram notification
         try {

@@ -107,11 +107,33 @@
                 </button>
             </div>
 
+            <div class="filter-bar wishlist-filters">
+                <input type="text" class="filter-input" id="wishlistSearch" placeholder="Поиск в избранном">
+                <div class="sort-select-wrapper">
+                    <select class="sort-select" id="wishlistSort">
+                        <option value="added">По умолчанию</option>
+                        <option value="price-asc">Цена: по возрастанию</option>
+                        <option value="price-desc">Цена: по убыванию</option>
+                        <option value="name-asc">Название: А-Я</option>
+                        <option value="name-desc">Название: Я-А</option>
+                    </select>
+                </div>
+                <label class="filter-checkbox-inline">
+                    <input type="checkbox" id="wishlistInStock">
+                    В наличии
+                </label>
+                <button class="btn btn-outline btn-sm" id="wishlistReset">Сбросить</button>
+            </div>
+
+            <div class="products-count" id="wishlistCount">
+                <span id="wishlistTotal">0</span> товаров
+            </div>
+
             <!-- Empty State -->
             <div class="empty-state" id="emptyWishlist" style="display: none;">
                 <i class="far fa-heart" style="font-size: 64px; color: #ddd; margin-bottom: 16px;"></i>
-                <h3>В избранном пока ничего нет</h3>
-                <p>Добавьте товары, чтобы не потерять их</p>
+                <h3 id="emptyWishlistTitle">В избранном пока ничего нет</h3>
+                <p id="emptyWishlistText">Добавьте товары, чтобы не потерять их</p>
                 <a href="/catalog" class="btn btn-primary">Перейти в каталог</a>
             </div>
 
@@ -261,6 +283,25 @@
     <script>
         let wishlistItems = [];
         let allProducts = [];
+        let wishlistOrder = [];
+
+        const wishlistSearch = document.getElementById('wishlistSearch');
+        const wishlistSort = document.getElementById('wishlistSort');
+        const wishlistInStock = document.getElementById('wishlistInStock');
+        const wishlistReset = document.getElementById('wishlistReset');
+        const emptyWishlistTitle = document.getElementById('emptyWishlistTitle');
+        const emptyWishlistText = document.getElementById('emptyWishlistText');
+        const wishlistTotal = document.getElementById('wishlistTotal');
+
+        const emptyWishlistDefaults = {
+            title: emptyWishlistTitle?.textContent || 'В избранном пока ничего нет',
+            text: emptyWishlistText?.textContent || 'Добавьте товары, чтобы не потерять их'
+        };
+
+        const initialWishlistParams = new URLSearchParams(window.location.search);
+        if (wishlistSearch) wishlistSearch.value = initialWishlistParams.get('q') || '';
+        if (wishlistSort) wishlistSort.value = initialWishlistParams.get('sort') || 'added';
+        if (wishlistInStock) wishlistInStock.checked = initialWishlistParams.get('stock') === '1';
 
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
@@ -279,6 +320,7 @@
         // Load wishlist
         function loadWishlist() {
             const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+            wishlistOrder = wishlist.map(id => String(id));
             wishlistItems = wishlist.map(id => {
                 const product = allProducts.find(p => p.id === id);
                 return product || null;
@@ -292,18 +334,35 @@
             const grid = document.getElementById('wishlistGrid');
             const emptyState = document.getElementById('emptyWishlist');
             const clearBtn = document.getElementById('clearWishlistBtn');
+            const filtered = applyWishlistFilters();
+
+            updateWishlistUrl();
 
             if (wishlistItems.length === 0) {
                 grid.style.display = 'none';
                 emptyState.style.display = 'flex';
                 clearBtn.style.display = 'none';
+                if (wishlistTotal) wishlistTotal.textContent = '0';
+                if (emptyWishlistTitle) emptyWishlistTitle.textContent = emptyWishlistDefaults.title;
+                if (emptyWishlistText) emptyWishlistText.textContent = emptyWishlistDefaults.text;
+                return;
+            }
+
+            clearBtn.style.display = 'inline-flex';
+
+            if (filtered.length === 0) {
+                grid.style.display = 'none';
+                emptyState.style.display = 'flex';
+                if (wishlistTotal) wishlistTotal.textContent = '0';
+                if (emptyWishlistTitle) emptyWishlistTitle.textContent = 'Ничего не найдено';
+                if (emptyWishlistText) emptyWishlistText.textContent = 'Попробуйте изменить поиск или фильтры.';
             } else {
                 grid.style.display = 'grid';
                 emptyState.style.display = 'none';
-                clearBtn.style.display = 'inline-flex';
+                if (wishlistTotal) wishlistTotal.textContent = String(filtered.length);
 
                 // Use renderProductCard from utils.js for consistent display
-                grid.innerHTML = wishlistItems.map(product => renderProductCard(product)).join('');
+                grid.innerHTML = filtered.map(product => renderProductCard(product)).join('');
 
                 // Attach product card listeners from utils.js
                 attachProductCardListeners(grid);
@@ -313,6 +372,91 @@
             }
 
             updateWishlistBadge();
+        }
+
+        function isInStock(product) {
+            const variants = Array.isArray(product.variants) ? product.variants : [];
+            const stockCount = variants.length > 0
+                ? variants.reduce((sum, v) => sum + (v.stock || 0), 0)
+                : (product.stock || 0);
+            return stockCount > 0;
+        }
+
+        function getProductPrice(product) {
+            return Number(product.finalPrice ?? product.price ?? 0);
+        }
+
+        function applyWishlistFilters() {
+            const term = wishlistSearch?.value.trim().toLowerCase() || '';
+            const sortValue = wishlistSort?.value || 'added';
+            const inStockOnly = wishlistInStock?.checked || false;
+
+            let filtered = [...wishlistItems];
+
+            if (term) {
+                filtered = filtered.filter((product) => {
+                    const title = product.title || product.name || '';
+                    return title.toLowerCase().includes(term);
+                });
+            }
+
+            if (inStockOnly) {
+                filtered = filtered.filter(isInStock);
+            }
+
+            switch (sortValue) {
+                case 'price-asc':
+                    filtered.sort((a, b) => getProductPrice(a) - getProductPrice(b));
+                    break;
+                case 'price-desc':
+                    filtered.sort((a, b) => getProductPrice(b) - getProductPrice(a));
+                    break;
+                case 'name-asc':
+                    filtered.sort((a, b) => (a.title || a.name || '').localeCompare(b.title || b.name || '', 'ru'));
+                    break;
+                case 'name-desc':
+                    filtered.sort((a, b) => (b.title || b.name || '').localeCompare(a.title || a.name || '', 'ru'));
+                    break;
+                case 'added':
+                default:
+                    filtered.sort((a, b) => {
+                        const indexA = wishlistOrder.indexOf(String(a.id));
+                        const indexB = wishlistOrder.indexOf(String(b.id));
+                        return indexA - indexB;
+                    });
+                    break;
+            }
+
+            return filtered;
+        }
+
+        function updateWishlistUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const term = wishlistSearch?.value.trim() || '';
+            const sortValue = wishlistSort?.value || 'added';
+            const inStockOnly = wishlistInStock?.checked || false;
+
+            if (term) {
+                params.set('q', term);
+            } else {
+                params.delete('q');
+            }
+
+            if (sortValue && sortValue !== 'added') {
+                params.set('sort', sortValue);
+            } else {
+                params.delete('sort');
+            }
+
+            if (inStockOnly) {
+                params.set('stock', '1');
+            } else {
+                params.delete('stock');
+            }
+
+            const query = params.toString();
+            const nextUrl = query ? `${window.location.pathname}?${query}` : window.location.pathname;
+            window.history.replaceState({}, '', nextUrl);
         }
 
         // Add remove buttons to wishlist cards
@@ -387,6 +531,16 @@
                 if (event.key === 'Escape' && modal.classList.contains('open')) {
                     closeModal();
                 }
+            });
+
+            wishlistSearch?.addEventListener('input', renderWishlist);
+            wishlistSort?.addEventListener('change', renderWishlist);
+            wishlistInStock?.addEventListener('change', renderWishlist);
+            wishlistReset?.addEventListener('click', () => {
+                if (wishlistSearch) wishlistSearch.value = '';
+                if (wishlistSort) wishlistSort.value = 'added';
+                if (wishlistInStock) wishlistInStock.checked = false;
+                renderWishlist();
             });
         }
 

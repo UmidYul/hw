@@ -810,6 +810,18 @@ a:hover {
     color: #9A7B4F;
 }
 
+.order-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.order-tags-compact {
+    gap: 4px;
+    margin-top: 4px;
+}
+
 /* === WYSIWYG EDITOR === */
 .editor-toolbar {
     display: flex;
@@ -2377,6 +2389,56 @@ a:hover {
 
 .order-link:hover {
     text-decoration: underline;
+}
+
+.mini-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 180px;
+}
+
+.mini-timeline-item {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    position: relative;
+    padding-left: 4px;
+}
+
+.mini-timeline-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 16px;
+    bottom: -6px;
+    width: 1px;
+    background: var(--color-border);
+}
+
+.mini-timeline-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    background: #fff;
+    flex-shrink: 0;
+    margin-top: 4px;
+}
+
+.mini-timeline-item.active .mini-timeline-dot {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+}
+
+.mini-timeline-status {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.mini-timeline-date {
+    font-size: 11px;
+    color: var(--color-text-secondary);
 }
 
 .action-buttons {

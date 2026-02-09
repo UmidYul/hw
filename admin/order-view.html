@@ -133,8 +133,8 @@
                         <button class="btn btn-secondary" onclick="window.print()">Печать</button>
                         <select class="btn btn-primary" id="statusSelect" onchange="changeStatus()">
                             <option value="">Изменить статус</option>
-                            <option value="new">Новый</option>
-                            <option value="paid">Оплачен</option>
+                            <option value="pending">Ожидает</option>
+                            <option value="processing">В обработке</option>
                             <option value="shipped">Отправлен</option>
                             <option value="completed">Выполнен</option>
                             <option value="cancelled">Отменен</option>
@@ -165,6 +165,10 @@
                                 <div>
                                     <div class="label">Способ оплаты</div>
                                     <div class="value" id="orderPayment">Онлайн</div>
+                                </div>
+                                <div>
+                                    <div class="label">Промо и скидки</div>
+                                    <div class="value" id="orderTags">—</div>
                                 </div>
                             </div>
                         </div>
@@ -313,6 +317,7 @@
             document.getElementById('orderStatus').innerHTML = getStatusBadge(order.status);
             document.getElementById('orderCreated').textContent = Components.formatDate(order.created_at);
             document.getElementById('orderPayment').textContent = order.payment_method || 'Не указан';
+            document.getElementById('orderTags').innerHTML = Components.renderOrderTags(order, { compact: true }) || '—';
 
             // Customer
             document.getElementById('customerInfo').innerHTML = `
@@ -393,16 +398,7 @@
                 </div>
             `;
 
-            // Timeline - show simple status if no history
-            document.getElementById('statusTimeline').innerHTML = `
-                <div class="timeline-item active">
-                    <div class="timeline-dot"></div>
-                    <div class="timeline-content">
-                        <div class="timeline-status">${getStatusLabel(order.status)}</div>
-                        <div class="timeline-date">${Components.formatDate(order.created_at)}</div>
-                    </div>
-                </div>
-            `;
+            renderStatusTimeline(order);
 
             // Notes
             document.getElementById('managerNotes').value = order.notes || '';
@@ -410,26 +406,36 @@
 
         // Get status badge
         function getStatusBadge(status) {
-            const badges = {
-                new: '<span class="badge badge-info">Новый</span>',
-                paid: '<span class="badge badge-success">Оплачен</span>',
-                shipped: '<span class="badge badge-warning">Отправлен</span>',
-                completed: '<span class="badge badge-success">Выполнен</span>',
-                cancelled: '<span class="badge badge-error">Отменен</span>'
-            };
-            return badges[status] || `<span class="badge">${status}</span>`;
+            const meta = Components.getOrderStatusMeta(status);
+            return Components.renderBadge(meta.label, meta.badge);
         }
 
         // Get status label
         function getStatusLabel(status) {
-            const labels = {
-                new: 'Новый заказ',
-                paid: 'Оплачен',
-                shipped: 'Отправлен',
-                completed: 'Выполнен',
-                cancelled: 'Отменен'
-            };
-            return labels[status] || status;
+            return Components.getOrderStatusMeta(status).label;
+        }
+
+        function renderStatusTimeline(order) {
+            const container = document.getElementById('statusTimeline');
+            const history = Array.isArray(order.status_history) ? order.status_history : [];
+            const entries = history.length
+                ? history
+                : [{ status: order.status, created_at: order.created_at }];
+
+            container.innerHTML = entries.map((entry, index) => {
+                const isActive = index === entries.length - 1;
+                const label = getStatusLabel(entry.status);
+                const dateValue = entry.created_at || entry.createdAt || order.created_at;
+                return `
+                    <div class="timeline-item ${isActive ? 'active' : ''}">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-status">${label}</div>
+                            <div class="timeline-date">${Components.formatDate(dateValue)}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
         // Change status

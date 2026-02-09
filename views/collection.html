@@ -95,6 +95,23 @@
 
             <!-- Products Grid -->
             <div class="products-section">
+                <div class="filter-bar collection-filters">
+                    <input type="text" class="filter-input" id="collectionSearch" placeholder="Поиск в коллекции">
+                    <div class="sort-select-wrapper">
+                        <select class="sort-select" id="collectionSort">
+                            <option value="default">По умолчанию</option>
+                            <option value="price-asc">Цена: по возрастанию</option>
+                            <option value="price-desc">Цена: по убыванию</option>
+                            <option value="name-asc">Название: А-Я</option>
+                            <option value="name-desc">Название: Я-А</option>
+                        </select>
+                    </div>
+                    <label class="filter-checkbox-inline">
+                        <input type="checkbox" id="collectionInStock">
+                        В наличии
+                    </label>
+                    <button class="btn btn-outline btn-sm" id="collectionReset">Сбросить</button>
+                </div>
                 <div class="products-count" id="productsCount">
                     <span id="productsTotal">0</span> товаров
                 </div>
@@ -116,8 +133,8 @@
                 <!-- Empty State -->
                 <div class="empty-state" id="emptyState" style="display: none;">
                     <i class="fas fa-box-open"></i>
-                    <h3>В коллекции пока нет товаров</h3>
-                    <p>Скоро здесь появятся новые товары. Следите за обновлениями!</p>
+                    <h3 id="emptyStateTitle">В коллекции пока нет товаров</h3>
+                    <p id="emptyStateText">Скоро здесь появятся новые товары. Следите за обновлениями!</p>
                     <a href="/catalog" class="btn btn-primary">Перейти в каталог</a>
                 </div>
 
@@ -219,6 +236,23 @@
         const loadingState = document.getElementById('loadingState');
         const errorState = document.getElementById('errorState');
         const emptyState = document.getElementById('emptyState');
+        const emptyStateTitle = document.getElementById('emptyStateTitle');
+        const emptyStateText = document.getElementById('emptyStateText');
+
+        const collectionSearch = document.getElementById('collectionSearch');
+        const collectionSort = document.getElementById('collectionSort');
+        const collectionInStock = document.getElementById('collectionInStock');
+        const collectionReset = document.getElementById('collectionReset');
+
+        const emptyStateDefaults = {
+            title: emptyStateTitle?.textContent || 'В коллекции пока нет товаров',
+            text: emptyStateText?.textContent || 'Скоро здесь появятся новые товары. Следите за обновлениями!'
+        };
+
+        const initialFilterParams = new URLSearchParams(window.location.search);
+        if (collectionSearch) collectionSearch.value = initialFilterParams.get('q') || '';
+        if (collectionSort) collectionSort.value = initialFilterParams.get('sort') || 'default';
+        if (collectionInStock) collectionInStock.checked = initialFilterParams.get('stock') === '1';
 
         // Load collection
         async function loadCollection() {
@@ -281,9 +315,7 @@
                     return;
                 }
 
-                // Display products
-                productsTotal.textContent = products.length;
-                renderProducts(products, 'productsGrid');
+                applyCollectionFilters();
 
             } catch (error) {
                 console.error('Error loading collection:', error);
@@ -308,6 +340,111 @@
             errorState.style.display = 'none';
             emptyState.style.display = 'block';
             productsGrid.innerHTML = '';
+            if (emptyStateTitle) emptyStateTitle.textContent = emptyStateDefaults.title;
+            if (emptyStateText) emptyStateText.textContent = emptyStateDefaults.text;
+        }
+
+        function showFilteredEmpty() {
+            loadingState.style.display = 'none';
+            errorState.style.display = 'none';
+            emptyState.style.display = 'block';
+            productsGrid.innerHTML = '';
+            if (emptyStateTitle) emptyStateTitle.textContent = 'Ничего не найдено';
+            if (emptyStateText) emptyStateText.textContent = 'Попробуйте изменить поиск или фильтры.';
+        }
+
+        function isInStock(product) {
+            const variants = Array.isArray(product.variants) ? product.variants : [];
+            const stockCount = variants.length > 0
+                ? variants.reduce((sum, v) => sum + (v.stock || 0), 0)
+                : (product.stock || 0);
+            return stockCount > 0;
+        }
+
+        function getProductPrice(product) {
+            return Number(product.finalPrice ?? product.price ?? 0);
+        }
+
+        function applyCollectionFilters() {
+            if (!products.length) return;
+
+            updateCollectionUrl();
+
+            const term = collectionSearch?.value.trim().toLowerCase() || '';
+            const sortValue = collectionSort?.value || 'default';
+            const inStockOnly = collectionInStock?.checked || false;
+
+            let filtered = [...products];
+
+            if (term) {
+                filtered = filtered.filter((product) => {
+                    const title = product.title || product.name || '';
+                    return title.toLowerCase().includes(term);
+                });
+            }
+
+            if (inStockOnly) {
+                filtered = filtered.filter(isInStock);
+            }
+
+            switch (sortValue) {
+                case 'price-asc':
+                    filtered.sort((a, b) => getProductPrice(a) - getProductPrice(b));
+                    break;
+                case 'price-desc':
+                    filtered.sort((a, b) => getProductPrice(b) - getProductPrice(a));
+                    break;
+                case 'name-asc':
+                    filtered.sort((a, b) => (a.title || a.name || '').localeCompare(b.title || b.name || '', 'ru'));
+                    break;
+                case 'name-desc':
+                    filtered.sort((a, b) => (b.title || b.name || '').localeCompare(a.title || a.name || '', 'ru'));
+                    break;
+                default:
+                    break;
+            }
+
+            productsTotal.textContent = filtered.length;
+
+            if (filtered.length === 0) {
+                showFilteredEmpty();
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            errorState.style.display = 'none';
+            loadingState.style.display = 'none';
+            renderProducts(filtered, 'productsGrid');
+        }
+
+        function updateCollectionUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const term = collectionSearch?.value.trim() || '';
+            const sortValue = collectionSort?.value || 'default';
+            const inStockOnly = collectionInStock?.checked || false;
+
+            if (collectionSlug) params.set('slug', collectionSlug);
+            if (term) {
+                params.set('q', term);
+            } else {
+                params.delete('q');
+            }
+
+            if (sortValue && sortValue !== 'default') {
+                params.set('sort', sortValue);
+            } else {
+                params.delete('sort');
+            }
+
+            if (inStockOnly) {
+                params.set('stock', '1');
+            } else {
+                params.delete('stock');
+            }
+
+            const query = params.toString();
+            const nextUrl = query ? `${window.location.pathname}?${query}` : window.location.pathname;
+            window.history.replaceState({}, '', nextUrl);
         }
 
 
@@ -362,6 +499,15 @@
         loadCollection();
         updateCartBadge();
         updateWishlistBadge();
+        collectionSearch?.addEventListener('input', applyCollectionFilters);
+        collectionSort?.addEventListener('change', applyCollectionFilters);
+        collectionInStock?.addEventListener('change', applyCollectionFilters);
+        collectionReset?.addEventListener('click', () => {
+            if (collectionSearch) collectionSearch.value = '';
+            if (collectionSort) collectionSort.value = 'default';
+            if (collectionInStock) collectionInStock.checked = false;
+            applyCollectionFilters();
+        });
     </script>
 </body>
 

@@ -38,10 +38,29 @@ router.get('/:id', async (req, res) => {
 
         // Get customer orders
         const orders = await dbAll('SELECT * FROM orders WHERE customer_id = ? ORDER BY created_at DESC', [req.params.id]);
+        const orderIds = orders.map(order => order.id);
+
+        let historyByOrder = {};
+        if (orderIds.length > 0) {
+            const statusRows = await dbAll(
+                'SELECT order_id, status, created_at FROM order_status_history WHERE order_id = ANY(?) ORDER BY created_at ASC',
+                [orderIds]
+            );
+
+            historyByOrder = statusRows.reduce((acc, row) => {
+                if (!acc[row.order_id]) acc[row.order_id] = [];
+                acc[row.order_id].push({ status: row.status, created_at: row.created_at });
+                return acc;
+            }, {});
+        }
 
         res.json({
             ...customer,
-            orders: orders.map(o => ({ ...o, items: parseJsonField(o.items, []) }))
+            orders: orders.map(o => ({
+                ...o,
+                items: parseJsonField(o.items, []),
+                status_history: historyByOrder[o.id] || []
+            }))
         });
     } catch (error) {
         res.status(500).json({ error: error.message });

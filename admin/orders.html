@@ -130,11 +130,11 @@
                                 <label class="form-label">Статус</label>
                                 <select class="form-select" id="filter-status" onchange="applyFilters()">
                                     <option value="">Все</option>
-                                    <option value="new">Новые</option>
-                                    <option value="paid">Оплачены</option>
-                                    <option value="shipped">Отправлены</option>
-                                    <option value="completed">Завершены</option>
-                                    <option value="cancelled">Отменены</option>
+                                    <option value="pending">Ожидает</option>
+                                    <option value="processing">В обработке</option>
+                                    <option value="shipped">Отправлен</option>
+                                    <option value="completed">Выполнен</option>
+                                    <option value="cancelled">Отменен</option>
                                 </select>
                             </div>
                             <div class="form-group mb-0">
@@ -179,14 +179,6 @@
         let currentPage = 1;
         const itemsPerPage = 15;
 
-        const statusBadges = {
-            new: { text: 'Новый', type: 'info' },
-            paid: { text: 'Оплачен', type: 'success' },
-            shipped: { text: 'Отправлен', type: 'warning' },
-            completed: { text: 'Завершен', type: 'success' },
-            cancelled: { text: 'Отменен', type: 'error' }
-        };
-
         function applyFilters() {
             currentPage = 1;
             loadOrders();
@@ -209,7 +201,7 @@
                 // Filters
                 const statusFilter = document.getElementById('filter-status').value;
                 if (statusFilter) {
-                    orders = orders.filter(o => o.status === statusFilter);
+                    orders = orders.filter(o => Components.normalizeOrderStatus(o.status) === statusFilter);
                 }
 
                 const minTotal = parseFloat(document.getElementById('filter-min-total').value) || 0;
@@ -258,7 +250,7 @@
             html += '</tr></thead><tbody>';
 
             orders.forEach(order => {
-                const badge = statusBadges[order.status] || { text: order.status, type: 'default' };
+                const badge = Components.getOrderStatusMeta(order.status);
 
                 // Get customer info from database fields
                 const customerName = order.customer_name || 'Без имени';
@@ -266,6 +258,8 @@
                 const customerEmail = order.customer_email || '';
                 const orderNumber = order.order_number || order.id;
                 const orderDate = order.created_at || order.createdAt;
+
+                const tagsHtml = Components.renderOrderTags(order);
 
                 html += `<tr>
                     <td class="orders-col-id"><strong>${orderNumber}</strong></td>
@@ -275,16 +269,18 @@
                         ${customerEmail ? `<small class="text-muted">${customerEmail}</small>` : ''}
                     </td>
                     <td class="orders-col-items">${order.items.length}</td>
-                    <td class="orders-col-total"><strong>${Components.formatPrice(order.total)}</strong></td>
-                    <td class="orders-col-status">${Components.renderBadge(badge.text, badge.type)}</td>
+                    <td class="orders-col-total"><strong>${Components.formatPrice(order.total)}</strong>${tagsHtml}</td>
+                    <td class="orders-col-status">${Components.renderBadge(badge.label, badge.badge)}</td>
                     <td class="orders-col-date"><small>${Components.formatDate(orderDate)}</small></td>
                     <td class="orders-col-actions">
                         <button class="btn btn-sm btn-ghost" onclick="viewOrder('${order.id}')" title="Открыть">Открыть</button>
                         <div class="dropdown" style="display:inline-block">
                             <button class="btn btn-sm btn-ghost" onclick="toggleStatusMenu('${order.id}')" title="Статус">Статус</button>
                             <div class="dropdown-menu" id="status-menu-${order.id}">
+                                <div class="dropdown-item" onclick="changeStatus('${order.id}', 'pending')">Ожидает</div>
                                 <div class="dropdown-item" onclick="changeStatus('${order.id}', 'processing')">В обработке</div>
-                                <div class="dropdown-item" onclick="changeStatus('${order.id}', 'completed')">Завершен</div>
+                                <div class="dropdown-item" onclick="changeStatus('${order.id}', 'shipped')">Отправлен</div>
+                                <div class="dropdown-item" onclick="changeStatus('${order.id}', 'completed')">Выполнен</div>
                                 <div class="dropdown-divider"></div>
                                 <div class="dropdown-item" onclick="changeStatus('${order.id}', 'cancelled')">Отменить</div>
                             </div>

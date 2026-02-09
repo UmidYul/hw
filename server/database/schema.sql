@@ -120,6 +120,14 @@ CREATE TABLE IF NOT EXISTS orders (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Order Status History
+CREATE TABLE IF NOT EXISTS order_status_history (
+    id UUID PRIMARY KEY,
+    order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    status TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Promocodes
 CREATE TABLE IF NOT EXISTS promocodes (
     id UUID PRIMARY KEY,

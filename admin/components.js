@@ -184,6 +184,48 @@ const Components = {
         return `<span class="badge badge-${type}">${text}</span>`;
     },
 
+    renderOrderTags(order, options = {}) {
+        const discountValue = Number(order?.discount) || 0;
+        const promoCode = order?.promo_code || order?.promoCode || '';
+        const tags = [];
+
+        if (discountValue > 0) {
+            tags.push(this.renderBadge(`Скидка -${this.formatPrice(discountValue)}`, 'warning'));
+        }
+
+        if (promoCode) {
+            tags.push(this.renderBadge(`Промокод ${promoCode}`, 'accent'));
+        }
+
+        if (tags.length === 0) return '';
+
+        const className = options.compact ? 'order-tags order-tags-compact' : 'order-tags';
+        return `<div class="${className}">${tags.join('')}</div>`;
+    },
+
+    normalizeOrderStatus(status) {
+        const value = String(status || '').toLowerCase();
+        const map = {
+            new: 'pending',
+            paid: 'processing'
+        };
+
+        return map[value] || value || 'pending';
+    },
+
+    getOrderStatusMeta(status) {
+        const normalized = this.normalizeOrderStatus(status);
+        const meta = {
+            pending: { label: 'Ожидает', badge: 'warning' },
+            processing: { label: 'В обработке', badge: 'info' },
+            shipped: { label: 'Отправлен', badge: 'warning' },
+            completed: { label: 'Выполнен', badge: 'success' },
+            cancelled: { label: 'Отменен', badge: 'error' }
+        };
+
+        return meta[normalized] || { label: normalized, badge: 'default' };
+    },
+
     // Skeleton loader
     showSkeleton(selector, lines = 5) {
         const container = document.querySelector(selector);

@@ -230,12 +230,17 @@
                 const orderNumber = order.order_number || order.orderNumber || order.id;
                 const total = order.total || 0;
                 const createdAt = order.created_at || order.createdAt;
+                const statusMeta = Components.getOrderStatusMeta(order.status);
+                const statusBadge = Components.renderBadge(statusMeta.label, statusMeta.badge);
+                const timelineHtml = renderMiniTimeline(order);
 
                 return `
                     <tr>
                         <td><strong>${orderNumber}</strong></td>
                         <td>${formatDate(createdAt)}</td>
                         <td>${Components.formatPrice(total)}</td>
+                        <td>${statusBadge}</td>
+                        <td>${timelineHtml}</td>
                         <td>
                             <a class="btn btn-sm btn-secondary" href="/admin/order-view?id=${order.id}">Открыть</a>
                         </td>
@@ -251,6 +256,8 @@
                                 <th>Номер</th>
                                 <th>Дата</th>
                                 <th>Сумма</th>
+                                <th>Статус</th>
+                                <th>История</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -258,6 +265,32 @@
                             ${rows}
                         </tbody>
                     </table>
+                </div>
+            `;
+        }
+
+        function renderMiniTimeline(order) {
+            const history = Array.isArray(order.status_history) ? order.status_history : [];
+            const entries = history.length
+                ? history
+                : [{ status: order.status, created_at: order.created_at || order.createdAt }];
+
+            return `
+                <div class="mini-timeline">
+                    ${entries.map((entry, index) => {
+                const isActive = index === entries.length - 1;
+                const dateValue = entry.created_at || entry.createdAt;
+                const label = Components.getOrderStatusMeta(entry.status).label;
+                return `
+                            <div class="mini-timeline-item ${isActive ? 'active' : ''}">
+                                <div class="mini-timeline-dot"></div>
+                                <div class="mini-timeline-content">
+                                    <div class="mini-timeline-status">${label}</div>
+                                    <div class="mini-timeline-date">${formatDate(dateValue)}</div>
+                                </div>
+                            </div>
+                        `;
+            }).join('')}
                 </div>
             `;
         }
