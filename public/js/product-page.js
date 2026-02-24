@@ -119,6 +119,22 @@ function splitFormattedPrice(formattedPrice) {
     };
 }
 
+function normalizeCurrencyLabel(currency) {
+    const value = String(currency || '').trim();
+    if (!value) return '';
+
+    const lower = value.toLowerCase();
+    if (
+        lower === 'uzs' ||
+        lower.includes('sum') ||
+        lower.includes('\u0441\u0443\u043c')
+    ) {
+        return '\u0441\u0443\u043c';
+    }
+
+    return value;
+}
+
 function setStyledPrice(target, value) {
     if (!target) return;
 
@@ -132,10 +148,11 @@ function setStyledPrice(target, value) {
     amountEl.textContent = amount || formatted;
     target.appendChild(amountEl);
 
-    if (currency) {
+    const normalizedCurrency = normalizeCurrencyLabel(currency);
+    if (normalizedCurrency) {
         const currencyEl = document.createElement('span');
         currencyEl.className = 'price-currency';
-        currencyEl.textContent = currency;
+        currencyEl.textContent = normalizedCurrency;
         target.appendChild(currencyEl);
     }
 }

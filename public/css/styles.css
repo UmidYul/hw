@@ -2486,7 +2486,7 @@ textarea {
     font-size: 20px;
     font-weight: 400;
     letter-spacing: 0.1em;
-    color: #A78E73;
+    color: var(--color-primary);
     line-height: 1;
     margin-bottom: 8px;
     opacity: 0.82;
