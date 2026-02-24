@@ -179,7 +179,7 @@
         let currentPage = 1;
         const itemsPerPage = 15;
 
-        function escapeHtml(value) {
+        function escapeOrderHtml(value) {
             return String(value ?? '')
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
@@ -262,10 +262,10 @@
                 const badge = Components.getOrderStatusMeta(order.status);
 
                 // Get customer info from database fields
-                const customerName = escapeHtml(order.customer_name || 'Без имени');
-                const customerPhone = escapeHtml(order.customer_phone || '—');
-                const customerEmail = escapeHtml(order.customer_email || '');
-                const orderNumber = escapeHtml(order.order_number || order.id);
+                const customerName = escapeOrderHtml(order.customer_name || 'Без имени');
+                const customerPhone = escapeOrderHtml(order.customer_phone || '—');
+                const customerEmail = escapeOrderHtml(order.customer_email || '');
+                const orderNumber = escapeOrderHtml(order.order_number || order.id);
                 const orderDate = order.created_at || order.createdAt;
                 const itemsCount = Array.isArray(order.items) ? order.items.length : 0;
 

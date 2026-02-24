@@ -261,7 +261,7 @@
     <script>
         let currentOrder = null;
 
-        function escapeHtml(value) {
+        function escapeOrderHtml(value) {
             return String(value ?? '')
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
@@ -331,10 +331,10 @@
             // Customer
             document.getElementById('customerInfo').innerHTML = `
                 <div style="margin-top: 12px;">
-                    <div style="font-weight: 500; margin-bottom: 4px;">${escapeHtml(order.customer_name || 'Без имени')}</div>
+                    <div style="font-weight: 500; margin-bottom: 4px;">${escapeOrderHtml(order.customer_name || 'Без имени')}</div>
                     <div style="color: #666; font-size: 14px;">
-                        ${escapeHtml(order.customer_email || '')}<br>
-                        ${escapeHtml(order.customer_phone || '')}
+                        ${escapeOrderHtml(order.customer_email || '')}<br>
+                        ${escapeOrderHtml(order.customer_phone || '')}
                     </div>
                 </div>
             `;
@@ -342,9 +342,9 @@
             // Items
             const items = Array.isArray(order.items) ? order.items : [];
             const itemsHtml = items.map(item => {
-                const itemTitle = escapeHtml(item.title || 'Товар');
-                const itemSize = escapeHtml(item.size || '');
-                const itemColor = escapeHtml(item.color || '');
+                const itemTitle = escapeOrderHtml(item.title || 'Товар');
+                const itemSize = escapeOrderHtml(item.size || '');
+                const itemColor = escapeOrderHtml(item.color || '');
                 const quantity = Number(item.quantity) || 0;
                 const price = Number(item.price) || 0;
                 return `
@@ -370,13 +370,13 @@
                     const addr = typeof order.shipping_address === 'string'
                         ? JSON.parse(order.shipping_address)
                         : order.shipping_address;
-                    const addressName = escapeHtml(addr?.name || order.customer_name || '');
+                    const addressName = escapeOrderHtml(addr?.name || order.customer_name || '');
                     const addressLine = typeof addr === 'string'
-                        ? escapeHtml(addr)
-                        : escapeHtml(addr?.address || '');
-                    const cityLine = addr?.city ? `${escapeHtml(addr.city)}, ${escapeHtml(addr.postalCode || '')}<br>` : '';
-                    const country = escapeHtml(addr?.country || 'Россия');
-                    const phone = escapeHtml(addr?.phone || order.customer_phone || '');
+                        ? escapeOrderHtml(addr)
+                        : escapeOrderHtml(addr?.address || '');
+                    const cityLine = addr?.city ? `${escapeOrderHtml(addr.city)}, ${escapeOrderHtml(addr.postalCode || '')}<br>` : '';
+                    const country = escapeOrderHtml(addr?.country || 'Россия');
+                    const phone = escapeOrderHtml(addr?.phone || order.customer_phone || '');
                     document.getElementById('shippingAddress').innerHTML = `
                         <p style="line-height: 1.6; margin: 0;">
                             ${addressName}<br>
@@ -387,7 +387,7 @@
                         </p>
                     `;
                 } catch (e) {
-                    document.getElementById('shippingAddress').innerHTML = `<p style="line-height: 1.6; margin: 0;">${escapeHtml(order.shipping_address)}</p>`;
+                    document.getElementById('shippingAddress').innerHTML = `<p style="line-height: 1.6; margin: 0;">${escapeOrderHtml(order.shipping_address)}</p>`;
                 }
             } else {
                 document.getElementById('shippingAddress').innerHTML = '<p class="text-muted">Адрес не указан</p>';

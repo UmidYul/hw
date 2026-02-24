@@ -99,6 +99,47 @@ function getMaxQuantity(product) {
     return product?.stock || 0;
 }
 
+function splitFormattedPrice(formattedPrice) {
+    const normalized = String(formattedPrice || '')
+        .replace(/\u00A0/g, ' ')
+        .trim();
+
+    if (!normalized) {
+        return { amount: '', currency: '' };
+    }
+
+    const parts = normalized.split(/\s+/);
+    if (parts.length === 1) {
+        return { amount: normalized, currency: '' };
+    }
+
+    return {
+        amount: parts.slice(0, -1).join(' '),
+        currency: parts.at(-1)
+    };
+}
+
+function setStyledPrice(target, value) {
+    if (!target) return;
+
+    const formatted = formatPrice(value);
+    const { amount, currency } = splitFormattedPrice(formatted);
+
+    target.textContent = '';
+
+    const amountEl = document.createElement('span');
+    amountEl.className = 'price-amount';
+    amountEl.textContent = amount || formatted;
+    target.appendChild(amountEl);
+
+    if (currency) {
+        const currencyEl = document.createElement('span');
+        currencyEl.className = 'price-currency';
+        currencyEl.textContent = currency;
+        target.appendChild(currencyEl);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     // Load products from API
     await loadProducts();
@@ -269,11 +310,17 @@ function renderProduct() {
     document.getElementById('productTitle').textContent = product.title;
 
     // Price
-    document.getElementById('productPrice').textContent = formatPrice(finalPrice);
+    const productPriceEl = document.getElementById('productPrice');
+    const productOldPriceEl = document.getElementById('productOldPrice');
+
+    setStyledPrice(productPriceEl, finalPrice);
+
     if (originalPrice && originalPrice > finalPrice) {
-        document.getElementById('productOldPrice').textContent = formatPrice(originalPrice);
+        productOldPriceEl.style.display = 'inline-flex';
+        setStyledPrice(productOldPriceEl, originalPrice);
     } else {
-        document.getElementById('productOldPrice').style.display = 'none';
+        productOldPriceEl.style.display = 'none';
+        productOldPriceEl.textContent = '';
     }
 
     // Colors
