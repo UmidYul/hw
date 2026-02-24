@@ -2458,12 +2458,12 @@ textarea {
     display: inline-flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
-    padding: 26px 30px;
-    margin: 16px 0 46px;
-    border: 1px solid #EEE5D7;
-    background: #FCF8F1;
-    border-radius: 2px;
+    gap: 10px;
+    padding: 0;
+    margin: 14px 0 40px;
+    border: none;
+    background: transparent;
+    border-radius: 0;
 }
 
 .product-info .product-price .price-current {
@@ -2474,11 +2474,11 @@ textarea {
 }
 
 .product-info .product-price .price-current .price-amount {
-    font-size: 72px;
+    font-size: 58px;
     font-weight: 600;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.07em;
     color: #8A5A2D;
-    line-height: 0.9;
+    line-height: 0.92;
     font-variant-numeric: tabular-nums;
 }
 
@@ -3261,8 +3261,8 @@ textarea.form-input {
     }
 
     .product-info .product-price {
-        padding: 20px 22px;
-        margin: 12px 0 34px;
+        padding: 0;
+        margin: 12px 0 32px;
     }
 
     .product-info .product-price .price-current {
@@ -3270,7 +3270,7 @@ textarea.form-input {
     }
 
     .product-info .product-price .price-current .price-amount {
-        font-size: 58px;
+        font-size: 50px;
         letter-spacing: 0.07em;
     }
 
@@ -3527,7 +3527,7 @@ textarea.form-input {
     }
 
     .product-info .product-price {
-        padding: 14px 16px;
+        padding: 0;
         margin: 10px 0 28px;
         gap: 8px;
     }
@@ -3537,8 +3537,8 @@ textarea.form-input {
     }
 
     .product-info .product-price .price-current .price-amount {
-        font-size: 44px;
-        letter-spacing: 0.06em;
+        font-size: 38px;
+        letter-spacing: 0.05em;
     }
 
     .product-info .product-price .price-current .price-currency {
