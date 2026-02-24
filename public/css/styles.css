@@ -2474,10 +2474,10 @@ textarea {
 }
 
 .product-info .product-price .price-current .price-amount {
-    font-size: 58px;
+    font-size: 50px;
     font-weight: 600;
     letter-spacing: 0.07em;
-    color: #8A5A2D;
+    color: var(--color-primary);
     line-height: 0.92;
     font-variant-numeric: tabular-nums;
 }
