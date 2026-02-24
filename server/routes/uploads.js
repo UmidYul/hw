@@ -15,25 +15,127 @@ const productUploadDir = path.join(__dirname, '../../public/images/products');
 const bannerUploadDir = path.join(__dirname, '../../public/images/banners');
 const logoUploadDir = path.join(__dirname, '../../public/images/logo');
 const newsletterUploadDir = path.join(__dirname, '../../public/images/newsletters');
-if (!fs.existsSync(productUploadDir)) {
-    fs.mkdirSync(productUploadDir, { recursive: true });
-}
-if (!fs.existsSync(bannerUploadDir)) {
-    fs.mkdirSync(bannerUploadDir, { recursive: true });
-}
-if (!fs.existsSync(logoUploadDir)) {
-    fs.mkdirSync(logoUploadDir, { recursive: true });
-}
-if (!fs.existsSync(newsletterUploadDir)) {
-    fs.mkdirSync(newsletterUploadDir, { recursive: true });
-}
+
+const ensureDir = (directory) => {
+    if (!fs.existsSync(directory)) {
+        fs.mkdirSync(directory, { recursive: true });
+    }
+};
+
+ensureDir(productUploadDir);
+ensureDir(bannerUploadDir);
+ensureDir(logoUploadDir);
+ensureDir(newsletterUploadDir);
+
+const IMAGE_UPLOAD_POLICY = Object.freeze({
+    'image/jpeg': {
+        extensions: new Set(['.jpg', '.jpeg']),
+        signature: (buffer) =>
+            buffer.length >= 3
+            && buffer[0] === 0xff
+            && buffer[1] === 0xd8
+            && buffer[2] === 0xff
+    },
+    'image/png': {
+        extensions: new Set(['.png']),
+        signature: (buffer) =>
+            buffer.length >= 8
+            && buffer[0] === 0x89
+            && buffer[1] === 0x50
+            && buffer[2] === 0x4e
+            && buffer[3] === 0x47
+            && buffer[4] === 0x0d
+            && buffer[5] === 0x0a
+            && buffer[6] === 0x1a
+            && buffer[7] === 0x0a
+    },
+    'image/webp': {
+        extensions: new Set(['.webp']),
+        signature: (buffer) =>
+            buffer.length >= 12
+            && buffer.toString('ascii', 0, 4) === 'RIFF'
+            && buffer.toString('ascii', 8, 12) === 'WEBP'
+    },
+    'image/gif': {
+        extensions: new Set(['.gif']),
+        signature: (buffer) => {
+            const signature = buffer.toString('ascii', 0, 6);
+            return signature === 'GIF87a' || signature === 'GIF89a';
+        }
+    },
+    'image/x-icon': {
+        extensions: new Set(['.ico']),
+        signature: (buffer) =>
+            buffer.length >= 4
+            && buffer[0] === 0x00
+            && buffer[1] === 0x00
+            && buffer[2] === 0x01
+            && buffer[3] === 0x00
+    },
+    'image/vnd.microsoft.icon': {
+        extensions: new Set(['.ico']),
+        signature: (buffer) =>
+            buffer.length >= 4
+            && buffer[0] === 0x00
+            && buffer[1] === 0x00
+            && buffer[2] === 0x01
+            && buffer[3] === 0x00
+    }
+});
+
+const getImagePolicy = (mimetype) => IMAGE_UPLOAD_POLICY[String(mimetype || '').toLowerCase()] || null;
+
+const getSafeUploadExtension = (file) => {
+    const policy = getImagePolicy(file?.mimetype);
+    if (!policy) return null;
+
+    const originalExt = path.extname(String(file?.originalname || '')).toLowerCase();
+    if (originalExt && policy.extensions.has(originalExt)) {
+        return originalExt;
+    }
+
+    return Array.from(policy.extensions)[0] || null;
+};
+
+const readFileSignature = async (filePath, maxBytes = 16) => {
+    const fileHandle = await fs.promises.open(filePath, 'r');
+    try {
+        const buffer = Buffer.alloc(maxBytes);
+        const result = await fileHandle.read(buffer, 0, maxBytes, 0);
+        return buffer.subarray(0, result.bytesRead);
+    } finally {
+        await fileHandle.close();
+    }
+};
+
+const deleteUploadedFileSilently = async (filePath) => {
+    if (!filePath) return;
+    try {
+        await fs.promises.unlink(filePath);
+    } catch (error) {
+        // Ignore cleanup errors.
+    }
+};
+
+const ensureValidUploadedImage = async (file) => {
+    if (!file?.path || !file?.mimetype) return false;
+    const policy = getImagePolicy(file.mimetype);
+    if (!policy) return false;
+
+    try {
+        const signature = await readFileSignature(file.path);
+        return policy.signature(signature);
+    } catch (error) {
+        return false;
+    }
+};
 
 const createStorage = (destination, prefix) => multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, destination);
     },
     filename: (req, file, cb) => {
-        const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
+        const ext = getSafeUploadExtension(file) || '.jpg';
         const stamp = Date.now().toString(36);
         const rand = Math.random().toString(36).slice(2, 8);
         cb(null, `${prefix}-${stamp}-${rand}${ext}`);
@@ -41,9 +143,16 @@ const createStorage = (destination, prefix) => multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-    if (!file.mimetype || !file.mimetype.startsWith('image/')) {
-        return cb(new Error('Only image files are allowed'));
+    const policy = getImagePolicy(file?.mimetype);
+    if (!policy) {
+        return cb(new Error('Only JPG, PNG, WEBP, GIF, and ICO images are allowed'));
     }
+
+    const ext = path.extname(String(file?.originalname || '')).toLowerCase();
+    if (ext && !policy.extensions.has(ext)) {
+        return cb(new Error('File extension does not match MIME type'));
+    }
+
     return cb(null, true);
 };
 
@@ -53,14 +162,33 @@ const createUploader = (destination, prefix) => multer({
     limits: { fileSize: 5 * 1024 * 1024 }
 });
 
-router.post('/products', requireAdmin, createUploader(productUploadDir, 'product').single('image'), (req, res) => {
+const uploadSingle = (destination, prefix) => {
+    const uploader = createUploader(destination, prefix).single('image');
+    return (req, res, next) => {
+        uploader(req, res, (error) => {
+            if (!error) {
+                return next();
+            }
+            return res.status(400).json({ success: false, message: error.message || 'Upload failed' });
+        });
+    };
+};
+
+const handleImageUpload = (urlPrefix) => async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ success: false, message: 'Файл не загружен' });
     }
 
-    const url = `/images/products/${req.file.filename}`;
-    return res.json({ success: true, url });
-});
+    const isValid = await ensureValidUploadedImage(req.file);
+    if (!isValid) {
+        await deleteUploadedFileSilently(req.file.path);
+        return res.status(400).json({ success: false, message: 'Некорректный формат изображения' });
+    }
+
+    return res.json({ success: true, url: `${urlPrefix}/${req.file.filename}` });
+};
+
+router.post('/products', requireAdmin, uploadSingle(productUploadDir, 'product'), handleImageUpload('/images/products'));
 
 router.post('/products/delete', requireAdmin, (req, res) => {
     try {
@@ -82,32 +210,9 @@ router.post('/products/delete', requireAdmin, (req, res) => {
     }
 });
 
-router.post('/banners', requireAdmin, createUploader(bannerUploadDir, 'banner').single('image'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ success: false, message: 'Файл не загружен' });
-    }
-
-    const url = `/images/banners/${req.file.filename}`;
-    return res.json({ success: true, url });
-});
-
-router.post('/newsletters', requireAdmin, createUploader(newsletterUploadDir, 'newsletter').single('image'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ success: false, message: 'Файл не загружен' });
-    }
-
-    const url = `/images/newsletters/${req.file.filename}`;
-    return res.json({ success: true, url });
-});
-
-router.post('/logo', requireAdmin, createUploader(logoUploadDir, 'logo').single('image'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ success: false, message: 'Файл не загружен' });
-    }
-
-    const url = `/images/logo/${req.file.filename}`;
-    return res.json({ success: true, url });
-});
+router.post('/banners', requireAdmin, uploadSingle(bannerUploadDir, 'banner'), handleImageUpload('/images/banners'));
+router.post('/newsletters', requireAdmin, uploadSingle(newsletterUploadDir, 'newsletter'), handleImageUpload('/images/newsletters'));
+router.post('/logo', requireAdmin, uploadSingle(logoUploadDir, 'logo'), handleImageUpload('/images/logo'));
 
 router.post('/banners/delete', requireAdmin, (req, res) => {
     try {

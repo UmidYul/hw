@@ -255,6 +255,12 @@ S, 86-90, 64-68, 90-94"></textarea>
                             <h3 class="card-title">Доставка</h3>
                         </div>
                         <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label">Сроки доставки (текст)</label>
+                                <input type="text" class="form-input" name="deliveryTimeline"
+                                    placeholder="Доставка 1-2 дня по Ташкенту, 2-5 дней по Узбекистану">
+                                <div class="form-hint">Показывается на странице товара в блоке «Доставка и возврат».</div>
+                            </div>
                             <div class="grid grid-cols-2">
                                 <div class="form-group">
                                     <label class="form-label">Бесплатная доставка от (Сумм)</label>
@@ -433,6 +439,7 @@ S, 86-90, 64-68, 90-94"></textarea>
                     'color_palette': 'colorPalette',
                     'sizes_list': 'sizesList',
                     'size_table': 'sizeTable',
+                    'delivery_timeline': 'deliveryTimeline',
                     'free_shipping_threshold': 'freeShippingThreshold',
                     'shipping_cost': 'flatShippingRate',
                     'enable_taxes': 'enableTaxes',

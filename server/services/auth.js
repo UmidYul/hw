@@ -6,7 +6,18 @@ import { sendAdminTwoFactorEmail } from './email.js';
 
 const ACCESS_TTL_SECONDS = parseInt(process.env.ACCESS_TOKEN_TTL || '900', 10);
 const REFRESH_TTL_SECONDS = parseInt(process.env.REFRESH_TOKEN_TTL || '604800', 10);
-const JWT_SECRET = process.env.JWT_SECRET || 'change-me';
+const ALLOW_INSECURE_AUTH_DEFAULTS = process.env.ALLOW_INSECURE_AUTH_DEFAULTS === 'true';
+const JWT_SECRET = String(process.env.JWT_SECRET || '');
+
+const hasStrongJwtSecret = JWT_SECRET.length >= 32 && JWT_SECRET !== 'change-me';
+if (!hasStrongJwtSecret) {
+    const message = 'JWT_SECRET is missing/weak. Set a random value with at least 32 chars.';
+    if (ALLOW_INSECURE_AUTH_DEFAULTS) {
+        console.warn(`[SECURITY WARNING] ${message}`);
+    } else {
+        throw new Error(message);
+    }
+}
 
 const LOGIN_LIMIT = {
     windowMs: 15 * 60 * 1000,
@@ -60,15 +71,17 @@ const setAuthCookies = (req, res, accessToken, refreshToken) => {
 
     res.cookie('accessToken', accessToken, {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'strict',
         secure: secureCookies,
+        path: '/',
         maxAge: ACCESS_TTL_SECONDS * 1000
     });
 
     res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'strict',
         secure: secureCookies,
+        path: '/',
         maxAge: REFRESH_TTL_SECONDS * 1000
     });
 };
@@ -208,8 +221,17 @@ export const initAuthTables = async () => {
 
     const existing = await dbGet('SELECT id FROM admin_users LIMIT 1');
     if (!existing) {
-        const seedUser = process.env.ADMIN_USER || 'admin';
-        const seedPass = process.env.ADMIN_PASS || 'admin';
+        const seedUser = String(process.env.ADMIN_USER || 'admin');
+        const seedPass = String(process.env.ADMIN_PASS || '');
+        const weakSeedPass = !seedPass || seedPass === 'admin' || seedPass.length < 12;
+
+        if (weakSeedPass && !ALLOW_INSECURE_AUTH_DEFAULTS) {
+            throw new Error('ADMIN_PASS is missing/weak. Set a non-default password with at least 12 chars.');
+        }
+        if (weakSeedPass) {
+            console.warn('[SECURITY WARNING] Seeding admin user with weak/default ADMIN_PASS.');
+        }
+
         const hash = await bcrypt.hash(seedPass, 12);
         const adminId = crypto.randomUUID();
         await dbRun(

@@ -249,6 +249,17 @@
                                 </div>
 
                                 <div class="form-group">
+                                    <label class="form-label">Крой</label>
+                                    <select class="form-select" name="fit">
+                                        <option value="Regular fit">Regular fit</option>
+                                        <option value="Slim fit">Slim fit</option>
+                                        <option value="Relaxed fit">Relaxed fit</option>
+                                        <option value="Oversized">Oversized</option>
+                                        <option value="Straight fit">Straight fit</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
                                     <label class="form-label">Изображения товара</label>
                                     <div id="product-images-container" class="product-images-container">
                                         <!-- Images will be rendered here -->
@@ -288,6 +299,21 @@
         const sessionUploadedImages = new Set();
         let paletteColors = [];
         let settingsSizes = [];
+        const statusValues = ['draft', 'active', 'archived'];
+
+        function resolveProductStatus(product) {
+            const rawStatus = typeof product?.status === 'string' ? product.status.trim().toLowerCase() : '';
+            if (statusValues.includes(rawStatus)) {
+                return rawStatus;
+            }
+
+            if (product?.is_active !== undefined && product?.is_active !== null) {
+                const isActive = String(product.is_active).toLowerCase();
+                return (isActive === 'true' || isActive === '1') ? 'active' : 'archived';
+            }
+
+            return 'draft';
+        }
 
         async function loadCategories() {
             try {
@@ -635,7 +661,7 @@
 
             form.querySelector('[name="title"]').value = product.title;
             form.querySelector('[name="category"]').value = product.category;
-            form.querySelector('[name="status"]').value = product.status;
+            form.querySelector('[name="status"]').value = resolveProductStatus(product);
             form.querySelector('[name="price"]').value = product.price;
             form.querySelector('[name="oldPrice"]').value = product.oldPrice || product.old_price || '';
             form.querySelector('[name="cost"]').value = product.cost || '';
@@ -645,6 +671,18 @@
             form.querySelector('[name="fullDescription"]').value = product.fullDescription || product.full_description || product.description || '';
             form.querySelector('[name="material"]').value = product.material || '';
             form.querySelector('[name="care"]').value = product.care || '';
+            const fitInput = form.querySelector('[name="fit"]');
+            const rawFit = typeof product.fit === 'string' ? product.fit.trim() : '';
+            const fitValue = rawFit || 'Regular fit';
+            if (fitInput) {
+                if (![...fitInput.options].some(option => option.value === fitValue)) {
+                    const customOption = document.createElement('option');
+                    customOption.value = fitValue;
+                    customOption.textContent = fitValue;
+                    fitInput.appendChild(customOption);
+                }
+                fitInput.value = fitValue;
+            }
 
             renderVariantsMatrix(mergedColors, mergedSizes, product.variants || []);
 
@@ -659,10 +697,12 @@
 
         function getFormData() {
             const form = document.getElementById('product-form');
+            const status = form.querySelector('[name="status"]').value;
             const data = {
                 title: form.querySelector('[name="title"]').value,
                 category: form.querySelector('[name="category"]').value,
-                status: form.querySelector('[name="status"]').value,
+                status,
+                isActive: status === 'active',
                 price: parseInt(form.querySelector('[name="price"]').value) || 0,
                 oldPrice: parseInt(form.querySelector('[name="oldPrice"]').value) || null,
                 cost: parseInt(form.querySelector('[name="cost"]').value) || null,
@@ -673,7 +713,7 @@
                 description: form.querySelector('[name="fullDescription"]').value || form.querySelector('[name="shortDescription"]').value,
                 material: form.querySelector('[name="material"]').value,
                 care: form.querySelector('[name="care"]').value,
-                fit: 'Regular fit',
+                fit: form.querySelector('[name="fit"]')?.value || 'Regular fit',
                 rating: 0,
                 reviewsCount: 0
             };
@@ -725,6 +765,7 @@
 
             const data = getFormData();
             data.status = 'active';
+            data.isActive = true;
 
             try {
                 if (editingId) {
@@ -749,6 +790,7 @@
 
             const data = getFormData();
             data.status = 'draft';
+            data.isActive = false;
 
             try {
                 if (editingId) {

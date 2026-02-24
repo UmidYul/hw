@@ -32,7 +32,7 @@ class PromoManager {
     // Apply promo code with API validation
     async apply(code, subtotal, customerIdentifier = null) {
         try {
-            const data = await API.promocodes.validate(code.toUpperCase(), subtotal);
+            const data = await API.promocodes.validate(code.toUpperCase(), subtotal, customerIdentifier);
 
             if (data.valid) {
                 this.applied = {
@@ -75,17 +75,6 @@ class PromoManager {
         }
 
         return discount;
-    }
-
-    // Record usage after order is placed
-    async recordUsage(orderId, discountAmount, customerPhone) {
-        if (!this.applied) return;
-
-        try {
-            await API.promocodes.recordUsage(this.applied.code, customerPhone, orderId);
-        } catch (error) {
-            console.error('Failed to record promo usage:', error);
-        }
     }
 
     remove() {

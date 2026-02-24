@@ -19,6 +19,140 @@ const filters = {
     sort: 'default'
 };
 
+const COLOR_ALIASES = {
+    black: 'black',
+    'черный': 'black',
+    'чёрный': 'black',
+    white: 'white',
+    'белый': 'white',
+    beige: 'beige',
+    'бежевый': 'beige',
+    navy: 'navy',
+    'темно-синий': 'navy',
+    'тёмно-синий': 'navy',
+    'синий': 'navy',
+    grey: 'grey',
+    gray: 'grey',
+    'серый': 'grey',
+    brown: 'brown',
+    'коричневый': 'brown'
+};
+
+function normalizeFilterToken(value) {
+    return String(value ?? '')
+        .trim()
+        .toLowerCase()
+        .replace(/ё/g, 'е')
+        .replace(/\s+/g, ' ');
+}
+
+function normalizeSizeValue(value) {
+    return String(value ?? '')
+        .trim()
+        .toUpperCase()
+        .replace(/\s+/g, ' ');
+}
+
+function normalizeHexColor(value) {
+    const token = String(value ?? '').trim().toLowerCase();
+    if (/^#[0-9a-f]{6}$/.test(token)) return token;
+    if (/^#[0-9a-f]{3}$/.test(token)) {
+        return `#${token[1]}${token[1]}${token[2]}${token[2]}${token[3]}${token[3]}`;
+    }
+    return '';
+}
+
+function normalizeColorValue(value) {
+    const raw = String(value ?? '').trim();
+    if (!raw) return '';
+
+    const normalizedHex = normalizeHexColor(raw);
+    if (normalizedHex) return normalizedHex;
+
+    const normalized = normalizeFilterToken(raw);
+    if (!normalized) return '';
+
+    if (COLOR_ALIASES[normalized]) {
+        return COLOR_ALIASES[normalized];
+    }
+
+    if (typeof getColorHex === 'function') {
+        const hex = normalizeHexColor(getColorHex(raw));
+        if (hex) return hex;
+    }
+
+    return normalized;
+}
+
+function parseListValue(value) {
+    if (Array.isArray(value)) return value;
+    if (value === null || value === undefined) return [];
+
+    if (typeof value === 'string') {
+        const trimmed = value.trim();
+        if (!trimmed) return [];
+
+        try {
+            const parsed = JSON.parse(trimmed);
+            if (Array.isArray(parsed)) return parsed;
+        } catch (error) {
+            // Fall back to comma-separated values
+        }
+
+        return trimmed
+            .split(',')
+            .map(item => item.trim())
+            .filter(Boolean);
+    }
+
+    if (typeof value === 'object') {
+        return Object.values(value);
+    }
+
+    return [];
+}
+
+function parseVariantsValue(value) {
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') {
+        try {
+            const parsed = JSON.parse(value);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (error) {
+            return [];
+        }
+    }
+    return [];
+}
+
+function getAvailableSizesForProduct(product) {
+    const variants = parseVariantsValue(product?.variants);
+    const sizeFromVariants = variants
+        .filter(v => v && v.size && (v.stock === undefined || Number(v.stock) > 0))
+        .map(v => v.size);
+    const sizeSource = sizeFromVariants.length > 0 ? sizeFromVariants : parseListValue(product?.sizes);
+
+    return Array.from(new Set(
+        sizeSource
+            .map(size => normalizeSizeValue(size))
+            .filter(Boolean)
+    ));
+}
+
+function getAvailableColorsForProduct(product) {
+    const variants = parseVariantsValue(product?.variants);
+    const colorFromVariants = variants
+        .filter(v => v && v.color && (v.stock === undefined || Number(v.stock) > 0))
+        .map(v => v.color);
+    const colorSource = colorFromVariants.length > 0 ? colorFromVariants : parseListValue(product?.colors);
+
+    return Array.from(new Set(
+        colorSource
+            .map(color => normalizeColorValue(color))
+            .filter(Boolean)
+    ));
+}
+
 function setMetaTag(name, content, isProperty = false) {
     const selector = isProperty ? `meta[property="${name}"]` : `meta[name="${name}"]`;
     let element = document.querySelector(selector);
@@ -288,10 +422,13 @@ function initializeFilters() {
     document.querySelectorAll('#sizeFilter .filter-chip').forEach(chip => {
         chip.addEventListener('click', () => {
             chip.classList.toggle('active');
-            const size = chip.dataset.value;
+            const size = normalizeSizeValue(chip.dataset.value);
+            if (!size) return;
 
             if (chip.classList.contains('active')) {
-                filters.sizes.push(size);
+                if (!filters.sizes.includes(size)) {
+                    filters.sizes.push(size);
+                }
             } else {
                 filters.sizes = filters.sizes.filter(s => s !== size);
             }
@@ -303,10 +440,13 @@ function initializeFilters() {
     document.querySelectorAll('#colorFilter .color-swatch').forEach(swatch => {
         swatch.addEventListener('click', () => {
             swatch.classList.toggle('active');
-            const color = swatch.dataset.color;
+            const color = normalizeColorValue(swatch.dataset.color);
+            if (!color) return;
 
             if (swatch.classList.contains('active')) {
-                filters.colors.push(color);
+                if (!filters.colors.includes(color)) {
+                    filters.colors.push(color);
+                }
             } else {
                 filters.colors = filters.colors.filter(c => c !== color);
             }
@@ -421,23 +561,28 @@ function applyFilters() {
 
     // Apply size filter
     if (filters.sizes.length > 0) {
-        filteredProducts = filteredProducts.filter(p =>
-            p.sizes && p.sizes.some(size => filters.sizes.includes(size))
-        );
+        const selectedSizes = new Set(filters.sizes.map(size => normalizeSizeValue(size)).filter(Boolean));
+        filteredProducts = filteredProducts.filter((p) => {
+            const productSizes = getAvailableSizesForProduct(p);
+            return productSizes.some(size => selectedSizes.has(size));
+        });
     }
 
     // Apply color filter
     if (filters.colors.length > 0) {
-        filteredProducts = filteredProducts.filter(p =>
-            p.colors && p.colors.some(color => filters.colors.includes(color))
-        );
+        const selectedColors = new Set(filters.colors.map(color => normalizeColorValue(color)).filter(Boolean));
+        filteredProducts = filteredProducts.filter((p) => {
+            const productColors = getAvailableColorsForProduct(p);
+            return productColors.some(color => selectedColors.has(color));
+        });
     }
 
     // Apply tag filter
     if (filters.tags.length > 0) {
-        filteredProducts = filteredProducts.filter(p =>
-            p.tags && p.tags.some(tag => filters.tags.includes(tag))
-        );
+        filteredProducts = filteredProducts.filter((p) => {
+            const tags = parseListValue(p.tags);
+            return tags.some(tag => filters.tags.includes(tag));
+        });
     }
 
     // Apply discount filter
@@ -452,7 +597,7 @@ function applyFilters() {
             const description = (p.description || '').toLowerCase();
             const category = (p.category || '').toLowerCase();
             const sku = (p.sku || '').toLowerCase();
-            const tags = p.tags || [];
+            const tags = parseListValue(p.tags);
 
             return name.includes(filters.search) ||
                 description.includes(filters.search) ||
@@ -482,8 +627,10 @@ function sortProducts() {
             break;
         case 'new':
             filteredProducts.sort((a, b) => {
-                const aNew = a.tags.includes('New') ? 1 : 0;
-                const bNew = b.tags.includes('New') ? 1 : 0;
+                const aTags = parseListValue(a.tags);
+                const bTags = parseListValue(b.tags);
+                const aNew = aTags.includes('New') ? 1 : 0;
+                const bNew = bTags.includes('New') ? 1 : 0;
                 return bNew - aNew;
             });
             break;

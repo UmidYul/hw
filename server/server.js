@@ -38,6 +38,7 @@ const PORT = process.env.PORT || 3000;
 const CSRF_COOKIE = 'csrfToken';
 const CSRF_HEADER = 'x-csrf-token';
 const CSRF_TOKEN_BYTES = 32;
+const HEALTH_TOKEN_HEADER = 'x-health-token';
 
 const cacheStore = new Map();
 const CACHE_TTL_MS = parseInt(process.env.API_CACHE_TTL_MS || '60000', 10);
@@ -78,8 +79,47 @@ const invalidateCache = (prefixes) => {
     });
 };
 
+const parseAllowedCorsOrigins = (rawValue) => String(rawValue || '')
+    .split(',')
+    .map(origin => origin.trim())
+    .filter(Boolean);
+
+const allowedCorsOrigins = parseAllowedCorsOrigins(process.env.CORS_ALLOWED_ORIGINS);
+const allowAllCorsOrigins = process.env.CORS_ALLOW_ALL === 'true';
+
+const corsOptions = {
+    origin: (origin, callback) => {
+        if (allowAllCorsOrigins) return callback(null, true);
+        if (!origin) return callback(null, true);
+        if (allowedCorsOrigins.includes(origin)) return callback(null, true);
+        return callback(null, false);
+    },
+    credentials: true,
+    optionsSuccessStatus: 204
+};
+
+const safeTokenEquals = (provided, expected) => {
+    if (!provided || !expected) return false;
+    const providedBuffer = Buffer.from(String(provided));
+    const expectedBuffer = Buffer.from(String(expected));
+    if (providedBuffer.length !== expectedBuffer.length) return false;
+    return crypto.timingSafeEqual(providedBuffer, expectedBuffer);
+};
+
+const canViewDetailedHealth = (req) => {
+    if (process.env.NODE_ENV !== 'production') {
+        return true;
+    }
+    const expectedToken = process.env.HEALTHCHECK_TOKEN;
+    if (!expectedToken) {
+        return false;
+    }
+    const providedToken = req.get(HEALTH_TOKEN_HEADER);
+    return safeTokenEquals(providedToken, expectedToken);
+};
+
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -131,8 +171,9 @@ app.use((req, res, next) => {
         const token = crypto.randomBytes(CSRF_TOKEN_BYTES).toString('hex');
         res.cookie(CSRF_COOKIE, token, {
             httpOnly: false,
-            sameSite: 'lax',
-            secure: getSecureCookieFlag(req)
+            sameSite: 'strict',
+            secure: getSecureCookieFlag(req),
+            path: '/'
         });
     }
 
@@ -273,7 +314,6 @@ app.use('/api/categories', (req, res, next) => {
     };
     next();
 }, categoriesRouter);
-dotenv.config({ path: path.join(__dirname, '.env') });
 app.use('/api/promocodes', promocodesRouter);
 app.use('/api/discounts', (req, res, next) => {
     if (req.method !== 'GET') {
@@ -379,16 +419,21 @@ app.use('/admin', (req, res, next) => {
 
 // Health check
 app.get('/api/health', (req, res) => {
-    res.json({
+    const payload = {
         status: 'ok',
-        message: 'Higher Waist API is running',
-        uptimeSec: Math.round(process.uptime()),
-        cacheEntries: cacheStore.size,
-        memory: {
+        message: 'Higher Waist API is running'
+    };
+
+    if (canViewDetailedHealth(req)) {
+        payload.uptimeSec = Math.round(process.uptime());
+        payload.cacheEntries = cacheStore.size;
+        payload.memory = {
             rss: process.memoryUsage().rss,
             heapUsed: process.memoryUsage().heapUsed
-        }
-    });
+        };
+    }
+
+    res.json(payload);
 });
 
 // Error handler

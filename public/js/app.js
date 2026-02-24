@@ -543,7 +543,7 @@ function initializeSearchModal() {
                 </div>
                 <div class="search-results-grid">
                     ${results.map(product => {
-                const imageUrl = product.images ? product.images[0] : product.image;
+                const imageUrl = getPrimaryProductImage(product);
                 const final = finalPrice(product);
                 const original = originalPrice(product);
                 const discount = hasDiscount(product);
@@ -582,6 +582,31 @@ function initializeSearchModal() {
 }
 
 // Quick View Modal (used in catalog)
+function normalizeListValue(value) {
+    if (Array.isArray(value)) return value;
+    if (value === null || value === undefined) return [];
+
+    if (typeof value === 'string') {
+        const trimmed = value.trim();
+        if (!trimmed) return [];
+
+        try {
+            const parsed = JSON.parse(trimmed);
+            return Array.isArray(parsed) ? parsed : [trimmed];
+        } catch (error) {
+            return [trimmed];
+        }
+    }
+
+    return [];
+}
+
+function getPrimaryProductImage(product) {
+    const images = normalizeListValue(product?.images);
+    if (images.length > 0) return images[0];
+    return product?.image || '';
+}
+
 function openQuickView(productId) {
     const targetId = String(productId);
     const product = products.find(p => String(p.id) === targetId);
@@ -593,13 +618,18 @@ function openQuickView(productId) {
     if (!modal || !modalBody) return;
 
     const hasDiscount = product.oldPrice ? Math.round((1 - product.price / product.oldPrice) * 100) : 0;
+    const imageUrl = getPrimaryProductImage(product);
+    const tags = normalizeListValue(product.tags);
+    const sizes = normalizeListValue(product.sizes);
+    const colors = normalizeListValue(product.colors);
 
     modalBody.innerHTML = `
         <div class="quick-view-grid">
-            <div class="quick-view-image" style="background: linear-gradient(135deg, ${product.images[0]} 0%, ${adjustColor(product.images[0], 20)} 100%)">
-                ${product.tags.length > 0 ? `
+            <div class="quick-view-image">
+                ${imageUrl ? `<img src="${imageUrl}" alt="${product.title}">` : ''}
+                ${tags.length > 0 ? `
                     <div class="product-card-badges">
-                        ${product.tags.map(tag => {
+                        ${tags.map(tag => {
         if (tag === 'Sale' && hasDiscount) {
             return `<span class="badge-sale">-${hasDiscount}%</span>`;
         } else if (tag === 'New') {
@@ -632,8 +662,8 @@ function openQuickView(productId) {
 
     // Add to cart button
     modalBody.querySelector('.quick-add-to-cart').addEventListener('click', () => {
-        const defaultSize = product.sizes[0];
-        const defaultColor = product.colors[0];
+        const defaultSize = sizes.length ? sizes[0] : '';
+        const defaultColor = colors.length ? colors[0] : '';
         cart.addItem(product, 1, defaultSize, defaultColor);
         showToast('Товар добавлен в корзину', 'success');
         modal.classList.remove('open');
@@ -646,7 +676,10 @@ document.addEventListener('click', (e) => {
     const modal = document.getElementById('quickViewModal');
     if (!modal) return;
 
-    if (e.target.id === 'quickViewOverlay' || e.target.id === 'quickViewClose') {
+    const isOverlayClick = e.target.id === 'quickViewOverlay';
+    const isCloseClick = e.target instanceof Element && Boolean(e.target.closest('#quickViewClose'));
+
+    if (isOverlayClick || isCloseClick) {
         modal.classList.remove('open');
         document.body.style.overflow = '';
     }

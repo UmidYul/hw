@@ -272,6 +272,8 @@ CREATE TABLE IF NOT EXISTS settings (
     social_whatsapp TEXT,
     color_palette JSONB,
     sizes_list JSONB,
+    size_table TEXT,
+    delivery_timeline TEXT,
     currency TEXT DEFAULT 'UZS',
     currency_symbol TEXT DEFAULT 'Сумм',
     vat_rate NUMERIC DEFAULT 0,

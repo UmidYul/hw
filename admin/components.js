@@ -13,6 +13,19 @@ const normalizeCurrencySymbol = (symbol) => {
     return value;
 };
 
+const escapeHtml = (value) => String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+const isSafeImageUrl = (url) => {
+    const value = String(url || '').trim();
+    if (!value) return false;
+    return value.startsWith('/') || /^https?:\/\//i.test(value);
+};
+
 const Components = {
     // Toast notifications
     showToast(title, message, type = 'info') {
@@ -181,7 +194,7 @@ const Components = {
 
     // Status badge
     renderBadge(text, type = 'default') {
-        return `<span class="badge badge-${type}">${text}</span>`;
+        return `<span class="badge badge-${type}">${escapeHtml(text)}</span>`;
     },
 
     renderOrderTags(order, options = {}) {
@@ -255,22 +268,24 @@ const applyAdminBranding = async () => {
 
         const iconEl = document.querySelector('.sidebar-logo-icon');
         if (iconEl) {
-            console.log(iconEl);
+            iconEl.style.background = 'none';
 
-            if (logoIcon) {
-                console.log("hi");
-                iconEl.textContent = '';
-                iconEl.style.background = 'none';
+            if (logoIcon && isSafeImageUrl(logoIcon)) {
                 iconEl.style.padding = '0';
-                iconEl.innerHTML = `<img src="${logoIcon}" alt="${logoText}" style="width:100%;height:100%;object-fit:cover;border-radius:var(--border-radius);">`;
+                const img = document.createElement('img');
+                img.src = logoIcon;
+                img.alt = logoText || 'logo';
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = 'var(--border-radius)';
+                iconEl.replaceChildren(img);
             } else {
-                console.log("hi");
-
-                iconEl.style.background = 'none';
+                iconEl.replaceChildren();
             }
         }
 
-        if (logoIcon) {
+        if (logoIcon && isSafeImageUrl(logoIcon)) {
             let iconLink = document.querySelector('link[rel="icon"], link[rel="shortcut icon"]');
             if (!iconLink) {
                 iconLink = document.createElement('link');

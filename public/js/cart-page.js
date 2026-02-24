@@ -667,15 +667,6 @@ function initializeCartPage() {
                 throw new Error('No API or REPO available');
             }
 
-            // Record promo usage if applicable
-            if (appliedPromo && discount > 0) {
-                await promo.recordUsage(
-                    order.id,
-                    discount,
-                    phone
-                );
-            }
-
             // Show success modal
             const orderNumber = order.orderNumber || order.order_number || `ORD-${Date.now()}`;
             document.getElementById('orderNumber').textContent = orderNumber;

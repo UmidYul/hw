@@ -18,7 +18,8 @@ let siteSettings = {
     socialYoutube: '',
     socialWhatsapp: '',
     colorPalette: [],
-    sizeTable: ''
+    sizeTable: '',
+    deliveryTimeline: ''
 };
 
 const defaultColorPalette = [
@@ -80,6 +81,7 @@ async function loadSiteSettings() {
             siteSettings.socialWhatsapp = settings.social_whatsapp || '';
             siteSettings.colorPalette = normalizeColorPalette(settings.color_palette);
             siteSettings.sizeTable = settings.size_table || '';
+            siteSettings.deliveryTimeline = settings.delivery_timeline || '';
             applyFavicon(siteSettings.logoIcon);
         }
     } catch (error) {

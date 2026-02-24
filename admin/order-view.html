@@ -261,6 +261,15 @@
     <script>
         let currentOrder = null;
 
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             loadOrder();
@@ -322,28 +331,34 @@
             // Customer
             document.getElementById('customerInfo').innerHTML = `
                 <div style="margin-top: 12px;">
-                    <div style="font-weight: 500; margin-bottom: 4px;">${order.customer_name || 'Без имени'}</div>
+                    <div style="font-weight: 500; margin-bottom: 4px;">${escapeHtml(order.customer_name || 'Без имени')}</div>
                     <div style="color: #666; font-size: 14px;">
-                        ${order.customer_email || ''}<br>
-                        ${order.customer_phone || ''}
+                        ${escapeHtml(order.customer_email || '')}<br>
+                        ${escapeHtml(order.customer_phone || '')}
                     </div>
                 </div>
             `;
 
             // Items
-            const itemsHtml = order.items.map(item => {
+            const items = Array.isArray(order.items) ? order.items : [];
+            const itemsHtml = items.map(item => {
+                const itemTitle = escapeHtml(item.title || 'Товар');
+                const itemSize = escapeHtml(item.size || '');
+                const itemColor = escapeHtml(item.color || '');
+                const quantity = Number(item.quantity) || 0;
+                const price = Number(item.price) || 0;
                 return `
                     <div class="order-item">
                         <div class="order-item-info">
-                            <div class="order-item-title">${item.title}</div>
+                            <div class="order-item-title">${itemTitle}</div>
                             <div class="order-item-meta">
-                                ${item.size ? `Размер: ${item.size}` : ''} 
-                                ${item.color ? `Цвет: ${item.color}` : ''}
+                                ${itemSize ? `Размер: ${itemSize}` : ''} 
+                                ${itemColor ? `Цвет: ${itemColor}` : ''}
                             </div>
                         </div>
-                        <div class="order-item-qty">${item.quantity} шт.</div>
-                        <div class="order-item-price">${Components.formatPrice(item.price)}</div>
-                        <div class="order-item-total">${Components.formatPrice(item.price * item.quantity)}</div>
+                        <div class="order-item-qty">${quantity} шт.</div>
+                        <div class="order-item-price">${Components.formatPrice(price)}</div>
+                        <div class="order-item-total">${Components.formatPrice(price * quantity)}</div>
                     </div>
                 `;
             }).join('');
@@ -355,24 +370,31 @@
                     const addr = typeof order.shipping_address === 'string'
                         ? JSON.parse(order.shipping_address)
                         : order.shipping_address;
+                    const addressName = escapeHtml(addr?.name || order.customer_name || '');
+                    const addressLine = typeof addr === 'string'
+                        ? escapeHtml(addr)
+                        : escapeHtml(addr?.address || '');
+                    const cityLine = addr?.city ? `${escapeHtml(addr.city)}, ${escapeHtml(addr.postalCode || '')}<br>` : '';
+                    const country = escapeHtml(addr?.country || 'Россия');
+                    const phone = escapeHtml(addr?.phone || order.customer_phone || '');
                     document.getElementById('shippingAddress').innerHTML = `
                         <p style="line-height: 1.6; margin: 0;">
-                            ${addr.name || order.customer_name || ''}<br>
-                            ${addr.address || addr}<br>
-                            ${addr.city ? `${addr.city}, ${addr.postalCode || ''}<br>` : ''}
-                            ${addr.country || 'Россия'}<br>
-                            Телефон: ${addr.phone || order.customer_phone}
+                            ${addressName}<br>
+                            ${addressLine}<br>
+                            ${cityLine}
+                            ${country}<br>
+                            Телефон: ${phone}
                         </p>
                     `;
                 } catch (e) {
-                    document.getElementById('shippingAddress').innerHTML = `<p style="line-height: 1.6; margin: 0;">${order.shipping_address}</p>`;
+                    document.getElementById('shippingAddress').innerHTML = `<p style="line-height: 1.6; margin: 0;">${escapeHtml(order.shipping_address)}</p>`;
                 }
             } else {
                 document.getElementById('shippingAddress').innerHTML = '<p class="text-muted">Адрес не указан</p>';
             }
 
             // Totals
-            const subtotal = order.subtotal || order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const subtotal = order.subtotal || items.reduce((sum, item) => sum + ((Number(item.price) || 0) * (Number(item.quantity) || 0)), 0);
             const shipping = order.shipping || 0;
             const discount = order.discount || 0;
             const total = order.total;

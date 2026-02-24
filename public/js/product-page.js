@@ -291,7 +291,8 @@ function renderProduct() {
             <p><strong>Крой:</strong> ${product.fit}</p>
         </div>
     `;
-    document.getElementById('accordionDelivery').innerHTML = `<div class="accordion-content-inner"><p>${product.deliveryInfo || product.delivery_info || 'Доставка 3-5 дней'}</p></div>`;
+    const defaultDeliveryText = (siteSettings?.deliveryTimeline || '').trim() || 'Доставка 3-5 дней';
+    document.getElementById('accordionDelivery').innerHTML = `<div class="accordion-content-inner"><p>${product.deliveryInfo || product.delivery_info || defaultDeliveryText}</p></div>`;
 
     // Check if in wishlist
     updateWishlistButton();

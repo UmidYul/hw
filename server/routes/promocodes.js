@@ -5,6 +5,29 @@ import { requireAdmin } from '../services/auth.js';
 
 const router = express.Router();
 
+const allowedPromoTypes = new Set(['percent', 'fixed']);
+
+const normalizePromoCode = (value) => String(value || '').trim().toUpperCase();
+
+const normalizeText = (value) => {
+    const text = String(value || '').trim();
+    return text || null;
+};
+
+const toNumber = (value, fallback = 0) => {
+    const num = Number(value);
+    return Number.isFinite(num) ? num : fallback;
+};
+
+const formatDateForDb = (isoDate) => {
+    if (!isoDate) return null;
+    const parsed = new Date(isoDate);
+    if (Number.isNaN(parsed.getTime())) {
+        return null;
+    }
+    return parsed.toISOString();
+};
+
 // Get all promocodes
 router.get('/', requireAdmin, async (req, res) => {
     try {
@@ -33,7 +56,13 @@ router.get('/:id', requireAdmin, async (req, res) => {
 // Validate promocode
 router.post('/validate', async (req, res) => {
     try {
-        const { code, amount, customerIdentifier } = req.body; // email or phone
+        const normalizedCode = normalizePromoCode(req.body?.code);
+        const amount = Math.max(0, toNumber(req.body?.amount, 0));
+        const customerIdentifier = normalizeText(req.body?.customerIdentifier); // email or phone
+
+        if (!normalizedCode) {
+            return res.status(400).json({ valid: false, message: 'Promo code is required' });
+        }
 
         const sql = `
       SELECT * FROM promocodes 
@@ -44,7 +73,7 @@ router.post('/validate', async (req, res) => {
       AND (usage_limit IS NULL OR usage_count < usage_limit)
     `;
 
-        const promo = await dbGet(sql, [code.toUpperCase()]);
+        const promo = await dbGet(sql, [normalizedCode]);
 
         if (!promo) {
             return res.status(404).json({ valid: false, message: 'Промокод не найден или истек' });
@@ -65,11 +94,13 @@ router.post('/validate', async (req, res) => {
                 WHERE promocode_id = ? AND customer_phone = ?
             `;
             const usageResult = await dbGet(usageCountSql, [promo.id, customerIdentifier]);
+            const usageCount = Math.max(0, Math.trunc(toNumber(usageResult?.count, 0)));
+            const maxUsesPerUser = Math.max(0, Math.trunc(toNumber(promo.max_uses_per_user, 0)));
 
-            if (usageResult.count >= promo.max_uses_per_user) {
+            if (usageCount >= maxUsesPerUser) {
                 return res.json({
                     valid: false,
-                    message: `Вы уже использовали этот промокод максимальное количество раз (${promo.max_uses_per_user})`
+                    message: `Вы уже использовали этот промокод максимальное количество раз (${maxUsesPerUser})`
                 });
             }
         }
@@ -97,11 +128,34 @@ router.post('/validate', async (req, res) => {
 router.post('/', requireAdmin, async (req, res) => {
     try {
         const { code, type, value, minAmount, excludeSale, usageLimit, maxUsesPerUser, startDate, endDate } = req.body;
+        const normalizedCode = normalizePromoCode(code);
+        const normalizedType = normalizeText(type)?.toLowerCase() || '';
+        const normalizedValue = toNumber(value, 0);
+        const normalizedMinAmount = Math.max(0, toNumber(minAmount, 0));
+        const normalizedUsageLimit = usageLimit === null || usageLimit === undefined || usageLimit === ''
+            ? null
+            : Math.max(0, Math.trunc(toNumber(usageLimit, 0)));
+        const normalizedMaxUsesPerUser = maxUsesPerUser === null || maxUsesPerUser === undefined || maxUsesPerUser === ''
+            ? null
+            : Math.max(0, Math.trunc(toNumber(maxUsesPerUser, 0)));
+        const normalizedStartDate = formatDateForDb(startDate);
+        const normalizedEndDate = formatDateForDb(endDate);
 
-        const formatDateForDb = (isoDate) => {
-            if (!isoDate) return null;
-            return new Date(isoDate).toISOString();
-        };
+        if (!normalizedCode) {
+            return res.status(400).json({ error: 'Promocode is required' });
+        }
+        if (!allowedPromoTypes.has(normalizedType)) {
+            return res.status(400).json({ error: 'Invalid promocode type' });
+        }
+        if (normalizedValue <= 0) {
+            return res.status(400).json({ error: 'Promocode value must be greater than 0' });
+        }
+        if ((startDate && !normalizedStartDate) || (endDate && !normalizedEndDate)) {
+            return res.status(400).json({ error: 'Invalid promo date format' });
+        }
+        if (normalizedStartDate && normalizedEndDate && normalizedStartDate > normalizedEndDate) {
+            return res.status(400).json({ error: 'Start date must be before end date' });
+        }
 
         const promoId = crypto.randomUUID();
         const sql = `
@@ -111,9 +165,16 @@ router.post('/', requireAdmin, async (req, res) => {
         `;
 
         const result = await dbRun(sql, [
-            promoId, code.toUpperCase(), type, value, minAmount || 0,
-            excludeSale ? true : false, usageLimit || null, maxUsesPerUser || null,
-            formatDateForDb(startDate), formatDateForDb(endDate)
+            promoId,
+            normalizedCode,
+            normalizedType,
+            normalizedValue,
+            normalizedMinAmount,
+            !!excludeSale,
+            normalizedUsageLimit,
+            normalizedMaxUsesPerUser,
+            normalizedStartDate,
+            normalizedEndDate
         ]);
 
         res.status(201).json({ id: result.id, message: 'Promocode created successfully' });
@@ -126,11 +187,38 @@ router.post('/', requireAdmin, async (req, res) => {
 router.put('/:id', requireAdmin, async (req, res) => {
     try {
         const { code, type, value, minAmount, excludeSale, usageLimit, maxUsesPerUser, isActive, startDate, endDate } = req.body;
+        const normalizedCode = normalizePromoCode(code);
+        const normalizedType = normalizeText(type)?.toLowerCase() || '';
+        const normalizedValue = toNumber(value, 0);
+        const normalizedMinAmount = Math.max(0, toNumber(minAmount, 0));
+        const normalizedUsageLimit = usageLimit === null || usageLimit === undefined || usageLimit === ''
+            ? null
+            : Math.max(0, Math.trunc(toNumber(usageLimit, 0)));
+        const normalizedMaxUsesPerUser = maxUsesPerUser === null || maxUsesPerUser === undefined || maxUsesPerUser === ''
+            ? null
+            : Math.max(0, Math.trunc(toNumber(maxUsesPerUser, 0)));
+        const normalizedStartDate = formatDateForDb(startDate);
+        const normalizedEndDate = formatDateForDb(endDate);
+        const normalizedIsActive = isActive === true
+            || isActive === 1
+            || isActive === '1'
+            || String(isActive || '').toLowerCase() === 'true';
 
-        const formatDateForDb = (isoDate) => {
-            if (!isoDate) return null;
-            return new Date(isoDate).toISOString();
-        };
+        if (!normalizedCode) {
+            return res.status(400).json({ error: 'Promocode is required' });
+        }
+        if (!allowedPromoTypes.has(normalizedType)) {
+            return res.status(400).json({ error: 'Invalid promocode type' });
+        }
+        if (normalizedValue <= 0) {
+            return res.status(400).json({ error: 'Promocode value must be greater than 0' });
+        }
+        if ((startDate && !normalizedStartDate) || (endDate && !normalizedEndDate)) {
+            return res.status(400).json({ error: 'Invalid promo date format' });
+        }
+        if (normalizedStartDate && normalizedEndDate && normalizedStartDate > normalizedEndDate) {
+            return res.status(400).json({ error: 'Start date must be before end date' });
+        }
 
         const sql = `
       UPDATE promocodes SET
@@ -141,9 +229,17 @@ router.put('/:id', requireAdmin, async (req, res) => {
     `;
 
         await dbRun(sql, [
-            code.toUpperCase(), type, value, minAmount || 0,
-            excludeSale ? true : false, usageLimit || null, maxUsesPerUser || null, isActive ? true : false,
-            formatDateForDb(startDate), formatDateForDb(endDate), req.params.id
+            normalizedCode,
+            normalizedType,
+            normalizedValue,
+            normalizedMinAmount,
+            !!excludeSale,
+            normalizedUsageLimit,
+            normalizedMaxUsesPerUser,
+            normalizedIsActive,
+            normalizedStartDate,
+            normalizedEndDate,
+            req.params.id
         ]);
 
         res.json({ message: 'Promocode updated successfully' });
@@ -163,12 +259,18 @@ router.delete('/:id', requireAdmin, async (req, res) => {
 });
 
 // Record promo code usage
-router.post('/record-usage', async (req, res) => {
+router.post('/record-usage', requireAdmin, async (req, res) => {
     try {
-        const { code, customerPhone, orderId } = req.body;
+        const code = normalizePromoCode(req.body?.code);
+        const customerPhone = normalizeText(req.body?.customerPhone);
+        const orderId = normalizeText(req.body?.orderId);
+
+        if (!code) {
+            return res.status(400).json({ error: 'Promocode is required' });
+        }
 
         // Get promocode
-        const promo = await dbGet('SELECT * FROM promocodes WHERE code = ?', [code.toUpperCase()]);
+        const promo = await dbGet('SELECT * FROM promocodes WHERE code = ?', [code]);
 
         if (!promo) {
             return res.status(404).json({ error: 'Promocode not found' });

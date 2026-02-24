@@ -116,6 +116,29 @@ function normalizeVariants(variants) {
         }));
 }
 
+function toBoolean(value, fallback = true) {
+    if (value === undefined || value === null || value === '') return fallback;
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'number') return value !== 0;
+    const normalized = String(value).trim().toLowerCase();
+    if (['true', '1', 'yes', 'y', 'on'].includes(normalized)) return true;
+    if (['false', '0', 'no', 'n', 'off'].includes(normalized)) return false;
+    return fallback;
+}
+
+function resolveIsActiveInput(status, isActive, fallback = true) {
+    if (typeof status === 'string' && status.trim()) {
+        const normalizedStatus = status.trim().toLowerCase();
+        if (normalizedStatus === 'active') return true;
+        if (normalizedStatus === 'draft' || normalizedStatus === 'archived') return false;
+    }
+    return toBoolean(isActive, fallback);
+}
+
+function deriveStatusFromActive(isActive) {
+    return toBoolean(isActive, true) ? 'active' : 'archived';
+}
+
 async function loadVariantsForProducts(productIds) {
     if (!productIds.length) return {};
 
@@ -178,13 +201,18 @@ router.get('/', async (req, res) => {
         const products = await dbAll(sql, params);
 
         // Parse JSON fields
-        const parsedProducts = products.map(p => ({
-            ...p,
-            tags: parseJsonField(p.tags, []),
-            colors: parseJsonField(p.colors, []),
-            sizes: parseJsonField(p.sizes, []),
-            images: parseJsonField(p.images, [])
-        }));
+        const parsedProducts = products.map(p => {
+            const isActive = toBoolean(p.is_active, true);
+            return {
+                ...p,
+                is_active: isActive,
+                status: deriveStatusFromActive(isActive),
+                tags: parseJsonField(p.tags, []),
+                colors: parseJsonField(p.colors, []),
+                sizes: parseJsonField(p.sizes, []),
+                images: parseJsonField(p.images, [])
+            };
+        });
 
         const variantsByProduct = await loadVariantsForProducts(parsedProducts.map(p => p.id));
         const withVariants = parsedProducts.map(p => ({
@@ -208,8 +236,11 @@ router.get('/:id', async (req, res) => {
         }
 
         // Parse JSON fields
+        const isActive = toBoolean(product.is_active, true);
         const parsedProduct = {
             ...product,
+            is_active: isActive,
+            status: deriveStatusFromActive(isActive),
             tags: parseJsonField(product.tags, []),
             colors: parseJsonField(product.colors, []),
             sizes: parseJsonField(product.sizes, []),
@@ -239,7 +270,7 @@ router.get('/:id', async (req, res) => {
 // Create product
 router.post('/', requireAdmin, async (req, res) => {
     try {
-        const { title, category, price, oldPrice, stock, tags, colors, sizes, description, material, care, fit, deliveryInfo, images, variants } = req.body;
+        const { title, category, price, oldPrice, stock, tags, colors, sizes, description, material, care, fit, deliveryInfo, images, variants, status, isActive } = req.body;
         const normalizedPrice = Number(price);
         if (!title || !category || !Number.isFinite(normalizedPrice) || normalizedPrice <= 0) {
             return res.status(400).json({ error: 'Title, category, and price are required.' });
@@ -249,6 +280,7 @@ router.post('/', requireAdmin, async (req, res) => {
         const totalStock = normalizedVariants.length > 0
             ? normalizedVariants.reduce((sum, v) => sum + v.stock, 0)
             : (stock || 0);
+        const resolvedIsActive = resolveIsActiveInput(status, isActive, true);
 
         // Generate SKU automatically
         const timestamp = Date.now().toString().slice(-6);
@@ -259,8 +291,8 @@ router.post('/', requireAdmin, async (req, res) => {
         const sql = `
             INSERT INTO products (
                 id, title, sku, category, price, old_price, stock, tags, colors, sizes,
-                description, material, care, fit, delivery_info, images
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                description, material, care, fit, delivery_info, images, is_active
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             RETURNING id
         `;
 
@@ -271,7 +303,8 @@ router.post('/', requireAdmin, async (req, res) => {
             JSON.stringify(sizes || []),
             description || '', material || '', care || '', fit || '',
             deliveryInfo || '',
-            JSON.stringify(images || [])
+            JSON.stringify(images || []),
+            resolvedIsActive
         ]);
 
         if (normalizedVariants.length > 0) {
@@ -302,7 +335,7 @@ router.post('/', requireAdmin, async (req, res) => {
 // Update product
 router.put('/:id', requireAdmin, async (req, res) => {
     try {
-        const { title, category, price, oldPrice, stock, tags, colors, sizes, description, material, care, fit, deliveryInfo, images, isActive, variants } = req.body;
+        const { title, category, price, oldPrice, stock, tags, colors, sizes, description, material, care, fit, deliveryInfo, images, isActive, status, variants } = req.body;
         const normalizedPrice = Number(price);
         if (!title || !category || !Number.isFinite(normalizedPrice) || normalizedPrice <= 0) {
             return res.status(400).json({ error: 'Title, category, and price are required.' });
@@ -318,6 +351,7 @@ router.put('/:id', requireAdmin, async (req, res) => {
         const totalStock = hasVariants
             ? normalizedVariants.reduce((sum, v) => sum + v.stock, 0)
             : (stock || 0);
+        const resolvedIsActive = resolveIsActiveInput(status, isActive, toBoolean(existing.is_active, true));
 
         const sql = `
       UPDATE products SET
@@ -336,7 +370,7 @@ router.put('/:id', requireAdmin, async (req, res) => {
             description || '', material || '', care || '', fit || '',
             deliveryInfo || '',
             JSON.stringify(images || []),
-            isActive !== undefined ? !!isActive : true,
+            resolvedIsActive,
             req.params.id
         ]);
 

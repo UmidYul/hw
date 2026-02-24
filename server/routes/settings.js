@@ -31,6 +31,7 @@ const initSettingsTable = async () => {
             color_palette JSONB,
             sizes_list JSONB,
             size_table TEXT,
+            delivery_timeline TEXT,
             currency TEXT DEFAULT 'UZS',
             currency_symbol TEXT DEFAULT 'Сумм',
             vat_rate REAL DEFAULT 0,
@@ -68,6 +69,7 @@ const initSettingsTable = async () => {
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS color_palette JSONB');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS sizes_list JSONB');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS size_table TEXT');
+        await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS delivery_timeline TEXT');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS enable_taxes INTEGER DEFAULT 0');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS return_policy TEXT');
         await dbRun('ALTER TABLE settings ADD COLUMN IF NOT EXISTS privacy_policy TEXT');
@@ -86,7 +88,8 @@ router.get('/', async (req, res) => {
             currency_symbol: 'Сумм',
             vat_rate: 0,
             shipping_cost: 0,
-            free_shipping_threshold: 0
+            free_shipping_threshold: 0,
+            delivery_timeline: 'Доставка 3-5 дней'
         });
     } catch (error) {
         console.error('Failed to get settings:', error);
@@ -113,6 +116,7 @@ router.put('/', requireAdmin, async (req, res) => {
             colorPalette,
             sizesList,
             sizeTable,
+            deliveryTimeline,
             currency,
             currencySymbol,
             freeShippingThreshold,
@@ -159,6 +163,7 @@ router.put('/', requireAdmin, async (req, res) => {
                 color_palette = ?,
                 sizes_list = ?,
                 size_table = ?,
+                delivery_timeline = ?,
                 currency = ?,
                 currency_symbol = ?,
                 shipping_cost = ?,
@@ -185,6 +190,7 @@ router.put('/', requireAdmin, async (req, res) => {
             colorPalette || null,
             sizesList || null,
             sizeTable || null,
+            deliveryTimeline || null,
             currency || 'UZS',
             currencySymbol || 'Сумм',
             flatShippingRate || 0,

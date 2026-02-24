@@ -374,10 +374,10 @@ const promocodesAPI = {
         return await apiCall(`/promocodes/${id}`);
     },
 
-    async validate(code, amount) {
+    async validate(code, amount, customerIdentifier = null) {
         return await apiCall('/promocodes/validate', {
             method: 'POST',
-            body: JSON.stringify({ code, amount })
+            body: JSON.stringify({ code, amount, customerIdentifier })
         });
     },
 
@@ -403,13 +403,6 @@ const promocodesAPI = {
 
     async getStats(id) {
         return await apiCall(`/promocodes/${id}/stats`);
-    },
-
-    async recordUsage(code, customerPhone, orderId) {
-        return await apiCall('/promocodes/record-usage', {
-            method: 'POST',
-            body: JSON.stringify({ code, customerPhone, orderId })
-        });
     }
 };
 
