@@ -11,10 +11,14 @@ const productsDir = path.join(projectRoot, 'public/images/products');
 const args = process.argv.slice(2);
 const applyChanges = args.includes('--apply');
 const rewriteDbToWebp = args.includes('--rewrite-db-webp');
+const forceWrite = args.includes('--force');
 const qualityArg = args.find((arg) => arg.startsWith('--quality='));
 const maxSideArg = args.find((arg) => arg.startsWith('--max-side='));
+const minSavingsArg = args.find((arg) => arg.startsWith('--min-savings='));
 const quality = Math.max(1, Math.min(100, parseInt((qualityArg || '').split('=')[1], 10) || 92));
 const maxSide = Math.max(400, parseInt((maxSideArg || '').split('=')[1], 10) || 2200);
+const minSavingsRaw = parseFloat((minSavingsArg || '').split('=')[1]);
+const minSavingsPercent = Math.max(0, Math.min(100, Number.isFinite(minSavingsRaw) ? minSavingsRaw : 2));
 
 const supportedExtensions = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 
@@ -93,7 +97,7 @@ const isLocalProductImage = (url) => typeof url === 'string' && url.startsWith('
 
 async function main() {
     console.log(`Mode: ${applyChanges ? 'apply' : 'dry-run'}`);
-    console.log(`Quality: ${quality}, Max side: ${maxSide}px, rewrite-db-webp: ${rewriteDbToWebp}`);
+    console.log(`Quality: ${quality}, Max side: ${maxSide}px, min-savings: ${minSavingsPercent}%, force: ${forceWrite}, rewrite-db-webp: ${rewriteDbToWebp}`);
 
     if (!fs.existsSync(productsDir)) {
         throw new Error(`Products directory not found: ${productsDir}`);
@@ -116,7 +120,8 @@ async function main() {
             const optimizedBuffer = await optimizeImageBuffer(inputPath, ext);
             const originalSize = await getFileSize(inputPath);
             const optimizedSize = optimizedBuffer.length;
-            const shouldKeepOptimized = optimizedSize < originalSize * 0.98;
+            const minSavingsRatio = minSavingsPercent / 100;
+            const shouldKeepOptimized = forceWrite || optimizedSize <= originalSize * (1 - minSavingsRatio);
 
             if (!shouldKeepOptimized) {
                 skipped += 1;
