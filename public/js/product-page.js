@@ -38,6 +38,28 @@ function toAbsoluteUrl(url) {
     return `${BASE_URL}/${url}`;
 }
 
+function getOptimizedImageUrl(url, { width = 1200, quality = 85 } = {}) {
+    if (!url || typeof url !== 'string') return url;
+
+    try {
+        const parsed = new URL(url, window.location.origin);
+        const hostname = parsed.hostname.toLowerCase();
+
+        // Unsplash supports server-side resizing and format conversion.
+        if (hostname.includes('unsplash.com')) {
+            parsed.searchParams.set('auto', 'format');
+            parsed.searchParams.set('fit', 'max');
+            parsed.searchParams.set('q', String(quality));
+            parsed.searchParams.set('w', String(width));
+            return parsed.toString();
+        }
+
+        return url;
+    } catch (error) {
+        return url;
+    }
+}
+
 function updateProductSeo(product, finalPrice, inStock) {
     const description = (product.description || 'Товар Higher Waist.').replace(/<[^>]*>/g, '').trim();
     const shortDescription = description.length > 160 ? `${description.slice(0, 157)}...` : description;
@@ -373,6 +395,8 @@ function renderGallery() {
     // Get images - handle both array and single image
     productImages = (Array.isArray(product.images) ? product.images : (product.images ? [product.images] : [product.image || 'https://via.placeholder.com/600']))
         .filter(Boolean);
+    const thumbImages = productImages.map((url) => getOptimizedImageUrl(url, { width: 320, quality: 78 }));
+    productImages = productImages.map((url) => getOptimizedImageUrl(url, { width: 1400, quality: 86 }));
     currentGalleryIndex = 0;
 
     galleryMain.innerHTML = '';
@@ -414,7 +438,7 @@ function renderGallery() {
         return;
     }
 
-    galleryThumbs.innerHTML = productImages.map((img, index) => `
+    galleryThumbs.innerHTML = thumbImages.map((img, index) => `
         <div class="gallery-thumb ${index === 0 ? 'active' : ''}" data-index="${index}" style="background-image: url('${img}'); background-size: cover; background-position: center;"></div>
     `).join('');
 
