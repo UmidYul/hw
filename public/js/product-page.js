@@ -5,8 +5,10 @@ let selectedColor = null;
 let selectedSize = null;
 let quantity = 1;
 let currentLightboxIndex = 0;
+let currentGalleryIndex = 0;
 let productImages = [];
 const BASE_URL = 'https://higherwaist.uz';
+const MOBILE_GALLERY_BREAKPOINT = 768;
 
 function setMetaTag(name, content, isProperty = false) {
     const selector = isProperty ? `meta[property="${name}"]` : `meta[name="${name}"]`;
@@ -366,43 +368,94 @@ function renderGallery() {
     const product = currentProduct;
     const galleryMain = document.getElementById('galleryMain');
     const galleryThumbs = document.getElementById('galleryThumbs');
+    const isMobileViewport = window.innerWidth <= MOBILE_GALLERY_BREAKPOINT;
 
     // Get images - handle both array and single image
-    productImages = Array.isArray(product.images) ? product.images : (product.images ? [product.images] : [product.image || 'https://via.placeholder.com/600']);
+    productImages = (Array.isArray(product.images) ? product.images : (product.images ? [product.images] : [product.image || 'https://via.placeholder.com/600']))
+        .filter(Boolean);
+    currentGalleryIndex = 0;
 
-    // Main image
-    const mainImage = productImages[0];
-    galleryMain.innerHTML = `
-        <div class="gallery-image" style="background-image: url('${mainImage}'); background-size: cover; background-position: center; cursor: zoom-in;" data-index="0"></div>
-    `;
+    galleryMain.innerHTML = '';
+    galleryThumbs.innerHTML = '';
 
-    // Add click to open lightbox
-    galleryMain.querySelector('.gallery-image').addEventListener('click', () => {
-        openLightbox(0);
+    const galleryTrack = document.createElement('div');
+    galleryTrack.className = 'gallery-main-track';
+    galleryTrack.id = 'galleryMainTrack';
+
+    productImages.forEach((img, index) => {
+        const slide = document.createElement('div');
+        slide.className = 'gallery-slide';
+        slide.dataset.index = String(index);
+
+        const image = document.createElement('img');
+        image.className = 'gallery-image';
+        image.src = img;
+        image.alt = `${product.title} - фото ${index + 1}`;
+        image.loading = index === 0 ? 'eager' : 'lazy';
+        image.decoding = 'async';
+        if (index === 0) {
+            image.fetchPriority = 'high';
+        }
+        image.dataset.index = String(index);
+
+        // On mobile, users browse by horizontal scroll without opening lightbox.
+        if (!isMobileViewport) {
+            image.style.cursor = 'zoom-in';
+            image.addEventListener('click', () => openLightbox(index));
+        }
+
+        slide.appendChild(image);
+        galleryTrack.appendChild(slide);
     });
 
-    // Always show thumbnails if there are images
+    galleryMain.appendChild(galleryTrack);
+
+    if (productImages.length <= 1) {
+        return;
+    }
+
     galleryThumbs.innerHTML = productImages.map((img, index) => `
         <div class="gallery-thumb ${index === 0 ? 'active' : ''}" data-index="${index}" style="background-image: url('${img}'); background-size: cover; background-position: center;"></div>
     `).join('');
 
-    // Thumb click handler
-    galleryThumbs.querySelectorAll('.gallery-thumb').forEach(thumb => {
-        thumb.addEventListener('click', () => {
-            galleryThumbs.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
-            thumb.classList.add('active');
-
-            const index = parseInt(thumb.dataset.index);
-            const img = productImages[index];
-            galleryMain.innerHTML = `
-                <div class="gallery-image" style="background-image: url('${img}'); background-size: cover; background-position: center; cursor: zoom-in;" data-index="${index}"></div>
-            `;
-
-            // Re-add click handler
-            galleryMain.querySelector('.gallery-image').addEventListener('click', () => {
-                openLightbox(index);
-            });
+    const setActiveThumb = (index) => {
+        galleryThumbs.querySelectorAll('.gallery-thumb').forEach((thumb) => {
+            thumb.classList.toggle('active', Number(thumb.dataset.index) === index);
         });
+    };
+
+    const scrollToImage = (index, behavior = 'smooth') => {
+        const maxIndex = productImages.length - 1;
+        const safeIndex = Math.max(0, Math.min(maxIndex, index));
+        const slideWidth = galleryMain.clientWidth;
+        galleryTrack.scrollTo({ left: slideWidth * safeIndex, behavior });
+        currentGalleryIndex = safeIndex;
+        setActiveThumb(safeIndex);
+    };
+
+    galleryThumbs.querySelectorAll('.gallery-thumb').forEach((thumb) => {
+        thumb.addEventListener('click', () => {
+            const index = parseInt(thumb.dataset.index, 10);
+            scrollToImage(index);
+        });
+    });
+
+    let scrollFrame = null;
+    galleryTrack.addEventListener('scroll', () => {
+        if (scrollFrame) return;
+        scrollFrame = requestAnimationFrame(() => {
+            scrollFrame = null;
+            const slideWidth = galleryMain.clientWidth || 1;
+            const index = Math.round(galleryTrack.scrollLeft / slideWidth);
+            if (index !== currentGalleryIndex) {
+                currentGalleryIndex = index;
+                setActiveThumb(index);
+            }
+        });
+    }, { passive: true });
+
+    window.requestAnimationFrame(() => {
+        scrollToImage(0, 'auto');
     });
 }
 

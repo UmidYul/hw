@@ -9,6 +9,7 @@
         "dev": "nodemon server.js",
         "migrate": "node migrations/migrate.js",
         "migrate:uuid": "node scripts/migrate_to_uuid.js",
+        "images:optimize:products": "node scripts/optimize_product_images.js",
         "test:prod:smoke": "node --test tests/prod-smoke.test.mjs",
         "test:prod:ui": "playwright test tests/prod-ui.spec.mjs",
         "test:prod:all": "npm run test:prod:smoke && npm run test:prod:ui"
@@ -31,7 +32,8 @@
         "multer": "^2.0.2",
         "node-fetch": "^3.3.2",
         "nodemailer": "^8.0.1",
-        "pg": "^8.11.5"
+        "pg": "^8.11.5",
+        "sharp": "^0.34.4"
     },
     "devDependencies": {
         "@playwright/test": "^1.58.2",

@@ -2277,9 +2277,31 @@ textarea {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.gallery-image {
-    aspect-ratio: 3/4;
+.gallery-main-track {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pinch-zoom;
+}
+
+.gallery-main-track::-webkit-scrollbar {
+    display: none;
+}
+
+.gallery-slide {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
     background: var(--color-border);
+}
+
+.gallery-image {
+    width: 100%;
+    display: block;
+    aspect-ratio: 3/4;
+    object-fit: cover;
     transition: transform 0.3s ease;
 }
 
@@ -3222,7 +3244,11 @@ textarea.form-input {
     }
 
     .gallery-thumbs {
-        grid-template-columns: repeat(4, 1fr);
+        display: none;
+    }
+
+    .gallery-main {
+        margin-bottom: 0;
     }
 
     .lightbox-prev {
@@ -3503,11 +3529,6 @@ textarea.form-input {
         width: 100%;
         padding: 10px 16px;
         font-size: 13px;
-    }
-
-    .gallery-thumbs {
-        grid-template-columns: repeat(3, 1fr);
-        gap: var(--spacing-xs);
     }
 
     .product-title {
