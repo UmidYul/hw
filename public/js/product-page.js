@@ -399,8 +399,22 @@ function renderGallery() {
     productImages = productImages.map((url) => getOptimizedImageUrl(url, { width: 1400, quality: 86 }));
     currentGalleryIndex = 0;
 
+
     galleryMain.innerHTML = '';
     galleryThumbs.innerHTML = '';
+
+    // Добавим стрелки
+    const leftArrow = document.createElement('button');
+    leftArrow.className = 'gallery-arrow gallery-arrow-left';
+    leftArrow.id = 'galleryArrowLeft';
+    leftArrow.setAttribute('aria-label', 'Предыдущее фото');
+    leftArrow.innerHTML = '<i class="fas fa-chevron-left"></i>';
+
+    const rightArrow = document.createElement('button');
+    rightArrow.className = 'gallery-arrow gallery-arrow-right';
+    rightArrow.id = 'galleryArrowRight';
+    rightArrow.setAttribute('aria-label', 'Следующее фото');
+    rightArrow.innerHTML = '<i class="fas fa-chevron-right"></i>';
 
     const galleryTrack = document.createElement('div');
     galleryTrack.className = 'gallery-main-track';
@@ -432,7 +446,20 @@ function renderGallery() {
         galleryTrack.appendChild(slide);
     });
 
+
+    galleryMain.appendChild(leftArrow);
     galleryMain.appendChild(galleryTrack);
+    galleryMain.appendChild(rightArrow);
+
+    // Обработчики стрелок
+    leftArrow.addEventListener('click', (e) => {
+        e.stopPropagation();
+        scrollToImage(currentGalleryIndex - 1);
+    });
+    rightArrow.addEventListener('click', (e) => {
+        e.stopPropagation();
+        scrollToImage(currentGalleryIndex + 1);
+    });
 
     if (productImages.length <= 1) {
         return;
@@ -811,6 +838,12 @@ function initializeLightbox() {
 }
 
 function openLightbox(index) {
+    // Получаем актуальный массив изображений (как в renderGallery)
+    const product = currentProduct;
+    productImages = (Array.isArray(product.images) ? product.images : (product.images ? [product.images] : [product.image || 'https://via.placeholder.com/600']))
+        .filter(Boolean)
+        .map((url) => getOptimizedImageUrl(url, { width: 1400, quality: 86 }));
+
     currentLightboxIndex = index;
     const lightboxModal = document.getElementById('lightboxModal');
     lightboxModal.classList.add('active');
