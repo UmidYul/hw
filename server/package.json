@@ -10,6 +10,8 @@
         "migrate": "node migrations/migrate.js",
         "migrate:uuid": "node scripts/migrate_to_uuid.js",
         "images:optimize:products": "node scripts/optimize_product_images.js",
+        "images:optimize:all": "node scripts/optimize_all_images.js",
+        "images:optimize:all:apply": "node scripts/optimize_all_images.js --apply",
         "test:prod:smoke": "node --test tests/prod-smoke.test.mjs",
         "test:prod:ui": "playwright test tests/prod-ui.spec.mjs",
         "test:prod:all": "npm run test:prod:smoke && npm run test:prod:ui"

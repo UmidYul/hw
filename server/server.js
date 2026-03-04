@@ -238,9 +238,9 @@ app.use((req, res, next) => {
 });
 
 // Static files (serve frontend)
-app.use('/css', express.static(path.join(__dirname, '../public/css')));
-app.use('/js', express.static(path.join(__dirname, '../public/js')));
-app.use('/images', express.static(path.join(__dirname, '../public/images')));
+app.use('/css', express.static(path.join(__dirname, '../public/css'), { maxAge: '7d', etag: true }));
+app.use('/js', express.static(path.join(__dirname, '../public/js'), { maxAge: '7d', etag: true }));
+app.use('/images', express.static(path.join(__dirname, '../public/images'), { maxAge: '30d', etag: true, immutable: true }));
 app.get('/robots.txt', (req, res) => res.sendFile(path.join(__dirname, '../public/robots.txt')));
 app.get('/sitemap.xml', (req, res) => res.sendFile(path.join(__dirname, '../public/sitemap.xml')));
 app.get('/googlee6f4b4acc0d1a64a.html', (req, res) =>

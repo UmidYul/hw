@@ -3,8 +3,27 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import sharp from 'sharp';
 import { requireAdmin } from '../services/auth.js';
 import { runUploadsCleanup } from '../services/uploads-cleanup.js';
+
+// Compress uploaded image to WebP and delete the original if different
+const compressToWebp = async (inputPath, quality = 82, maxSide = 1600) => {
+    const ext = path.extname(inputPath).toLowerCase();
+    const webpPath = inputPath.slice(0, inputPath.length - ext.length) + '.webp';
+
+    await sharp(inputPath)
+        .rotate()
+        .resize({ width: maxSide, height: maxSide, fit: 'inside', withoutEnlargement: true })
+        .webp({ quality, effort: 4, smartSubsample: true })
+        .toFile(webpPath);
+
+    if (webpPath !== inputPath) {
+        await fs.promises.unlink(inputPath).catch(() => { });
+    }
+
+    return webpPath;
+};
 
 const router = express.Router();
 
@@ -174,7 +193,7 @@ const uploadSingle = (destination, prefix) => {
     };
 };
 
-const handleImageUpload = (urlPrefix) => async (req, res) => {
+const handleImageUpload = (urlPrefix, compressOptions = {}) => async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ success: false, message: 'Файл не загружен' });
     }
@@ -185,10 +204,18 @@ const handleImageUpload = (urlPrefix) => async (req, res) => {
         return res.status(400).json({ success: false, message: 'Некорректный формат изображения' });
     }
 
-    return res.json({ success: true, url: `${urlPrefix}/${req.file.filename}` });
+    try {
+        const { quality = 82, maxSide = 1600 } = compressOptions;
+        const webpPath = await compressToWebp(req.file.path, quality, maxSide);
+        const filename = path.basename(webpPath);
+        return res.json({ success: true, url: `${urlPrefix}/${filename}` });
+    } catch (err) {
+        await deleteUploadedFileSilently(req.file.path);
+        return res.status(500).json({ success: false, message: 'Ошибка при обработке изображения: ' + err.message });
+    }
 };
 
-router.post('/products', requireAdmin, uploadSingle(productUploadDir, 'product'), handleImageUpload('/images/products'));
+router.post('/products', requireAdmin, uploadSingle(productUploadDir, 'product'), handleImageUpload('/images/products', { quality: 82, maxSide: 1600 }));
 
 router.post('/products/delete', requireAdmin, (req, res) => {
     try {
@@ -210,9 +237,9 @@ router.post('/products/delete', requireAdmin, (req, res) => {
     }
 });
 
-router.post('/banners', requireAdmin, uploadSingle(bannerUploadDir, 'banner'), handleImageUpload('/images/banners'));
-router.post('/newsletters', requireAdmin, uploadSingle(newsletterUploadDir, 'newsletter'), handleImageUpload('/images/newsletters'));
-router.post('/logo', requireAdmin, uploadSingle(logoUploadDir, 'logo'), handleImageUpload('/images/logo'));
+router.post('/banners', requireAdmin, uploadSingle(bannerUploadDir, 'banner'), handleImageUpload('/images/banners', { quality: 85, maxSide: 1920 }));
+router.post('/newsletters', requireAdmin, uploadSingle(newsletterUploadDir, 'newsletter'), handleImageUpload('/images/newsletters', { quality: 82, maxSide: 1400 }));
+router.post('/logo', requireAdmin, uploadSingle(logoUploadDir, 'logo'), handleImageUpload('/images/logo', { quality: 88, maxSide: 400 }));
 
 router.post('/banners/delete', requireAdmin, (req, res) => {
     try {
