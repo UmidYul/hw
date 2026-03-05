@@ -10,13 +10,21 @@ import { runUploadsCleanup } from '../services/uploads-cleanup.js';
 // Compress uploaded image to WebP and delete the original if different
 const compressToWebp = async (inputPath, quality = 82, maxSide = 1600) => {
     const ext = path.extname(inputPath).toLowerCase();
+
+    if (ext === '.webp') {
+        return inputPath;
+    }
+
     const webpPath = inputPath.slice(0, inputPath.length - ext.length) + '.webp';
+    const tempPath = `${webpPath}.tmp`;
 
     await sharp(inputPath)
         .rotate()
         .resize({ width: maxSide, height: maxSide, fit: 'inside', withoutEnlargement: true })
         .webp({ quality, effort: 4, smartSubsample: true })
-        .toFile(webpPath);
+        .toFile(tempPath);
+
+    await fs.promises.rename(tempPath, webpPath);
 
     if (webpPath !== inputPath) {
         await fs.promises.unlink(inputPath).catch(() => { });

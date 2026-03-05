@@ -16,6 +16,7 @@ const projectRoot = path.join(__dirname, '../..');
 
 const args = process.argv.slice(2);
 const apply = args.includes('--apply');
+const reencodeWebp = args.includes('--reencode-webp');
 
 const DIRS = [
     { dir: path.join(projectRoot, 'public/images/products'), quality: 82, maxSide: 1600 },
@@ -50,6 +51,12 @@ async function processDir({ dir, quality, maxSide }) {
         const baseName = filename.slice(0, filename.length - ext.length);
         const webpPath = path.join(dir, baseName + '.webp');
 
+        if (ext === '.webp' && !reencodeWebp) {
+            totalSkipped++;
+            console.log(`  - ${filename} (skip: existing webp, use --reencode-webp to force)`);
+            continue;
+        }
+
         try {
             const originalSize = (await fs.promises.stat(inputPath)).size;
 
@@ -63,7 +70,9 @@ async function processDir({ dir, quality, maxSide }) {
             const saved = originalSize - newSize;
 
             if (apply) {
-                await fs.promises.writeFile(webpPath, buffer);
+                const tempPath = `${webpPath}.tmp`;
+                await fs.promises.writeFile(tempPath, buffer);
+                await fs.promises.rename(tempPath, webpPath);
                 // Remove original only if it's a different file (not already .webp)
                 if (ext !== '.webp') {
                     await fs.promises.unlink(inputPath).catch(() => { });
@@ -83,7 +92,8 @@ async function processDir({ dir, quality, maxSide }) {
 }
 
 async function main() {
-    console.log(`Mode: ${apply ? 'APPLY' : 'dry-run (add --apply to write files)'}\n`);
+    console.log(`Mode: ${apply ? 'APPLY' : 'dry-run (add --apply to write files)'}`);
+    console.log(`Options: reencodeWebp=${reencodeWebp ? 'yes' : 'no'}\n`);
 
     for (const entry of DIRS) {
         console.log(`Directory: ${path.relative(projectRoot, entry.dir)}`);
