@@ -17,6 +17,7 @@ const listFiles = (dir) => {
         .map(entry => entry.name);
 };
 
+
 const collectUsedProductFiles = async () => {
     const rows = await dbAll('SELECT images FROM products');
     const used = new Set();
