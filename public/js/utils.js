@@ -135,6 +135,26 @@ function formatPrice(price) {
     return price.toLocaleString('ru-RU') + ' ' + symbol;
 }
 
+function getImageSourceWithFallback(url) {
+    const original = String(url || '').trim();
+    if (!original) return { primary: '', fallback: '' };
+
+    try {
+        const parsed = new URL(original, window.location.origin);
+        const extMatch = parsed.pathname.match(/\.(jpe?g|png)$/i);
+        const isLocalImage = parsed.pathname.startsWith('/images/');
+
+        if (!isLocalImage || !extMatch) {
+            return { primary: original, fallback: '' };
+        }
+
+        parsed.pathname = parsed.pathname.replace(/\.(jpe?g|png)$/i, '.webp');
+        return { primary: parsed.toString(), fallback: original };
+    } catch (error) {
+        return { primary: original, fallback: '' };
+    }
+}
+
 // LocalStorage helpers
 const storage = {
     get(key) {
@@ -439,12 +459,15 @@ function renderProductCard(product) {
 
     // Get first image
     const imageUrl = product.images ? product.images[0] : product.image;
+    const imageSource = getImageSourceWithFallback(imageUrl);
     const safeTitle = String(product.title || product.name || 'Товар').replace(/"/g, '&quot;');
+    const primaryImageUrl = String(imageSource.primary || imageUrl || '').replace(/"/g, '&quot;');
+    const fallbackImageUrl = String(imageSource.fallback || '').replace(/"/g, '&quot;');
 
     return `
         <div class="product-card" data-product-id="${product.id}" data-link="/product?id=${product.id}" role="link">
             <div class="product-card-image" data-link="/product?id=${product.id}" role="link">
-                <img class="product-card-image-media" src="${imageUrl}" alt="${safeTitle}" loading="lazy" decoding="async">
+                <img class="product-card-image-media" src="${primaryImageUrl}" data-fallback-src="${fallbackImageUrl}" alt="${safeTitle}" loading="lazy" decoding="async">
                 <div class="product-card-actions">
                     <button class="product-card-btn wishlist-toggle" data-id="${product.id}" aria-label="В избранное">
                         <i class="fa${isInWishlist ? 's' : 'r'} fa-heart"></i>
@@ -503,6 +526,15 @@ function renderProducts(products, containerId) {
 
 // Attach event listeners to product cards
 function attachProductCardListeners(container) {
+    container.querySelectorAll('.product-card-image-media').forEach((image) => {
+        image.addEventListener('error', () => {
+            const fallback = image.dataset.fallbackSrc;
+            if (!fallback || image.dataset.fallbackApplied === '1') return;
+            image.dataset.fallbackApplied = '1';
+            image.src = fallback;
+        });
+    });
+
     // Card click -> product page
     container.querySelectorAll('.product-card').forEach(card => {
         card.addEventListener('click', (e) => {

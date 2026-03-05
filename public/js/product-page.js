@@ -7,6 +7,7 @@ let quantity = 1;
 let currentLightboxIndex = 0;
 let currentGalleryIndex = 0;
 let productImages = [];
+let productImageFallbacks = [];
 const BASE_URL = 'https://higherwaist.uz';
 const MOBILE_GALLERY_BREAKPOINT = 768;
 
@@ -77,6 +78,13 @@ function getOptimizedImageUrl(url, { width = 1200, quality = 85 } = {}) {
     } catch (error) {
         return url;
     }
+}
+
+function resolveImageSource(url) {
+    if (typeof getImageSourceWithFallback === 'function') {
+        return getImageSourceWithFallback(url);
+    }
+    return { primary: url, fallback: '' };
 }
 
 function updateProductSeo(product, finalPrice, inStock) {
@@ -470,10 +478,14 @@ function renderGallery() {
     const isMobileViewport = window.innerWidth <= MOBILE_GALLERY_BREAKPOINT;
 
     // Get images - handle both array and single image
-    productImages = (Array.isArray(product.images) ? product.images : (product.images ? [product.images] : [product.image || 'https://via.placeholder.com/600']))
+    const sourceImages = (Array.isArray(product.images) ? product.images : (product.images ? [product.images] : [product.image || 'https://via.placeholder.com/600']))
         .filter(Boolean);
-    const thumbImages = productImages.map((url) => getOptimizedImageUrl(url, { width: 320, quality: 78 }));
-    productImages = productImages.map((url) => getOptimizedImageUrl(url, { width: 1400, quality: 86 }));
+    const thumbImages = sourceImages.map((url) => getOptimizedImageUrl(url, { width: 320, quality: 78 }));
+    const mainImageSources = sourceImages
+        .map((url) => getOptimizedImageUrl(url, { width: 1400, quality: 86 }))
+        .map((url) => resolveImageSource(url));
+    productImages = mainImageSources.map((item) => item.primary);
+    productImageFallbacks = mainImageSources.map((item) => item.fallback || '');
     currentGalleryIndex = 0;
 
 
@@ -497,6 +509,20 @@ function renderGallery() {
     galleryTrack.className = 'gallery-main-track';
     galleryTrack.id = 'galleryMainTrack';
 
+    const ensureSlideImageLoaded = (index) => {
+        const image = galleryTrack.querySelector(`.gallery-image[data-index="${index}"]`);
+        if (!image || image.dataset.loaded === '1') return;
+
+        image.dataset.loaded = '1';
+        image.src = image.dataset.src || '';
+        image.addEventListener('error', () => {
+            const fallback = image.dataset.fallbackSrc;
+            if (!fallback || image.dataset.fallbackApplied === '1') return;
+            image.dataset.fallbackApplied = '1';
+            image.src = fallback;
+        }, { once: true });
+    };
+
     productImages.forEach((img, index) => {
         const slide = document.createElement('div');
         slide.className = 'gallery-slide';
@@ -504,7 +530,8 @@ function renderGallery() {
 
         const image = document.createElement('img');
         image.className = 'gallery-image';
-        image.src = img;
+        image.dataset.src = img;
+        image.dataset.fallbackSrc = productImageFallbacks[index] || '';
         image.alt = `${product.title} - фото ${index + 1}`;
         image.loading = index === 0 ? 'eager' : 'lazy';
         image.decoding = 'async';
@@ -522,6 +549,8 @@ function renderGallery() {
         slide.appendChild(image);
         galleryTrack.appendChild(slide);
     });
+
+    ensureSlideImageLoaded(0);
 
 
     galleryMain.appendChild(leftArrow);
@@ -555,6 +584,8 @@ function renderGallery() {
     const scrollToImage = (index, behavior = 'smooth') => {
         const maxIndex = productImages.length - 1;
         const safeIndex = Math.max(0, Math.min(maxIndex, index));
+        ensureSlideImageLoaded(safeIndex);
+        ensureSlideImageLoaded(Math.min(maxIndex, safeIndex + 1));
         const slideWidth = galleryMain.clientWidth;
         galleryTrack.scrollTo({ left: slideWidth * safeIndex, behavior });
         currentGalleryIndex = safeIndex;
@@ -917,9 +948,12 @@ function initializeLightbox() {
 function openLightbox(index) {
     // Получаем актуальный массив изображений (как в renderGallery)
     const product = currentProduct;
-    productImages = (Array.isArray(product.images) ? product.images : (product.images ? [product.images] : [product.image || 'https://via.placeholder.com/600']))
+    const sourceImages = (Array.isArray(product.images) ? product.images : (product.images ? [product.images] : [product.image || 'https://via.placeholder.com/600']))
         .filter(Boolean)
-        .map((url) => getOptimizedImageUrl(url, { width: 1400, quality: 86 }));
+        .map((url) => getOptimizedImageUrl(url, { width: 1400, quality: 86 }))
+        .map((url) => resolveImageSource(url));
+    productImages = sourceImages.map((item) => item.primary);
+    productImageFallbacks = sourceImages.map((item) => item.fallback || '');
 
     currentLightboxIndex = index;
     const lightboxModal = document.getElementById('lightboxModal');
@@ -941,6 +975,13 @@ function updateLightboxImage() {
     const lightboxNext = document.getElementById('lightboxNext');
 
     lightboxImage.src = productImages[currentLightboxIndex];
+    lightboxImage.onerror = () => {
+        const fallback = productImageFallbacks[currentLightboxIndex];
+        if (!fallback || lightboxImage.dataset.fallbackApplied === '1') return;
+        lightboxImage.dataset.fallbackApplied = '1';
+        lightboxImage.src = fallback;
+    };
+    lightboxImage.dataset.fallbackApplied = '0';
     lightboxCounter.textContent = `${currentLightboxIndex + 1} / ${productImages.length}`;
 
     // Hide navigation buttons if only one image
