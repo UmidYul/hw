@@ -480,7 +480,11 @@ function renderGallery() {
     // Get images - handle both array and single image
     const sourceImages = (Array.isArray(product.images) ? product.images : (product.images ? [product.images] : [product.image || 'https://via.placeholder.com/600']))
         .filter(Boolean);
-    const thumbImages = sourceImages.map((url) => getOptimizedImageUrl(url, { width: 320, quality: 78 }));
+    const thumbImageSources = sourceImages
+        .map((url) => getOptimizedImageUrl(url, { width: 320, quality: 78 }))
+        .map((url) => resolveImageSource(url));
+    const thumbImages = thumbImageSources.map((item) => item.primary);
+    const thumbFallbacks = thumbImageSources.map((item) => item.fallback || '');
     const mainImageSources = sourceImages
         .map((url) => getOptimizedImageUrl(url, { width: 1400, quality: 86 }))
         .map((url) => resolveImageSource(url));
@@ -572,8 +576,19 @@ function renderGallery() {
     }
 
     galleryThumbs.innerHTML = thumbImages.map((img, index) => `
-        <div class="gallery-thumb ${index === 0 ? 'active' : ''}" data-index="${index}" style="background-image: url('${img}'); background-size: cover; background-position: center;"></div>
+        <div class="gallery-thumb ${index === 0 ? 'active' : ''}" data-index="${index}">
+            <img class="gallery-thumb-image" src="${img}" data-fallback-src="${thumbFallbacks[index]}" alt="${product.title} миниатюра ${index + 1}" loading="lazy" decoding="async">
+        </div>
     `).join('');
+
+    galleryThumbs.querySelectorAll('.gallery-thumb-image').forEach((thumbImage) => {
+        thumbImage.addEventListener('error', () => {
+            const fallback = thumbImage.dataset.fallbackSrc;
+            if (!fallback || thumbImage.dataset.fallbackApplied === '1') return;
+            thumbImage.dataset.fallbackApplied = '1';
+            thumbImage.src = fallback;
+        });
+    });
 
     const setActiveThumb = (index) => {
         galleryThumbs.querySelectorAll('.gallery-thumb').forEach((thumb) => {
