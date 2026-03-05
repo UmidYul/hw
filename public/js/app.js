@@ -610,12 +610,18 @@ function getPrimaryProductImage(product) {
 function openQuickView(productId) {
     const targetId = String(productId);
     const product = products.find(p => String(p.id) === targetId);
-    if (!product) return;
+    if (!product) {
+        window.location.href = `/product?id=${encodeURIComponent(targetId)}`;
+        return;
+    }
 
     const modal = document.getElementById('quickViewModal');
     const modalBody = document.getElementById('quickViewBody');
 
-    if (!modal || !modalBody) return;
+    if (!modal || !modalBody) {
+        window.location.href = `/product?id=${encodeURIComponent(targetId)}`;
+        return;
+    }
 
     const hasDiscount = product.oldPrice ? Math.round((1 - product.price / product.oldPrice) * 100) : 0;
     const imageUrl = getPrimaryProductImage(product);
