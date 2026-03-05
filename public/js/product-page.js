@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const productId = getUrlParam('id');
 
     if (!productId) {
-        window.location.href = 'catalog.html';
+        window.location.href = '/catalog';
         return;
     }
 
@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         : products.find(p => String(p.id) === String(productId));
 
     if (!currentProduct) {
-        window.location.href = 'catalog.html';
+        window.location.href = '/catalog';
         return;
     }
 
@@ -297,7 +297,7 @@ function renderProduct() {
     const product = currentProduct;
 
     // Update breadcrumbs
-    document.getElementById('productCategoryLink').href = `catalog.html?category=${product.category}`;
+    document.getElementById('productCategoryLink').href = `/catalog?category=${product.category}`;
     document.getElementById('productCategoryLink').textContent = getCategoryTitle(product.category);
     document.getElementById('productBreadcrumb').textContent = product.title;
 

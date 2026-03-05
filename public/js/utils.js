@@ -439,10 +439,12 @@ function renderProductCard(product) {
 
     // Get first image
     const imageUrl = product.images ? product.images[0] : product.image;
+    const safeTitle = String(product.title || product.name || 'Товар').replace(/"/g, '&quot;');
 
     return `
         <div class="product-card" data-product-id="${product.id}" data-link="/product?id=${product.id}" role="link">
-            <div class="product-card-image" data-link="/product?id=${product.id}" role="link" style="background-image: url('${imageUrl}'); background-size: cover; background-position: center;">
+            <div class="product-card-image" data-link="/product?id=${product.id}" role="link">
+                <img class="product-card-image-media" src="${imageUrl}" alt="${safeTitle}" loading="lazy" decoding="async">
                 <div class="product-card-actions">
                     <button class="product-card-btn wishlist-toggle" data-id="${product.id}" aria-label="В избранное">
                         <i class="fa${isInWishlist ? 's' : 'r'} fa-heart"></i>
