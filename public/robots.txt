@@ -1,4 +1,10 @@
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /cart
+Disallow: /wishlist
+Disallow: /*?search=
+Disallow: /*&search=
 
 Sitemap: https://higherwaist.uz/sitemap.xml

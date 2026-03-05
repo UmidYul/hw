@@ -26,6 +26,7 @@ import newslettersRouter from './routes/newsletters.js';
 import contentRouter from './routes/content.js';
 import { runUploadsCleanup } from './services/uploads-cleanup.js';
 import { initAuthTables, requireAdmin } from './services/auth.js';
+import { dbAll } from './database/db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -242,7 +243,102 @@ app.use('/css', express.static(path.join(__dirname, '../public/css'), { maxAge: 
 app.use('/js', express.static(path.join(__dirname, '../public/js'), { maxAge: '7d', etag: true }));
 app.use('/images', express.static(path.join(__dirname, '../public/images'), { maxAge: '30d', etag: true, immutable: true }));
 app.get('/robots.txt', (req, res) => res.sendFile(path.join(__dirname, '../public/robots.txt')));
-app.get('/sitemap.xml', (req, res) => res.sendFile(path.join(__dirname, '../public/sitemap.xml')));
+app.get('/sitemap.xml', async (req, res) => {
+    const siteUrl = String(process.env.SITE_URL || 'https://higherwaist.uz').replace(/\/$/, '');
+    const defaultDate = new Date().toISOString().split('T')[0];
+
+    const staticUrls = [
+        { loc: '/', changefreq: 'daily', priority: '1.0' },
+        { loc: '/catalog', changefreq: 'daily', priority: '0.9' },
+        { loc: '/collection', changefreq: 'daily', priority: '0.8' },
+        { loc: '/about', changefreq: 'monthly', priority: '0.6' },
+        { loc: '/contacts', changefreq: 'monthly', priority: '0.6' },
+        { loc: '/delivery', changefreq: 'monthly', priority: '0.5' },
+        { loc: '/payment', changefreq: 'monthly', priority: '0.5' },
+        { loc: '/returns', changefreq: 'monthly', priority: '0.5' },
+        { loc: '/faq', changefreq: 'weekly', priority: '0.6' },
+        { loc: '/privacy', changefreq: 'yearly', priority: '0.3' },
+        { loc: '/terms', changefreq: 'yearly', priority: '0.3' }
+    ];
+
+    try {
+        const [products, categories, collections] = await Promise.all([
+            dbAll(`
+                SELECT id, updated_at
+                FROM products
+                WHERE is_active = TRUE
+            `),
+            dbAll(`
+                SELECT slug, created_at
+                FROM categories
+                WHERE is_visible = TRUE
+            `),
+            dbAll(`
+                SELECT slug, updated_at
+                FROM collections
+                WHERE is_visible = TRUE
+            `)
+        ]);
+
+        const xmlEntries = [
+            ...staticUrls.map((item) => {
+                const lastmod = item.lastmod || defaultDate;
+                return `
+  <url>
+    <loc>${siteUrl}${item.loc}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>${item.changefreq}</changefreq>
+    <priority>${item.priority}</priority>
+  </url>`;
+            }),
+            ...categories.map((category) => {
+                const lastmod = category?.created_at
+                    ? new Date(category.created_at).toISOString().split('T')[0]
+                    : defaultDate;
+                return `
+  <url>
+    <loc>${siteUrl}/catalog?category=${encodeURIComponent(category.slug)}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+            }),
+            ...collections.map((collection) => {
+                const lastmod = collection?.updated_at
+                    ? new Date(collection.updated_at).toISOString().split('T')[0]
+                    : defaultDate;
+                return `
+  <url>
+    <loc>${siteUrl}/collection?slug=${encodeURIComponent(collection.slug)}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+            }),
+            ...products.map((product) => {
+                const lastmod = product?.updated_at
+                    ? new Date(product.updated_at).toISOString().split('T')[0]
+                    : defaultDate;
+                return `
+  <url>
+    <loc>${siteUrl}/product?id=${encodeURIComponent(product.id)}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>`;
+            })
+        ];
+
+        const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${xmlEntries.join('')}\n</urlset>`;
+
+        res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+        res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=300');
+        res.send(sitemapXml);
+    } catch (error) {
+        console.error('Failed to generate sitemap.xml:', error.message);
+        res.sendFile(path.join(__dirname, '../public/sitemap.xml'));
+    }
+});
 app.get('/googlee6f4b4acc0d1a64a.html', (req, res) =>
     res.sendFile(path.join(__dirname, '../public/googlee6f4b4acc0d1a64a.html'))
 );

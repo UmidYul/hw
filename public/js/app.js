@@ -1,7 +1,196 @@
 // Main Application Logic
 // This file handles common functionality across all pages
 
+const SEO_BASE_URL = 'https://higherwaist.uz';
+
+const SEO_PAGE_DEFAULTS = {
+    '/': {
+        title: 'Higher Waist · Минималистичная мода',
+        description: 'Минималистичная мода, изысканные вещи и современные коллекции Higher Waist.',
+        robots: 'index,follow,max-image-preview:large'
+    },
+    '/catalog': {
+        title: 'Каталог · Higher Waist',
+        description: 'Каталог Higher Waist: одежда и аксессуары, подборки и сезонные предложения.',
+        robots: 'index,follow,max-image-preview:large'
+    },
+    '/collection': {
+        title: 'Коллекции · Higher Waist',
+        description: 'Коллекции Higher Waist: капсулы, сезонные дропы и актуальные подборки.',
+        robots: 'index,follow,max-image-preview:large'
+    },
+    '/product': {
+        title: 'Товар · Higher Waist',
+        description: 'Карточка товара Higher Waist: фото, состав, размеры и условия доставки.',
+        robots: 'index,follow,max-image-preview:large'
+    },
+    '/about': {
+        title: 'О бренде · Higher Waist',
+        description: 'О бренде Higher Waist: философия минимализма, качество и современный стиль.',
+        robots: 'index,follow,max-image-preview:large'
+    },
+    '/contacts': {
+        title: 'Контакты · Higher Waist',
+        description: 'Свяжитесь с Higher Waist: контакты, поддержка и ответы на вопросы.',
+        robots: 'index,follow,max-image-preview:large'
+    },
+    '/delivery': {
+        title: 'Доставка · Higher Waist',
+        description: 'Условия доставки заказов Higher Waist по Узбекистану.',
+        robots: 'index,follow,max-image-preview:large'
+    },
+    '/payment': {
+        title: 'Оплата · Higher Waist',
+        description: 'Способы оплаты заказов Higher Waist и информация о безопасности платежей.',
+        robots: 'index,follow,max-image-preview:large'
+    },
+    '/returns': {
+        title: 'Возврат и обмен · Higher Waist',
+        description: 'Условия возврата и обмена товаров Higher Waist.',
+        robots: 'index,follow,max-image-preview:large'
+    },
+    '/faq': {
+        title: 'FAQ · Higher Waist',
+        description: 'Часто задаваемые вопросы о заказах, доставке и возврате Higher Waist.',
+        robots: 'index,follow,max-image-preview:large'
+    },
+    '/privacy': {
+        title: 'Политика конфиденциальности · Higher Waist',
+        description: 'Политика конфиденциальности интернет-магазина Higher Waist.',
+        robots: 'index,follow,max-image-preview:large'
+    },
+    '/terms': {
+        title: 'Пользовательское соглашение · Higher Waist',
+        description: 'Пользовательское соглашение интернет-магазина Higher Waist.',
+        robots: 'index,follow,max-image-preview:large'
+    },
+    '/cart': {
+        title: 'Корзина · Higher Waist',
+        description: 'Корзина покупок Higher Waist.',
+        robots: 'noindex,follow'
+    },
+    '/wishlist': {
+        title: 'Избранное · Higher Waist',
+        description: 'Избранные товары Higher Waist.',
+        robots: 'noindex,follow'
+    }
+};
+
+function setMetaTag(name, content, isProperty = false) {
+    const selector = isProperty ? `meta[property="${name}"]` : `meta[name="${name}"]`;
+    let element = document.querySelector(selector);
+
+    if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute(isProperty ? 'property' : 'name', name);
+        document.head.appendChild(element);
+    }
+
+    element.setAttribute('content', content);
+}
+
+function setCanonical(url) {
+    let link = document.querySelector('link[rel="canonical"]');
+    if (!link) {
+        link = document.createElement('link');
+        link.rel = 'canonical';
+        document.head.appendChild(link);
+    }
+    link.href = url;
+}
+
+function setHrefLang(pathname) {
+    const alternates = [
+        { lang: 'ru-UZ', href: `${SEO_BASE_URL}${pathname}` },
+        { lang: 'x-default', href: `${SEO_BASE_URL}${pathname}` }
+    ];
+
+    alternates.forEach((item) => {
+        const selector = `link[rel="alternate"][hreflang="${item.lang}"]`;
+        let link = document.querySelector(selector);
+        if (!link) {
+            link = document.createElement('link');
+            link.rel = 'alternate';
+            link.hreflang = item.lang;
+            document.head.appendChild(link);
+        }
+        link.href = item.href;
+    });
+}
+
+function setJsonLd(id, payload) {
+    let script = document.getElementById(id);
+    if (!script) {
+        script = document.createElement('script');
+        script.id = id;
+        script.type = 'application/ld+json';
+        document.head.appendChild(script);
+    }
+    script.textContent = JSON.stringify(payload);
+}
+
+function applyGlobalSeoDefaults() {
+    const pathname = window.location.pathname || '/';
+    const pageSeo = SEO_PAGE_DEFAULTS[pathname] || {
+        title: document.title || 'Higher Waist',
+        description: 'Higher Waist — интернет-магазин минималистичной одежды.',
+        robots: 'index,follow,max-image-preview:large'
+    };
+
+    const canonicalUrl = `${SEO_BASE_URL}${pathname}`;
+    const imageUrl = `${SEO_BASE_URL}/images/logo.PNG`;
+
+    if (!document.title || document.title.trim().length < 3) {
+        document.title = pageSeo.title;
+    }
+
+    setMetaTag('description', pageSeo.description);
+    setMetaTag('robots', pageSeo.robots);
+
+    setMetaTag('og:site_name', 'Higher Waist', true);
+    setMetaTag('og:locale', 'ru_RU', true);
+    setMetaTag('og:type', pathname === '/product' ? 'product' : 'website', true);
+    setMetaTag('og:title', document.title || pageSeo.title, true);
+    setMetaTag('og:description', pageSeo.description, true);
+    setMetaTag('og:url', canonicalUrl, true);
+    setMetaTag('og:image', imageUrl, true);
+
+    setMetaTag('twitter:card', 'summary_large_image');
+    setMetaTag('twitter:title', document.title || pageSeo.title);
+    setMetaTag('twitter:description', pageSeo.description);
+    setMetaTag('twitter:image', imageUrl);
+
+    setCanonical(canonicalUrl);
+    setHrefLang(pathname);
+
+    const organizationSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: 'Higher Waist',
+        url: SEO_BASE_URL,
+        logo: imageUrl
+    };
+
+    const websiteSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'Higher Waist',
+        url: SEO_BASE_URL,
+        inLanguage: 'ru-UZ',
+        potentialAction: {
+            '@type': 'SearchAction',
+            target: `${SEO_BASE_URL}/catalog?search={search_term_string}`,
+            'query-input': 'required name=search_term_string'
+        }
+    };
+
+    setJsonLd('organization-schema', organizationSchema);
+    setJsonLd('website-schema', websiteSchema);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    applyGlobalSeoDefaults();
+
     // Initialize badges
     updateCartBadge();
     updateWishlistBadge();

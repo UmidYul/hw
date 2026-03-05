@@ -174,20 +174,106 @@ function setCanonical(url) {
     link.href = url;
 }
 
+function setHrefLang(pathnameWithSearch) {
+    const alternates = [
+        { lang: 'ru-UZ', href: `${BASE_URL}${pathnameWithSearch}` },
+        { lang: 'x-default', href: `${BASE_URL}${pathnameWithSearch}` }
+    ];
+
+    alternates.forEach((item) => {
+        const selector = `link[rel="alternate"][hreflang="${item.lang}"]`;
+        let link = document.querySelector(selector);
+        if (!link) {
+            link = document.createElement('link');
+            link.rel = 'alternate';
+            link.hreflang = item.lang;
+            document.head.appendChild(link);
+        }
+        link.href = item.href;
+    });
+}
+
+function getCatalogCanonicalUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const canonicalParams = new URLSearchParams();
+
+    const category = urlParams.get('category');
+    const tag = urlParams.get('tag');
+
+    if (category && category !== 'all') {
+        canonicalParams.set('category', category);
+    }
+    if (tag) {
+        canonicalParams.set('tag', tag);
+    }
+
+    const query = canonicalParams.toString();
+    return query ? `${BASE_URL}/catalog?${query}` : `${BASE_URL}/catalog`;
+}
+
+function shouldCatalogBeIndexed() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasSearchQuery = !!(urlParams.get('search') || filters.search);
+    const hasDeepFilters =
+        filters.sizes.length > 0 ||
+        filters.colors.length > 0 ||
+        filters.discountOnly ||
+        (filters.priceMin !== null && filters.priceMin > 0) ||
+        (filters.priceMax !== null && filters.priceMax < 50000000) ||
+        filters.sort !== 'default';
+
+    return !hasSearchQuery && !hasDeepFilters;
+}
+
 function updateCatalogSeo(titleSuffix, description) {
     const title = titleSuffix ? `${titleSuffix} · Higher Waist` : 'Каталог · Higher Waist';
     const desc = description || 'Каталог Higher Waist: одежда и аксессуары, подборки и сезонные предложения.';
-    const canonicalUrl = `${BASE_URL}${window.location.pathname}${window.location.search}`;
+    const canonicalUrl = getCatalogCanonicalUrl();
+    const indexable = shouldCatalogBeIndexed();
+    const robotsValue = indexable ? 'index,follow,max-image-preview:large' : 'noindex,follow';
+    const pathForLang = canonicalUrl.replace(BASE_URL, '');
 
     document.title = title;
     setMetaTag('description', desc);
+    setMetaTag('robots', robotsValue);
     setMetaTag('og:site_name', 'Higher Waist', true);
+    setMetaTag('og:locale', 'ru_RU', true);
     setMetaTag('og:title', title, true);
     setMetaTag('og:description', desc, true);
     setMetaTag('og:type', 'website', true);
     setMetaTag('og:url', canonicalUrl, true);
     setMetaTag('og:image', `${BASE_URL}/images/logo.PNG`, true);
+    setMetaTag('twitter:card', 'summary_large_image');
+    setMetaTag('twitter:title', title);
+    setMetaTag('twitter:description', desc);
+    setMetaTag('twitter:image', `${BASE_URL}/images/logo.PNG`);
     setCanonical(canonicalUrl);
+    setHrefLang(pathForLang);
+}
+
+function updateCatalogItemListSchema(pageProducts) {
+    const items = Array.isArray(pageProducts) ? pageProducts : [];
+    const listItems = items.map((product, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        url: `${BASE_URL}/product?id=${encodeURIComponent(product.id)}`,
+        name: product.title
+    }));
+
+    const schema = {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        itemListElement: listItems
+    };
+
+    let schemaEl = document.getElementById('catalog-schema');
+    if (!schemaEl) {
+        schemaEl = document.createElement('script');
+        schemaEl.type = 'application/ld+json';
+        schemaEl.id = 'catalog-schema';
+        document.head.appendChild(schemaEl);
+    }
+    schemaEl.textContent = JSON.stringify(schema);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -613,6 +699,13 @@ function applyFilters() {
     // Reset pagination
     currentPage = 1;
 
+    updateCatalogSeo(
+        document.getElementById('catalogTitle')?.textContent || 'Каталог',
+        filters.search
+            ? `Результаты поиска по запросу "${filters.search}" в каталоге Higher Waist.`
+            : `Каталог Higher Waist: найдено ${filteredProducts.length} товаров.`
+    );
+
     // Render
     renderCatalog();
 }
@@ -649,6 +742,7 @@ function renderCatalog() {
         catalogProducts.style.display = 'none';
         pagination.style.display = 'none';
         emptyState.style.display = 'flex';
+        updateCatalogItemListSchema([]);
     } else {
         emptyState.style.display = 'none';
         catalogProducts.style.display = 'grid';
@@ -660,6 +754,7 @@ function renderCatalog() {
 
         catalogProducts.innerHTML = pageProducts.map(product => renderProductCard(product)).join('');
         attachProductCardListeners(catalogProducts);
+        updateCatalogItemListSchema(pageProducts);
 
         // Show/hide load more button
         if (endIndex < filteredProducts.length) {

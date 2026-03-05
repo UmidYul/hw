@@ -31,6 +31,25 @@ function setCanonical(url) {
     link.href = url;
 }
 
+function setHrefLang(pathname) {
+    const alternates = [
+        { lang: 'ru-UZ', href: `${BASE_URL}${pathname}` },
+        { lang: 'x-default', href: `${BASE_URL}${pathname}` }
+    ];
+
+    alternates.forEach((item) => {
+        const selector = `link[rel="alternate"][hreflang="${item.lang}"]`;
+        let link = document.querySelector(selector);
+        if (!link) {
+            link = document.createElement('link');
+            link.rel = 'alternate';
+            link.hreflang = item.lang;
+            document.head.appendChild(link);
+        }
+        link.href = item.href;
+    });
+}
+
 function toAbsoluteUrl(url) {
     if (!url) return `${BASE_URL}/images/logo.PNG`;
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
@@ -66,16 +85,26 @@ function updateProductSeo(product, finalPrice, inStock) {
     const rawImageUrl = Array.isArray(product.images) ? product.images[0] : (product.images || product.image || `${BASE_URL}/images/logo.PNG`);
     const imageUrl = toAbsoluteUrl(rawImageUrl);
     const canonicalUrl = `${BASE_URL}/product?id=${product.id}`;
+    const pathnameForLang = `/product?id=${encodeURIComponent(product.id)}`;
 
     document.title = `${product.title} · Higher Waist`;
     setMetaTag('description', shortDescription);
+    setMetaTag('robots', 'index,follow,max-image-preview:large');
     setMetaTag('og:site_name', 'Higher Waist', true);
+    setMetaTag('og:locale', 'ru_RU', true);
     setMetaTag('og:title', `${product.title} · Higher Waist`, true);
     setMetaTag('og:description', shortDescription, true);
     setMetaTag('og:type', 'product', true);
     setMetaTag('og:url', canonicalUrl, true);
     setMetaTag('og:image', imageUrl, true);
+    setMetaTag('twitter:card', 'summary_large_image');
+    setMetaTag('twitter:title', `${product.title} · Higher Waist`);
+    setMetaTag('twitter:description', shortDescription);
+    setMetaTag('twitter:image', imageUrl);
     setCanonical(canonicalUrl);
+    setHrefLang(pathnameForLang);
+
+    const priceValidUntil = new Date(Date.now() + (30 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
 
     const schema = {
         "@context": "https://schema.org",
@@ -84,14 +113,29 @@ function updateProductSeo(product, finalPrice, inStock) {
         image: imageUrl ? [imageUrl] : [],
         description: shortDescription,
         sku: product.sku || `SKU-${product.id}`,
+        brand: {
+            "@type": "Brand",
+            name: 'Higher Waist'
+        },
         offers: {
             "@type": "Offer",
             priceCurrency: "UZS",
             price: String(finalPrice),
             availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-            url: canonicalUrl
+            url: canonicalUrl,
+            priceValidUntil
         }
     };
+
+    const ratingValue = Number(product.rating || 0);
+    const reviewCount = Number(product.reviews_count || 0);
+    if (ratingValue > 0 && reviewCount > 0) {
+        schema.aggregateRating = {
+            '@type': 'AggregateRating',
+            ratingValue,
+            reviewCount
+        };
+    }
 
     let schemaEl = document.getElementById('product-schema');
     if (!schemaEl) {
@@ -101,6 +145,39 @@ function updateProductSeo(product, finalPrice, inStock) {
         document.head.appendChild(schemaEl);
     }
     schemaEl.textContent = JSON.stringify(schema);
+
+    let breadcrumbSchema = document.getElementById('product-breadcrumb-schema');
+    if (!breadcrumbSchema) {
+        breadcrumbSchema = document.createElement('script');
+        breadcrumbSchema.type = 'application/ld+json';
+        breadcrumbSchema.id = 'product-breadcrumb-schema';
+        document.head.appendChild(breadcrumbSchema);
+    }
+
+    breadcrumbSchema.textContent = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+            {
+                '@type': 'ListItem',
+                position: 1,
+                name: 'Главная',
+                item: `${BASE_URL}/`
+            },
+            {
+                '@type': 'ListItem',
+                position: 2,
+                name: getCategoryTitle(product.category),
+                item: `${BASE_URL}/catalog?category=${encodeURIComponent(product.category || 'all')}`
+            },
+            {
+                '@type': 'ListItem',
+                position: 3,
+                name: product.title,
+                item: canonicalUrl
+            }
+        ]
+    });
 }
 
 function getVariants(product) {
